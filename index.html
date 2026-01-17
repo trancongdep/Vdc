@@ -3,64 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM - HR SUPERVISOR</title>
+    <title>VDC CRM - INTELLIGENT MONITOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .blink-bg { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { background-color: rgba(185, 28, 28, 0.7); } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen p-4 font-sans">
+<body class="bg-gray-950 text-white min-h-screen p-4 font-sans antialiased">
     
     <div class="max-w-7xl mx-auto">
-        <header class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+        <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-blue-500 tracking-widest flex items-center gap-2">
-                    <i class="fa-solid fa-satellite-dish"></i> VDC MONITOR
+                <h1 class="text-2xl md:text-3xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-network-wired"></i> VDC INTELLIGENCE
                 </h1>
-                <p class="text-xs text-gray-400 mt-1">Hệ thống giám sát Real-time Heartbeat</p>
+                <p class="text-xs text-gray-500 mt-1">Hệ thống trinh sát dữ liệu tự động v3.3</p>
             </div>
-            <div class="text-right bg-gray-800 p-2 rounded-lg border border-gray-700">
-                <div class="text-3xl font-bold text-emerald-400" id="leadCount">0</div>
-                <div class="text-[10px] text-gray-500 font-bold uppercase">SĐT TÌM ĐƯỢC</div>
+            <div class="flex gap-4">
+                <div class="text-right bg-gray-900 p-2 rounded-lg border border-gray-800">
+                    <div class="text-3xl font-bold text-emerald-400 font-mono" id="leadCount">0</div>
+                    <div class="text-[10px] text-gray-500 font-bold uppercase">LEADS TÌM ĐƯỢC</div>
+                </div>
             </div>
         </header>
 
-        <h3 class="text-gray-400 text-xs font-bold uppercase mb-3"><i class="fa-solid fa-server mr-1"></i> Trạng thái Bot (Auto-detect Offline)</h3>
-        <div id="botGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <div class="col-span-full text-center py-10 text-gray-600 italic">Đang kết nối tới máy chủ VDC...</div>
+        <div class="mb-2 flex justify-between items-end">
+            <h3 class="text-gray-500 text-xs font-bold uppercase"><i class="fa-solid fa-robot mr-1"></i> Biệt đội Bot (Chỉ hiện Bot Online)</h3>
         </div>
+        
+        <div id="botGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 min-h-[100px]">
+            </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 bg-gray-800 rounded-xl border border-gray-700 h-[500px] flex flex-col overflow-hidden shadow-xl">
-                <div class="p-3 bg-gray-700/50 border-b border-gray-600 flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-gray-300 uppercase">Dữ liệu mới về</h3>
-                    <span class="text-[10px] text-emerald-400 animate-pulse">● Live Updating</span>
+        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-2xl flex flex-col h-[600px]">
+            <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-gray-300 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-database text-blue-500"></i> Dữ liệu Leads Realtime
+                </h3>
+                <span class="text-[10px] text-emerald-500 flex items-center gap-1">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Live Sync
+                </span>
+            </div>
+            
+            <div class="grid grid-cols-12 gap-4 p-3 bg-gray-900 text-xs text-gray-500 font-bold uppercase tracking-wider border-b border-gray-800">
+                <div class="col-span-1 text-center">Time</div>
+                <div class="col-span-4">Công Ty / Nguồn</div>
+                <div class="col-span-3">Người Liên Hệ (HR)</div>
+                <div class="col-span-4 text-right">Số Điện Thoại</div>
+            </div>
+
+            <div id="feed" class="overflow-y-auto flex-1 p-0">
                 </div>
-                <div id="feed" class="overflow-y-auto p-4 space-y-2 flex-1"></div>
-            </div>
-
-            <div class="hidden lg:block bg-gray-800/50 rounded-xl p-4 border border-gray-700 h-fit">
-                <h3 class="text-sm font-bold text-blue-400 mb-3">Chú giải Trạng thái</h3>
-                <ul class="text-xs text-gray-400 space-y-3">
-                    <li class="flex gap-2 items-center">
-                        <div class="w-3 h-3 bg-green-600 rounded"></div>
-                        <span><b>ONLINE:</b> Đang hoạt động tốt.</span>
-                    </li>
-                    <li class="flex gap-2 items-center">
-                        <div class="w-3 h-3 bg-red-600 rounded animate-pulse"></div>
-                        <span><b>CẦN CỨU HỘ:</b> Đang bị Captcha chặn.</span>
-                    </li>
-                    <li class="flex gap-2 items-center">
-                        <div class="w-3 h-3 bg-gray-600 rounded"></div>
-                        <span><b>OFFLINE:</b> Đã tắt hoặc mất mạng > 60s.</span>
-                    </li>
-                </ul>
-            </div>
         </div>
     </div>
 
@@ -81,122 +84,121 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
-        // BIẾN CẤU HÌNH TIMEOUT
-        const OFFLINE_THRESHOLD = 60; // Sau 60 giây không update thì coi như Offline
+        const OFFLINE_THRESHOLD = 60; // Sau 60s không thấy tín hiệu là coi như Tắt
+        let botData = {};
 
-        let botData = {}; // Lưu dữ liệu bot cục bộ để update timer
-
-        // --- 1. THEO DÕI BOT ---
-        const statusRef = ref(db, 'hr_status');
-        onValue(statusRef, (snapshot) => {
+        // --- 1. RENDER BOTS ---
+        onValue(ref(db, 'hr_status'), (snapshot) => {
             botData = snapshot.val() || {};
             renderBots();
         });
 
-        // Hàm render giao diện Bot
         function renderBots() {
             const grid = document.getElementById('botGrid');
             grid.innerHTML = '';
-            
             const now = Math.floor(Date.now() / 1000);
+            let activeBotCount = 0;
 
             Object.keys(botData).forEach(key => {
                 const bot = botData[key];
+                const isOffline = (now - (bot.timestamp || 0)) > OFFLINE_THRESHOLD;
                 
-                // LOGIC QUAN TRỌNG: Kiểm tra xem Bot còn sống không?
-                const secondsSinceLastUpdate = now - (bot.timestamp || 0);
-                const isOffline = secondsSinceLastUpdate > OFFLINE_THRESHOLD;
+                // --- QUAN TRỌNG: NẾU OFFLINE THÌ BỎ QUA LUÔN (KHÔNG VẼ) ---
+                if (isOffline) return;
 
-                let isError = bot.is_error;
+                activeBotCount++;
+                const isError = bot.is_error;
                 
-                // Xác định Style thẻ
-                let cardClass = "";
-                let statusBadge = "";
-                let iconClass = "";
-                let message = bot.message;
+                let cardClass = isError ? "bg-red-900/40 border-red-500/50 blink-bg" : "bg-slate-800 border-blue-500/50";
+                let statusBadge = isError ? '<span class="text-red-400 font-bold text-[10px]">SOS</span>' : '<span class="text-emerald-400 font-bold text-[10px]">RUNNING</span>';
+                let iconClass = isError ? "fa-triangle-exclamation text-red-500" : "fa-robot text-blue-400";
 
-                if (isOffline) {
-                    // TRẠNG THÁI: OFFLINE (XÁM)
-                    cardClass = "bg-gray-800 border-gray-600 opacity-60";
-                    iconClass = "fa-power-off text-gray-500";
-                    statusBadge = '<span class="bg-gray-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">OFFLINE</span>';
-                    message = `Mất tín hiệu ${secondsSinceLastUpdate}s trước.`;
-                } else if (isError) {
-                    // TRẠNG THÁI: LỖI (ĐỎ)
-                    cardClass = "bg-red-900/80 border-red-500 blink-bg shadow-[0_0_15px_rgba(239,68,68,0.5)]";
-                    iconClass = "fa-triangle-exclamation text-white";
-                    statusBadge = '<span class="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">CẦN CỨU HỘ</span>';
-                } else {
-                    // TRẠNG THÁI: BÌNH THƯỜNG (XANH)
-                    cardClass = "bg-slate-800 border-blue-500 shadow-lg";
-                    iconClass = "fa-robot text-blue-400";
-                    statusBadge = '<span class="bg-green-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">ONLINE</span>';
-                }
-
-                // Timer đếm ngược (Chỉ hiện khi Online)
+                // Timer HTML
                 let timerHtml = '';
-                if (!isOffline && bot.duration > 0) {
-                    const endTime = bot.timestamp + bot.duration;
-                    const left = Math.max(0, endTime - now);
+                if (bot.duration > 0) {
+                    const left = Math.max(0, (bot.timestamp + bot.duration) - now);
                     if (left > 0) {
                         const m = Math.floor(left / 60);
                         const s = (left % 60).toString().padStart(2, '0');
-                        const color = isError ? "text-white" : "text-yellow-400";
-                        const label = isError ? "RESET SAU:" : "NGHỈ:";
-                        timerHtml = `<div class="mt-2 text-center border-t border-white/10 pt-1"><span class="text-[10px] text-gray-400">${label}</span> <span class="font-mono font-bold ${color} text-xl">${m}:${s}</span></div>`;
+                        timerHtml = `<span class="font-mono text-yellow-400 font-bold">${m}:${s}</span>`;
                     }
                 }
 
                 const card = document.createElement('div');
-                card.className = `${cardClass} border-t-4 rounded-lg p-4 transition-all duration-300 relative`;
+                card.className = `${cardClass} border rounded-lg p-3 flex flex-col justify-between h-24 transition-all relative overflow-hidden shadow-lg animate-fade-in`;
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex flex-col">
-                            <h3 class="font-bold text-lg uppercase tracking-wider text-gray-200">${bot.name}</h3>
-                            <span class="text-[10px] text-gray-500">${bot.last_active}</span>
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-2">
+                             <div class="bg-gray-900/50 p-1.5 rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fa-solid ${iconClass}"></i>
+                            </div>
+                            <h4 class="font-bold text-sm text-gray-300 truncate max-w-[120px]" title="${bot.name}">${bot.name}</h4>
                         </div>
-                        <div class="bg-gray-900/50 p-2 rounded-full w-10 h-10 flex items-center justify-center">
-                            <i class="fa-solid ${iconClass} text-xl"></i>
-                        </div>
+                        ${statusBadge}
                     </div>
-                    <div class="mb-2">${statusBadge}</div>
-                    <p class="text-xs text-gray-300 h-8 overflow-hidden leading-tight">${message}</p>
-                    ${timerHtml}
+                    <p class="text-[10px] text-gray-400 line-clamp-1 mt-2 leading-tight pl-1">${bot.message}</p>
+                    <div class="mt-auto flex justify-between items-end text-[10px] text-gray-500 border-t border-white/5 pt-1">
+                        <span>${bot.last_active}</span>
+                        ${timerHtml}
+                    </div>
                 `;
                 grid.appendChild(card);
             });
-        }
 
-        // Cập nhật giao diện mỗi giây (Để check Offline và đếm ngược Timer)
+            // Nếu không có Bot nào hoạt động
+            if (activeBotCount === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-600 italic border border-dashed border-gray-700 rounded-lg">Hiện không có Bot nào hoạt động.<br>Hãy bật file worker_bot.py trên máy trạm.</div>';
+            }
+        }
+        
+        // Cập nhật lại mỗi giây để check offline realtime
         setInterval(renderBots, 1000);
 
-        // --- 2. FEED LEADS ---
-        const leadsRef = ref(db, 'hr_leads');
+        // --- 2. RENDER LEADS (DATA TABLE STYLE) ---
         let total = 0;
-        onChildAdded(leadsRef, (snapshot) => {
+        onChildAdded(ref(db, 'hr_leads'), (snapshot) => {
             const d = snapshot.val();
             if(d.phone && d.phone !== "Không tìm thấy") {
                 total++;
                 document.getElementById('leadCount').innerText = total;
+                
                 const feed = document.getElementById('feed');
                 const div = document.createElement('div');
-                div.className = "bg-gray-700/30 p-3 rounded-lg border-l-4 border-emerald-500 mb-2 animate-pulse";
-                // Xóa animate-pulse sau 2s
-                setTimeout(() => div.classList.remove('animate-pulse'), 2000);
+                div.className = "grid grid-cols-12 gap-4 p-3 border-b border-gray-800 hover:bg-gray-800/50 transition duration-150 group animate-fade-in items-center";
                 
+                // Xử lý hiển thị HR Name
+                let hrDisplay = d.hr_name && d.hr_name !== "Không rõ tên" 
+                    ? `<span class="text-emerald-300 font-bold"><i class="fa-solid fa-user-tie mr-1 text-xs"></i>${d.hr_name}</span>`
+                    : `<span class="text-gray-600 italic text-[10px]">Chưa rõ tên</span>`;
+
                 div.innerHTML = `
-                    <div class="flex justify-between">
-                        <h4 class="text-sm font-bold text-emerald-200">${d.company}</h4>
-                        <span class="text-[9px] text-gray-400">${d.timestamp.split(' ')[1]}</span>
+                    <div class="col-span-1 text-center text-[10px] text-gray-500 font-mono">${d.timestamp.split(' ')[1]}</div>
+                    
+                    <div class="col-span-4 min-w-0">
+                        <div class="font-bold text-gray-200 text-sm truncate" title="${d.company}">${d.company}</div>
+                        <div class="text-[10px] text-gray-500 truncate flex gap-2">
+                            <span>${d.bot}</span>
+                            <span class="text-blue-500"><a href="${d.link}" target="_blank" class="hover:underline">Link gốc</a></span>
+                        </div>
                     </div>
-                    <div class="text-right mt-1">
-                        <span class="bg-emerald-900/50 text-emerald-400 px-2 py-1 rounded text-xs font-mono font-bold">${d.phone}</span>
+                    
+                    <div class="col-span-3 min-w-0 text-xs">
+                        ${hrDisplay}
+                    </div>
+                    
+                    <div class="col-span-4 text-right">
+                        <span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded border border-emerald-900/50 font-mono font-bold text-sm select-all cursor-copy hover:bg-emerald-900/50 transition">
+                            ${d.phone}
+                        </span>
                     </div>
                 `;
                 feed.insertBefore(div, feed.firstChild);
             }
         });
     </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+    </style>
 </body>
 </html>

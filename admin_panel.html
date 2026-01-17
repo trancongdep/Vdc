@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDC - TRUNG TÂM CHỈ HUY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center font-sans">
+
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 w-full max-w-2xl">
+        <h1 class="text-2xl font-bold text-blue-500 mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-crosshairs"></i> CẤU HÌNH MỤC TIÊU SĂN TÌM
+        </h1>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2 uppercase">
+                    <i class="fa-solid fa-map-location-dot mr-1"></i> Tỉnh/Thành Ưu Tiên (Sales quan tâm)
+                </label>
+                <input type="text" id="prio_provinces" placeholder="Ví dụ: Bình Dương, Đồng Nai, Long An" 
+                    class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white focus:border-blue-500 focus:outline-none placeholder-gray-600">
+                <p class="text-[10px] text-gray-500 mt-1">* Cách nhau bằng dấu phẩy</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-400 mb-2 uppercase">
+                    <i class="fa-solid fa-industry mr-1"></i> Ngành Nghề Ưu Tiên
+                </label>
+                <input type="text" id="prio_industries" placeholder="Ví dụ: Gỗ, May mặc, Logistic, Bao bì" 
+                    class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white focus:border-blue-500 focus:outline-none placeholder-gray-600">
+                <p class="text-[10px] text-gray-500 mt-1">* Cách nhau bằng dấu phẩy</p>
+            </div>
+
+            <button onclick="saveConfig()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition transform active:scale-95">
+                <i class="fa-solid fa-floppy-disk mr-2"></i> LƯU CẤU HÌNH & ĐIỀU PHỐI BOT
+            </button>
+            
+            <div id="status" class="text-center text-sm font-bold min-h-[20px]"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU",
+            authDomain: "vdc-crm-southern.firebaseapp.com",
+            databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com",
+            projectId: "vdc-crm-southern",
+            storageBucket: "vdc-crm-southern.firebasestorage.app",
+            messagingSenderId: "793485969742",
+            appId: "1:793485969742:web:40bd247e271eca62df361f",
+            measurementId: "G-QYDTW8VWQ0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Load cấu hình cũ khi mở trang
+        get(ref(db, 'config_priority')).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('prio_provinces').value = data.provinces || '';
+                document.getElementById('prio_industries').value = data.industries || '';
+            }
+        });
+
+        // Hàm lưu (Gắn vào window để gọi từ HTML)
+        window.saveConfig = function() {
+            const provinces = document.getElementById('prio_provinces').value;
+            const industries = document.getElementById('prio_industries').value;
+            const statusDiv = document.getElementById('status');
+
+            statusDiv.innerHTML = '<span class="text-yellow-400">Đang đồng bộ...</span>';
+
+            set(ref(db, 'config_priority'), {
+                provinces: provinces,
+                industries: industries,
+                updated_at: Date.now()
+            }).then(() => {
+                statusDiv.innerHTML = '<span class="text-green-400">✅ Đã cập nhật lệnh cho Bot!</span>';
+                setTimeout(() => statusDiv.innerHTML = '', 3000);
+            }).catch((error) => {
+                statusDiv.innerHTML = '<span class="text-red-400">❌ Lỗi: ' + error.message + '</span>';
+            });
+        }
+    </script>
+</body>
+</html>

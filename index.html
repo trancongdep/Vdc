@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM MANAGER v9.0</title>
+    <title>VDC CRM MANAGER v10.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,22 +18,24 @@
 <body class="bg-gray-950 text-white min-h-screen p-2 font-sans antialiased text-sm">
     
     <div class="max-w-[1600px] mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b border-gray-800 pb-2 gap-4">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-2 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group"></i> VDC CRM v9.0
+                    <i class="fa-solid fa-gamepad"></i> VDC CONTROL v10
                 </h1>
-                <p class="text-xs text-gray-500">Hệ thống Quản trị Dữ liệu & Điều phối Bot</p>
+                <p class="text-xs text-gray-500">Trung tâm Điều hành & Tác chiến</p>
             </div>
             
-            <div class="bg-gray-900 border border-orange-500/30 rounded p-2 flex gap-2 items-center shadow-lg">
-                <span class="text-orange-400 font-bold text-xs uppercase"><i class="fa-solid fa-crosshairs"></i> Mục tiêu:</span>
-                <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs outline-none">
-                    <option value="site:hosocongty.vn">hosocongty.vn</option>
-                    <option value="site:masothue.com">masothue.com</option>
-                </select>
-                <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs w-16 text-center" value="20">
-                <button onclick="saveConfig()" class="bg-orange-600 hover:bg-orange-500 text-white px-3 py-1 rounded text-xs font-bold transition">Lưu Lệnh</button>
+            <div class="flex gap-2">
+                <div class="bg-gray-900 border border-orange-500/30 rounded p-2 flex gap-2 items-center shadow-lg">
+                    <span class="text-orange-400 font-bold text-xs uppercase"><i class="fa-solid fa-crosshairs"></i> Mục tiêu:</span>
+                    <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs outline-none">
+                        <option value="site:hosocongty.vn">hosocongty.vn</option>
+                        <option value="site:masothue.com">masothue.com</option>
+                    </select>
+                    <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs w-16 text-center" value="20">
+                    <button onclick="saveConfig()" class="bg-orange-600 hover:bg-orange-500 text-white px-3 py-1 rounded text-xs font-bold transition">Lưu</button>
+                </div>
             </div>
         </header>
 
@@ -42,68 +44,70 @@
             <div class="lg:col-span-1 grid grid-cols-2 gap-2">
                 <div class="bg-blue-900/10 border border-blue-500/30 rounded p-3 text-center">
                     <div class="text-2xl font-bold text-blue-400" id="queueCount">0</div>
-                    <div class="text-[10px] text-gray-400 uppercase font-bold">Kho chờ (Queue)</div>
+                    <div class="text-[10px] text-gray-400 uppercase font-bold">Kho chờ</div>
                 </div>
                 <div class="bg-emerald-900/10 border border-emerald-500/30 rounded p-3 text-center">
                     <div class="text-2xl font-bold text-emerald-400" id="leadCount">0</div>
-                    <div class="text-[10px] text-gray-400 uppercase font-bold">Đã tìm (Leads)</div>
+                    <div class="text-[10px] text-gray-400 uppercase font-bold">Kết quả</div>
                 </div>
             </div>
 
-            <div class="lg:col-span-3">
-                <div id="botGrid" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div class="lg:col-span-1 bg-gray-900 border border-gray-700 rounded p-3 flex flex-col justify-center items-center">
+                <div class="text-[10px] text-gray-500 font-bold uppercase mb-2">Trạng thái Hệ thống</div>
+                <div class="flex gap-4 w-full justify-center">
+                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-gray-800 hover:bg-emerald-600 text-emerald-500 hover:text-white border border-emerald-500/50 py-2 rounded font-bold transition flex flex-col items-center justify-center gap-1">
+                        <i class="fa-solid fa-play text-xl"></i> CHẠY
+                    </button>
+                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-gray-800 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/50 py-2 rounded font-bold transition flex flex-col items-center justify-center gap-1">
+                        <i class="fa-solid fa-pause text-xl"></i> DỪNG
+                    </button>
+                </div>
+                <div id="systemStatusText" class="mt-2 text-xs font-bold tracking-widest text-gray-500">ĐANG TẢI...</div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div id="botGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2 h-full overflow-y-auto">
                     </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-220px)]">
-            
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-250px)]">
             <div class="bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden">
                 <div class="p-3 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-blue-400 flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-stacked"></i> KHO DỮ LIỆU THÔ (QUEUE)
-                    </h3>
-                    <span class="text-[10px] text-gray-400 italic">Sale kiểm tra, xóa rác tại đây để Bot chạy chuẩn</span>
+                    <h3 class="font-bold text-blue-400 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> QUEUE</h3>
                 </div>
                 <div class="overflow-auto flex-1">
                     <table class="w-full text-left border-collapse table-fixed-header">
                         <thead>
-                            <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700">
-                                <th class="p-2 w-10">#</th>
-                                <th class="p-2">Tên Công Ty / Địa chỉ</th>
-                                <th class="p-2 w-24">Nguồn</th>
-                                <th class="p-2 w-20 text-center">Hành động</th>
+                            <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700 bg-gray-800">
+                                <th class="p-2 w-8">#</th>
+                                <th class="p-2">Công ty</th>
+                                <th class="p-2 w-16 text-center">Xử lý</th>
                             </tr>
                         </thead>
-                        <tbody id="queueTableBody" class="text-xs divide-y divide-gray-800">
-                            </tbody>
+                        <tbody id="queueTableBody" class="text-xs divide-y divide-gray-800"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden">
                 <div class="p-3 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-check-double"></i> KẾT QUẢ TÌM KIẾM (LEADS)
-                    </h3>
-                    <span class="text-[10px] text-emerald-500 animate-pulse">● Live Update</span>
+                    <h3 class="font-bold text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> LEADS</h3>
                 </div>
                 <div class="overflow-auto flex-1">
                     <table class="w-full text-left border-collapse table-fixed-header">
                         <thead>
-                            <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700">
-                                <th class="p-2">Tên Công Ty</th>
-                                <th class="p-2 w-32">Số điện thoại</th>
-                                <th class="p-2 w-24">Cập nhật</th>
-                                <th class="p-2 w-20 text-center">Xóa</th>
+                            <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700 bg-gray-800">
+                                <th class="p-2">Công ty</th>
+                                <th class="p-2 w-28">Phone</th>
+                                <th class="p-2 w-20 text-center">Ngày</th>
+                                <th class="p-2 w-10 text-center">X</th>
                             </tr>
                         </thead>
-                        <tbody id="leadTableBody" class="text-xs divide-y divide-gray-800">
-                            </tbody>
+                        <tbody id="leadTableBody" class="text-xs divide-y divide-gray-800"></tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -124,111 +128,104 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- HÀM TOÀN CỤC (Để gọi từ nút HTML) ---
+        // --- HÀM ĐIỀU KHIỂN HỆ THỐNG ---
+        window.setSystemStatus = function(status) {
+            set(ref(db, 'config_system/status'), status);
+        }
+
+        // Theo dõi trạng thái hệ thống để đổi màu nút
+        onValue(ref(db, 'config_system/status'), snap => {
+            const status = snap.val();
+            const btnStart = document.getElementById('btnStart');
+            const btnStop = document.getElementById('btnStop');
+            const txt = document.getElementById('systemStatusText');
+
+            if (status === 'RUNNING') {
+                btnStart.className = "flex-1 bg-emerald-600 text-white border border-emerald-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(16,185,129,0.5)] flex flex-col items-center justify-center gap-1";
+                btnStop.className = "flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1";
+                txt.innerText = "HỆ THỐNG ĐANG CHẠY";
+                txt.className = "mt-2 text-xs font-bold tracking-widest text-emerald-400 animate-pulse text-center";
+            } else {
+                btnStart.className = "flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1";
+                btnStop.className = "flex-1 bg-red-600 text-white border border-red-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center gap-1";
+                txt.innerText = "HỆ THỐNG ĐANG TẠM DỪNG";
+                txt.className = "mt-2 text-xs font-bold tracking-widest text-red-400 text-center";
+            }
+        });
+
+        // --- HÀM CRM ---
         window.deleteNode = function(path, name) {
-            if(confirm(`Bạn có chắc muốn XÓA vĩnh viễn:\n${name}?`)) {
-                remove(ref(db, path)).catch(alert);
-            }
+            if(confirm(`Xóa vĩnh viễn:\n${name}?`)) remove(ref(db, path));
         }
-
         window.editNode = function(path, currentName) {
-            const newName = prompt("Sửa tên công ty:", currentName);
-            if(newName && newName !== currentName) {
-                update(ref(db, path), { name: newName }).catch(alert);
-            }
+            const newName = prompt("Sửa tên:", currentName);
+            if(newName && newName !== currentName) update(ref(db, path), { name: newName });
         }
-
         window.saveConfig = function() {
             const site = document.getElementById('targetSite').value;
             const quota = parseInt(document.getElementById('scoutQuota').value) || 20;
             set(ref(db, 'config_target'), { target_site: site, quota: quota, updated_at: Date.now() })
-            .then(() => alert("Đã cập nhật lệnh cho Bot!"))
-            .catch(e => alert("Lỗi: " + e.message));
+            .then(() => alert("Đã lưu lệnh!"));
         }
 
-        // --- 1. RENDER KHO CHỜ (QUEUE) ---
+        // --- RENDER DỮ LIỆU ---
+        // 1. Queue
         onValue(ref(db, 'hr_queue'), snap => {
             const data = snap.val();
             const tbody = document.getElementById('queueTableBody');
             document.getElementById('queueCount').innerText = snap.size;
             tbody.innerHTML = '';
+            if(!data) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center italic text-gray-600">Kho trống</td></tr>'; return; }
             
-            if(!data) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500 italic">Kho đang trống. Bot Scout đang đi tìm...</td></tr>';
-                return;
-            }
-
             let i = 1;
             Object.keys(data).forEach(key => {
                 const item = data[key];
                 const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800 transition group";
+                row.className = "hover:bg-gray-800 group border-b border-gray-800/50";
                 row.innerHTML = `
                     <td class="p-2 text-gray-500">${i++}</td>
                     <td class="p-2">
-                        <div class="font-bold text-blue-300 group-hover:text-blue-200 cursor-pointer" onclick="editNode('hr_queue/${key}', '${item.name}')">
-                            ${item.name} <i class="fa-solid fa-pencil text-[10px] ml-1 opacity-0 group-hover:opacity-100 text-gray-500"></i>
-                        </div>
-                        <div class="text-[10px] text-gray-500 truncate max-w-[200px]">${item.address || 'Chưa có địa chỉ'}</div>
+                        <div class="font-bold text-blue-300 cursor-pointer hover:text-white" onclick="editNode('hr_queue/${key}', '${item.name}')">${item.name}</div>
+                        <div class="text-[10px] text-gray-500 truncate w-48">${item.address || ''}</div>
                     </td>
-                    <td class="p-2 text-[10px] text-gray-400">${item.source || 'N/A'}</td>
                     <td class="p-2 text-center">
-                        <button onclick="deleteNode('hr_queue/${key}', '${item.name}')" class="text-red-500 hover:text-red-300 p-1 rounded hover:bg-red-900/30 transition" title="Xóa rác">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <button onclick="deleteNode('hr_queue/${key}', '${item.name}')" class="text-gray-600 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         });
 
-        // --- 2. RENDER KẾT QUẢ (LEADS) ---
+        // 2. Leads
         onValue(ref(db, 'hr_leads'), snap => {
             const data = snap.val();
             const tbody = document.getElementById('leadTableBody');
             document.getElementById('leadCount').innerText = snap.size;
             tbody.innerHTML = '';
+            if(!data) return;
 
-            if(!data) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500 italic">Chưa có kết quả nào.</td></tr>';
-                return;
-            }
-
-            // Chuyển object thành array để sort ngày mới nhất lên đầu
             const leadsArr = Object.entries(data).sort((a, b) => b[1].timestamp.localeCompare(a[1].timestamp));
-
             leadsArr.forEach(([key, item]) => {
                 const row = document.createElement('tr');
                 const hasPhone = item.phone && item.phone !== "Chưa có";
-                row.className = "hover:bg-gray-800 transition border-l-2 " + (hasPhone ? "border-emerald-500" : "border-transparent");
-                
+                row.className = "hover:bg-gray-800 border-b border-gray-800/50";
                 row.innerHTML = `
                     <td class="p-2">
-                        <div class="font-bold text-gray-200 hover:text-white cursor-pointer" onclick="editNode('hr_leads/${key}', '${item.company}')">
-                            ${item.company}
-                        </div>
-                        <div class="text-[10px] text-gray-500">ĐD: ${item.legal_rep || 'N/A'}</div>
+                        <div class="font-bold text-gray-300 cursor-pointer hover:text-white" onclick="editNode('hr_leads/${key}', '${item.company}')">${item.company}</div>
                     </td>
                     <td class="p-2">
-                        <span class="${hasPhone ? 'bg-emerald-900/40 text-emerald-400 border-emerald-500/30' : 'bg-gray-800 text-gray-500'} px-2 py-1 rounded border text-[11px] font-mono font-bold select-all">
-                            ${item.phone}
-                        </span>
+                        <span class="${hasPhone ? 'text-emerald-400 font-bold' : 'text-gray-600'} font-mono text-xs">${item.phone}</span>
                     </td>
-                    <td class="p-2 text-[10px] text-gray-400">
-                        ${item.last_updated ? item.last_updated.split(' ')[0] : 'N/A'}
-                        <div class="text-[9px] text-gray-600">${item.context || ''}</div>
-                    </td>
+                    <td class="p-2 text-center text-[10px] text-gray-500">${item.last_updated ? item.last_updated.split(' ')[1] : ''}</td>
                     <td class="p-2 text-center">
-                        <button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-600 hover:text-red-400 transition" title="Xóa">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
+                        <button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-600 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         });
 
-        // --- 3. BOT STATUS ---
+        // 3. Bot Status
         onValue(ref(db, 'hr_status'), snap => {
             const data = snap.val() || {};
             const grid = document.getElementById('botGrid');
@@ -238,19 +235,19 @@
             Object.keys(data).forEach(key => {
                 const bot = data[key];
                 if ((now - (bot.timestamp || 0)) > 120) return;
-
-                let color = bot.type === "SCOUT" ? "border-purple-500 text-purple-400" : 
-                            (bot.type === "WORKER" ? "border-blue-500 text-blue-400" : "border-gray-500 text-gray-400");
-                let icon = bot.type === "SCOUT" ? "fa-binoculars" : "fa-robot";
-
-                if (bot.is_error) color = "border-red-500 text-red-400 blink-bg";
+                
+                let statusColor = "bg-gray-800 border-gray-700";
+                let icon = "fa-robot";
+                if(bot.type === "PAUSED") { statusColor = "bg-red-900/20 border-red-800"; icon = "fa-pause"; }
+                else if(bot.type === "SCOUT") { statusColor = "bg-purple-900/20 border-purple-800"; icon = "fa-binoculars"; }
+                else if(bot.type === "WORKER") { statusColor = "bg-blue-900/20 border-blue-800"; icon = "fa-briefcase"; }
 
                 grid.innerHTML += `
-                    <div class="bg-gray-900 border ${color} rounded p-2 flex items-center gap-2 shadow-lg">
-                        <i class="fa-solid ${icon} text-lg"></i>
+                    <div class="${statusColor} border rounded p-2 flex items-center gap-2 shadow-md">
+                        <i class="fa-solid ${icon} text-gray-400"></i>
                         <div class="overflow-hidden">
-                            <div class="font-bold text-xs truncate">${bot.name}</div>
-                            <div class="text-[10px] text-gray-400 truncate" title="${bot.message}">${bot.message}</div>
+                            <div class="font-bold text-[10px] text-gray-300 truncate">${bot.name}</div>
+                            <div class="text-[9px] text-gray-500 truncate">${bot.message}</div>
                         </div>
                     </div>
                 `;

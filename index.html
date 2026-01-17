@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM - INTELLIGENT MONITOR</title>
+    <title>VDC CRM - MONITOR V3.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .blink-bg { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { background-color: rgba(185, 28, 28, 0.7); } }
-        /* Tùy chỉnh thanh cuộn */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
@@ -24,45 +23,31 @@
                 <h1 class="text-2xl md:text-3xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-network-wired"></i> VDC INTELLIGENCE
                 </h1>
-                <p class="text-xs text-gray-500 mt-1">Hệ thống trinh sát dữ liệu tự động v3.3</p>
+                <p class="text-xs text-gray-500 mt-1">Hệ thống trinh sát dữ liệu tự động v3.4</p>
             </div>
-            <div class="flex gap-4">
-                <div class="text-right bg-gray-900 p-2 rounded-lg border border-gray-800">
-                    <div class="text-3xl font-bold text-emerald-400 font-mono" id="leadCount">0</div>
-                    <div class="text-[10px] text-gray-500 font-bold uppercase">LEADS TÌM ĐƯỢC</div>
-                </div>
+            <div class="text-right bg-gray-900 p-3 rounded-lg border border-gray-800 shadow-lg">
+                <div class="text-4xl font-bold text-emerald-400 font-mono" id="leadCount">0</div>
+                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">LEADS TÌM ĐƯỢC</div>
             </div>
         </header>
 
-        <div class="mb-2 flex justify-between items-end">
-            <h3 class="text-gray-500 text-xs font-bold uppercase"><i class="fa-solid fa-robot mr-1"></i> Biệt đội Bot (Chỉ hiện Bot Online)</h3>
+        <div class="mb-2">
+            <h3 class="text-gray-500 text-xs font-bold uppercase"><i class="fa-solid fa-robot mr-1"></i> Bot đang chạy</h3>
         </div>
-        
-        <div id="botGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 min-h-[100px]">
+        <div id="botGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 min-h-[80px]">
             </div>
 
-        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-2xl flex flex-col h-[600px]">
+        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-2xl flex flex-col h-[650px]">
             <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
                 <h3 class="text-sm font-bold text-gray-300 uppercase flex items-center gap-2">
-                    <i class="fa-solid fa-database text-blue-500"></i> Dữ liệu Leads Realtime
+                    <i class="fa-solid fa-list-ul text-blue-500"></i> Danh sách kết quả mới nhất
                 </h3>
-                <span class="text-[10px] text-emerald-500 flex items-center gap-1">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    Live Sync
+                <span class="text-[10px] text-emerald-500 flex items-center gap-1 animate-pulse">
+                    <i class="fa-solid fa-circle text-[8px]"></i> Live Sync
                 </span>
             </div>
             
-            <div class="grid grid-cols-12 gap-4 p-3 bg-gray-900 text-xs text-gray-500 font-bold uppercase tracking-wider border-b border-gray-800">
-                <div class="col-span-1 text-center">Time</div>
-                <div class="col-span-4">Công Ty / Nguồn</div>
-                <div class="col-span-3">Người Liên Hệ (HR)</div>
-                <div class="col-span-4 text-right">Số Điện Thoại</div>
-            </div>
-
-            <div id="feed" class="overflow-y-auto flex-1 p-0">
+            <div id="feed" class="overflow-y-auto flex-1 p-0 divide-y divide-gray-800">
                 </div>
         </div>
     </div>
@@ -84,7 +69,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const OFFLINE_THRESHOLD = 60; // Sau 60s không thấy tín hiệu là coi như Tắt
+        const OFFLINE_THRESHOLD = 60; 
         let botData = {};
 
         // --- 1. RENDER BOTS ---
@@ -97,64 +82,37 @@
             const grid = document.getElementById('botGrid');
             grid.innerHTML = '';
             const now = Math.floor(Date.now() / 1000);
-            let activeBotCount = 0;
+            let activeCount = 0;
 
             Object.keys(botData).forEach(key => {
                 const bot = botData[key];
-                const isOffline = (now - (bot.timestamp || 0)) > OFFLINE_THRESHOLD;
+                // Bỏ qua Bot Offline
+                if ((now - (bot.timestamp || 0)) > OFFLINE_THRESHOLD) return;
                 
-                // --- QUAN TRỌNG: NẾU OFFLINE THÌ BỎ QUA LUÔN (KHÔNG VẼ) ---
-                if (isOffline) return;
-
-                activeBotCount++;
+                activeCount++;
                 const isError = bot.is_error;
-                
                 let cardClass = isError ? "bg-red-900/40 border-red-500/50 blink-bg" : "bg-slate-800 border-blue-500/50";
-                let statusBadge = isError ? '<span class="text-red-400 font-bold text-[10px]">SOS</span>' : '<span class="text-emerald-400 font-bold text-[10px]">RUNNING</span>';
-                let iconClass = isError ? "fa-triangle-exclamation text-red-500" : "fa-robot text-blue-400";
-
-                // Timer HTML
-                let timerHtml = '';
-                if (bot.duration > 0) {
-                    const left = Math.max(0, (bot.timestamp + bot.duration) - now);
-                    if (left > 0) {
-                        const m = Math.floor(left / 60);
-                        const s = (left % 60).toString().padStart(2, '0');
-                        timerHtml = `<span class="font-mono text-yellow-400 font-bold">${m}:${s}</span>`;
-                    }
-                }
-
-                const card = document.createElement('div');
-                card.className = `${cardClass} border rounded-lg p-3 flex flex-col justify-between h-24 transition-all relative overflow-hidden shadow-lg animate-fade-in`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-2">
-                             <div class="bg-gray-900/50 p-1.5 rounded-full w-8 h-8 flex items-center justify-center">
-                                <i class="fa-solid ${iconClass}"></i>
-                            </div>
-                            <h4 class="font-bold text-sm text-gray-300 truncate max-w-[120px]" title="${bot.name}">${bot.name}</h4>
+                let statusBadge = isError ? "SOS" : "ONLINE";
+                
+                grid.innerHTML += `
+                    <div class="${cardClass} border rounded-lg p-3 flex justify-between items-center shadow-lg animate-fade-in">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-200">${bot.name}</h4>
+                            <p class="text-[10px] text-gray-400 mt-1 truncate w-40">${bot.message}</p>
                         </div>
-                        ${statusBadge}
-                    </div>
-                    <p class="text-[10px] text-gray-400 line-clamp-1 mt-2 leading-tight pl-1">${bot.message}</p>
-                    <div class="mt-auto flex justify-between items-end text-[10px] text-gray-500 border-t border-white/5 pt-1">
-                        <span>${bot.last_active}</span>
-                        ${timerHtml}
+                        <div class="text-right">
+                             <span class="text-[10px] font-bold ${isError ? 'text-red-400' : 'text-emerald-400'}">${statusBadge}</span>
+                             <div class="text-[9px] text-gray-500 mt-1">${bot.last_active}</div>
+                        </div>
                     </div>
                 `;
-                grid.appendChild(card);
             });
-
-            // Nếu không có Bot nào hoạt động
-            if (activeBotCount === 0) {
-                grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-600 italic border border-dashed border-gray-700 rounded-lg">Hiện không có Bot nào hoạt động.<br>Hãy bật file worker_bot.py trên máy trạm.</div>';
-            }
+            
+            if(activeCount === 0) grid.innerHTML = '<div class="col-span-full text-center text-gray-600 text-sm py-4 italic border border-dashed border-gray-800 rounded">Chưa có Bot nào hoạt động...</div>';
         }
-        
-        // Cập nhật lại mỗi giây để check offline realtime
         setInterval(renderBots, 1000);
 
-        // --- 2. RENDER LEADS (DATA TABLE STYLE) ---
+        // --- 2. RENDER LEADS (GIAO DIỆN MỚI DỄ ĐỌC) ---
         let total = 0;
         onChildAdded(ref(db, 'hr_leads'), (snapshot) => {
             const d = snapshot.val();
@@ -164,41 +122,50 @@
                 
                 const feed = document.getElementById('feed');
                 const div = document.createElement('div');
-                div.className = "grid grid-cols-12 gap-4 p-3 border-b border-gray-800 hover:bg-gray-800/50 transition duration-150 group animate-fade-in items-center";
+                div.className = "p-4 hover:bg-gray-800 transition duration-150 animate-fade-in group";
                 
-                // Xử lý hiển thị HR Name
-                let hrDisplay = d.hr_name && d.hr_name !== "Không rõ tên" 
-                    ? `<span class="text-emerald-300 font-bold"><i class="fa-solid fa-user-tie mr-1 text-xs"></i>${d.hr_name}</span>`
-                    : `<span class="text-gray-600 italic text-[10px]">Chưa rõ tên</span>`;
+                // Xử lý tên HR
+                let hrInfo = `<span class="text-gray-500 italic text-sm">Chưa rõ tên</span>`;
+                if (d.hr_name && d.hr_name !== "Không rõ tên") {
+                    hrInfo = `<span class="text-emerald-300 font-bold text-base"><i class="fa-solid fa-user-tie mr-2"></i>${d.hr_name}</span>`;
+                }
 
+                // Layout mới: 2 Dòng
                 div.innerHTML = `
-                    <div class="col-span-1 text-center text-[10px] text-gray-500 font-mono">${d.timestamp.split(' ')[1]}</div>
-                    
-                    <div class="col-span-4 min-w-0">
-                        <div class="font-bold text-gray-200 text-sm truncate" title="${d.company}">${d.company}</div>
-                        <div class="text-[10px] text-gray-500 truncate flex gap-2">
-                            <span>${d.bot}</span>
-                            <span class="text-blue-500"><a href="${d.link}" target="_blank" class="hover:underline">Link gốc</a></span>
+                    <div class="mb-3">
+                        <h4 class="text-lg md:text-xl font-bold text-blue-400 leading-tight group-hover:text-blue-300 transition">
+                            <a href="${d.link}" target="_blank" class="hover:underline decoration-dashed decoration-1 underline-offset-4" title="Bấm để mở nguồn">
+                                ${d.company}
+                            </a>
+                        </h4>
+                        <div class="text-[10px] text-gray-500 mt-1 flex gap-3">
+                            <span><i class="fa-regular fa-clock mr-1"></i>${d.timestamp}</span>
+                            <span><i class="fa-solid fa-robot mr-1"></i>${d.bot}</span>
+                            <span><i class="fa-solid fa-earth-americas mr-1"></i>${d.source || 'N/A'}</span>
                         </div>
                     </div>
-                    
-                    <div class="col-span-3 min-w-0 text-xs">
-                        ${hrDisplay}
-                    </div>
-                    
-                    <div class="col-span-4 text-right">
-                        <span class="bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded border border-emerald-900/50 font-mono font-bold text-sm select-all cursor-copy hover:bg-emerald-900/50 transition">
-                            ${d.phone}
-                        </span>
+
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-950/30 p-3 rounded-lg border border-gray-800 group-hover:border-gray-700">
+                        <div class="mb-2 md:mb-0">
+                            ${hrInfo}
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider hidden md:block">Điện thoại:</span>
+                            <span class="bg-emerald-900/40 text-emerald-400 px-4 py-1.5 rounded-md border border-emerald-500/30 font-mono font-bold text-xl md:text-2xl select-all cursor-copy shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                ${d.phone}
+                            </span>
+                        </div>
                     </div>
                 `;
+                
                 feed.insertBefore(div, feed.firstChild);
             }
         });
     </script>
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
     </style>
 </body>
 </html>

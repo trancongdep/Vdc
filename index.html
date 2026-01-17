@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM - MONITOR V3.4</title>
+    <title>VDC CRM - MONITOR V3.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,16 +18,32 @@
 <body class="bg-gray-950 text-white min-h-screen p-4 font-sans antialiased">
     
     <div class="max-w-7xl mx-auto">
-        <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-            <div>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-800 pb-4 gap-4">
+            <div class="w-full md:w-auto">
                 <h1 class="text-2xl md:text-3xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-network-wired"></i> VDC INTELLIGENCE
                 </h1>
-                <p class="text-xs text-gray-500 mt-1">Hệ thống trinh sát dữ liệu tự động v3.4</p>
+                <p class="text-xs text-gray-500 mt-1">Hệ thống trinh sát dữ liệu tự động v3.5</p>
             </div>
-            <div class="text-right bg-gray-900 p-3 rounded-lg border border-gray-800 shadow-lg">
-                <div class="text-4xl font-bold text-emerald-400 font-mono" id="leadCount">0</div>
-                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">LEADS TÌM ĐƯỢC</div>
+            
+            <div class="flex gap-4 w-full md:w-auto justify-end">
+                
+                <div class="text-right bg-gray-900/80 p-3 rounded-lg border border-blue-900/30 shadow-lg min-w-[140px] relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                    <div class="text-4xl font-bold text-blue-400 font-mono group-hover:scale-110 transition duration-300" id="queueCount">...</div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                        <i class="fa-solid fa-boxes-stacked mr-1"></i> KHO VIỆC
+                    </div>
+                </div>
+
+                <div class="text-right bg-gray-900/80 p-3 rounded-lg border border-emerald-900/30 shadow-lg min-w-[140px] relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                    <div class="text-4xl font-bold text-emerald-400 font-mono group-hover:scale-110 transition duration-300" id="leadCount">...</div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                        <i class="fa-solid fa-check-circle mr-1"></i> TÌM ĐƯỢC
+                    </div>
+                </div>
+
             </div>
         </header>
 
@@ -72,7 +88,14 @@
         const OFFLINE_THRESHOLD = 60; 
         let botData = {};
 
-        // --- 1. RENDER BOTS ---
+        // --- 1. THEO DÕI SỐ LƯỢNG KHO VIỆC (QUEUE) ---
+        // Đây là tính năng mới thêm vào
+        onValue(ref(db, 'hr_queue'), (snapshot) => {
+            const count = snapshot.size; // Đếm số lượng con trong hr_queue
+            document.getElementById('queueCount').innerText = count;
+        });
+
+        // --- 2. RENDER BOTS ---
         onValue(ref(db, 'hr_status'), (snapshot) => {
             botData = snapshot.val() || {};
             renderBots();
@@ -86,7 +109,6 @@
 
             Object.keys(botData).forEach(key => {
                 const bot = botData[key];
-                // Bỏ qua Bot Offline
                 if ((now - (bot.timestamp || 0)) > OFFLINE_THRESHOLD) return;
                 
                 activeCount++;
@@ -112,29 +134,27 @@
         }
         setInterval(renderBots, 1000);
 
-        // --- 2. RENDER LEADS (GIAO DIỆN MỚI DỄ ĐỌC) ---
-        let total = 0;
+        // --- 3. RENDER LEADS ---
+        let totalLeads = 0;
         onChildAdded(ref(db, 'hr_leads'), (snapshot) => {
             const d = snapshot.val();
             if(d.phone && d.phone !== "Không tìm thấy") {
-                total++;
-                document.getElementById('leadCount').innerText = total;
+                totalLeads++;
+                document.getElementById('leadCount').innerText = totalLeads;
                 
                 const feed = document.getElementById('feed');
                 const div = document.createElement('div');
                 div.className = "p-4 hover:bg-gray-800 transition duration-150 animate-fade-in group";
                 
-                // Xử lý tên HR
                 let hrInfo = `<span class="text-gray-500 italic text-sm">Chưa rõ tên</span>`;
                 if (d.hr_name && d.hr_name !== "Không rõ tên") {
                     hrInfo = `<span class="text-emerald-300 font-bold text-base"><i class="fa-solid fa-user-tie mr-2"></i>${d.hr_name}</span>`;
                 }
 
-                // Layout mới: 2 Dòng
                 div.innerHTML = `
                     <div class="mb-3">
                         <h4 class="text-lg md:text-xl font-bold text-blue-400 leading-tight group-hover:text-blue-300 transition">
-                            <a href="${d.link}" target="_blank" class="hover:underline decoration-dashed decoration-1 underline-offset-4" title="Bấm để mở nguồn">
+                            <a href="${d.link}" target="_blank" class="hover:underline decoration-dashed decoration-1 underline-offset-4">
                                 ${d.company}
                             </a>
                         </h4>
@@ -149,7 +169,6 @@
                         <div class="mb-2 md:mb-0">
                             ${hrInfo}
                         </div>
-                        
                         <div class="flex items-center gap-3">
                             <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider hidden md:block">Điện thoại:</span>
                             <span class="bg-emerald-900/40 text-emerald-400 px-4 py-1.5 rounded-md border border-emerald-500/30 font-mono font-bold text-xl md:text-2xl select-all cursor-copy shadow-[0_0_10px_rgba(16,185,129,0.1)]">
@@ -158,7 +177,6 @@
                         </div>
                     </div>
                 `;
-                
                 feed.insertBefore(div, feed.firstChild);
             }
         });

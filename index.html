@@ -3,135 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Lead Hunter Pro v1.1 - Thầy Đẹp</title>
+    <title>HR Hunter - No Limit Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
-      }
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .loading-spinner {
-            border: 3px solid #e5e7eb;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        body { font-family: 'Segoe UI', sans-serif; }
+        .btn-hunt { transition: all 0.2s; }
+        .btn-hunt:hover { transform: translateY(-2px); shadow: lg; }
+        .visited { opacity: 0.6; background-color: #e5e7eb !important; border-color: #d1d5db !important; color: #6b7280 !important; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-blue-100 min-h-screen p-4 md:p-6">
+<body class="bg-gray-100 min-h-screen p-6">
 
     <div class="max-w-7xl mx-auto space-y-6">
-        <header class="flex justify-between items-end border-b pb-4 border-gray-300">
+        <header class="bg-white p-6 rounded-xl shadow-sm border-l-8 border-indigo-600 flex justify-between items-center">
             <div>
-                <h1 class="text-3xl md:text-4xl font-bold text-blue-900">
-                    <i class="fa-solid fa-crosshairs text-blue-600 mr-2"></i>HR Lead Hunter Pro
-                </h1>
-                <p class="text-gray-600 text-sm mt-1">Phiên bản 1.1 - Tối ưu Quota (Anti-Ban Rate Limit)</p>
+                <h1 class="text-3xl font-bold text-gray-800"><i class="fa-solid fa-infinity mr-3 text-indigo-600"></i>HR Hunter - Bản Không Giới Hạn</h1>
+                <p class="text-gray-500 mt-1">Sử dụng thuật toán Google Dorking - Không cần API - Không bao giờ bị chặn</p>
             </div>
-            <div class="text-right hidden md:block">
-                <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Free Tier Safe Mode</span>
+            <div class="text-right">
+                <button onclick="clearAll()" class="text-red-500 hover:text-red-700 font-medium text-sm underline">Xóa làm lại</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white rounded-xl shadow-lg p-6 glass-effect border-t-4 border-blue-600">
-                    <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center">
-                        <i class="fa-solid fa-sliders mr-2 text-blue-500"></i>Thiết lập
-                    </h2>
+            <div class="lg:col-span-3 space-y-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <label class="block font-bold text-gray-700 mb-2">Nhập danh sách công ty</label>
+                    <textarea id="inputList" rows="15" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" placeholder="Mỗi dòng một tên công ty..."></textarea>
                     
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Gemini API Key</label>
-                            <div class="relative">
-                                <input type="password" id="apiKey" class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition" placeholder="Dán API Key vào đây...">
-                                <i class="fa-solid fa-key absolute right-3 top-3 text-gray-400"></i>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                                Danh sách công ty 
-                                <span class="text-xs font-normal text-gray-500">(Mỗi công ty 1 dòng)</span>
-                            </label>
-                            <textarea id="companyList" rows="12" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition font-mono text-sm" placeholder="Vingroup&#10;Viettel&#10;FPT Software&#10;..."></textarea>
-                            <div class="flex justify-between mt-1">
-                                <span id="lineCount" class="text-xs text-gray-500">0 công ty</span>
-                                <button onclick="document.getElementById('companyList').value=''" class="text-xs text-red-500 hover:text-red-700">Xóa hết</button>
-                            </div>
-                        </div>
-
-                        <button id="startBtn" onclick="startHunting()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200 flex justify-center items-center gap-2 transform active:scale-95">
-                            <i class="fa-solid fa-rocket"></i> Bắt đầu quét
-                        </button>
-                    </div>
+                    <button onclick="generateLinks()" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Tạo Danh Sách Quét
+                    </button>
                 </div>
-
-                <div id="statusPanel" class="hidden bg-white rounded-xl shadow-md p-5 border-l-4 border-yellow-400">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-bold text-gray-700">Tiến độ xử lý</span>
-                        <span id="progressText" class="text-sm text-blue-600 font-bold">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-3">
-                        <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                        <div id="statusIcon" class="loading-spinner"></div>
-                        <span id="statusMessage" class="truncate">Đang chuẩn bị...</span>
-                    </div>
+                
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 text-sm text-blue-800">
+                    <h3 class="font-bold mb-2"><i class="fa-solid fa-circle-info"></i> Cách dùng:</h3>
+                    <ul class="list-disc pl-4 space-y-1">
+                        <li>Nhập tên công ty và bấm nút "Tạo".</li>
+                        <li>Bấm vào các nút màu để mở tab tìm kiếm Google đã được tối ưu từ khóa.</li>
+                        <li>Nút sẽ tự mờ đi sau khi bấm để tránh nhầm lẫn.</li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="lg:col-span-8">
-                <div class="bg-white rounded-xl shadow-lg p-6 glass-effect h-full flex flex-col min-h-[600px]">
-                    <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                        <h2 class="text-lg font-bold text-gray-800 flex items-center">
-                            <i class="fa-solid fa-table-list mr-2 text-green-600"></i>Kết quả tìm kiếm
-                        </h2>
-                        <div class="flex gap-2">
-                            <span id="foundCount" class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded hidden">Tìm thấy: 0</span>
-                            <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded transition shadow flex items-center">
-                                <i class="fa-solid fa-file-excel mr-1"></i> Xuất Excel
-                            </button>
-                        </div>
+            <div class="lg:col-span-9">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden min-h-[600px]">
+                    <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                        <h2 class="font-bold text-gray-700" id="resultCount">Danh sách chờ quét (0)</h2>
+                        <div class="text-xs text-gray-500 italic">Mẹo: Giữ phím CTRL khi bấm để mở trong tab mới mà không chuyển trang</div>
                     </div>
                     
-                    <div class="overflow-x-auto flex-grow rounded-lg border border-gray-200">
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-100 sticky top-0">
-                                <tr class="text-gray-600 text-xs uppercase tracking-wider">
-                                    <th class="p-3 border-b font-bold w-1/4">Công Ty</th>
-                                    <th class="p-3 border-b font-bold w-1/4">Vị Trí</th>
-                                    <th class="p-3 border-b font-bold w-1/4">Liên hệ (Ưu tiên SĐT)</th>
-                                    <th class="p-3 border-b font-bold w-1/4">Nguồn / Ghi chú</th>
+                            <thead class="bg-gray-100 text-xs uppercase text-gray-600 sticky top-0">
+                                <tr>
+                                    <th class="p-4 border-b w-1/4">Tên Công Ty</th>
+                                    <th class="p-4 border-b text-center">Tìm SĐT Di Động (Facebook)</th>
+                                    <th class="p-4 border-b text-center">Tìm trên Vieclam24h/TopCV</th>
+                                    <th class="p-4 border-b text-center">Tìm File Excel/DS nhân viên</th>
                                 </tr>
                             </thead>
-                            <tbody id="resultTableBody" class="text-gray-700 text-sm divide-y divide-gray-100">
-                                <tr id="emptyRow">
+                            <tbody id="tableBody" class="text-sm divide-y divide-gray-100">
+                                <tr>
                                     <td colspan="4" class="p-10 text-center text-gray-400">
-                                        <i class="fa-solid fa-inbox text-4xl mb-3 block opacity-20"></i>
-                                        Chưa có dữ liệu. Nhập danh sách bên trái và nhấn Bắt đầu.
+                                        Hãy nhập dữ liệu và bấm nút Tạo để bắt đầu.
                                     </td>
                                 </tr>
                             </tbody>
@@ -142,215 +78,78 @@
         </div>
     </div>
 
-    <script type="module">
-        import { GoogleGenerativeAI } from "@google/generative-ai";
-
-        let genAI = null;
-        let model = null;
-        let isProcessing = false;
-        let shouldStop = false;
-
-        // Data storage
-        const results = [];
-        let successCount = 0;
-
-        // Count lines for UX
-        document.getElementById('companyList').addEventListener('input', function() {
-            const lines = this.value.split('\n').filter(line => line.trim() !== "").length;
-            document.getElementById('lineCount').innerText = `${lines} công ty`;
-        });
-
-        // Delay utility
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-        window.startHunting = async function() {
-            if (isProcessing) return;
-
-            const apiKey = document.getElementById('apiKey').value.trim();
-            const companyListRaw = document.getElementById('companyList').value.trim();
+    <script>
+        function generateLinks() {
+            const raw = document.getElementById('inputList').value;
+            const lines = raw.split('\n').filter(line => line.trim() !== "");
             
-            if (!apiKey) { alert("Thiếu API Key!"); return; }
-            if (!companyListRaw) { alert("Thiếu danh sách công ty!"); return; }
+            if (lines.length === 0) {
+                alert("Vui lòng nhập tên công ty!");
+                return;
+            }
 
-            // Init
-            genAI = new GoogleGenerativeAI(apiKey);
-            model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = "";
+            document.getElementById('resultCount').innerText = `Danh sách chờ quét (${lines.length})`;
 
-            const companies = companyListRaw.split('\n').filter(line => line.trim() !== "");
-            
-            // UI Reset
-            isProcessing = true;
-            shouldStop = false;
-            results.length = 0;
-            successCount = 0;
-            
-            const startBtn = document.getElementById('startBtn');
-            startBtn.disabled = true;
-            startBtn.classList.add('bg-gray-400');
-            startBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Đang chạy...';
-            
-            document.getElementById('statusPanel').classList.remove('hidden');
-            document.getElementById('resultTableBody').innerHTML = '';
-            document.getElementById('foundCount').classList.remove('hidden');
-            document.getElementById('foundCount').innerText = `Tìm thấy: 0`;
-
-            const total = companies.length;
-
-            // --- MAIN LOOP (SEQUENTIAL to save quota) ---
-            for (let i = 0; i < total; i++) {
-                const company = companies[i].trim();
+            lines.forEach((company, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition";
                 
-                // Update Status
-                document.getElementById('statusMessage').innerText = `Đang quét: ${company}`;
-                updateProgress(i, total);
+                // Thuật toán tạo Link Dorking
+                const name = company.trim();
+                const encodedName = encodeURIComponent(name);
 
-                // Process
-                const data = await processCompany(company);
-                addRowToTable(data);
-                
-                if(data.found) {
-                    successCount++;
-                    document.getElementById('foundCount').innerText = `Tìm thấy: ${successCount}`;
-                }
+                // 1. Dork tìm SĐT trên Facebook/LinkedIn (Quét 09xx, 03xx...)
+                const dorkMobile = `site:facebook.com OR site:linkedin.com "${name}" "tuyển dụng" AND ("09" OR "03" OR "07" OR "08" OR "Zalo")`;
+                const linkMobile = `https://www.google.com/search?q=${encodeURIComponent(dorkMobile)}`;
 
-                // --- RATE LIMIT PROTECTION ---
-                // If not the last item, wait 4 seconds
-                if (i < total - 1) {
-                    for(let s = 4; s > 0; s--) {
-                        document.getElementById('statusMessage').innerHTML = 
-                            `Đang nghỉ <b class='text-red-500'>${s}s</b> để tránh khóa API...`;
-                        document.getElementById('statusIcon').style.borderTopColor = "#f59e0b"; // Yellow when waiting
-                        await delay(1000);
-                    }
-                    document.getElementById('statusIcon').style.borderTopColor = "#3b82f6"; // Blue when working
-                }
-            }
+                // 2. Dork tìm trên trang tuyển dụng
+                const dorkJob = `site:vieclam24h.vn OR site:topcv.vn OR site:careerbuilder.vn "${name}" "liên hệ"`;
+                const linkJob = `https://www.google.com/search?q=${encodeURIComponent(dorkJob)}`;
 
-            // Finish
-            finishProcess(total);
-        }
+                // 3. Dork tìm file danh sách nhân viên (Filetype: xls, pdf...)
+                const dorkFile = `filetype:xls OR filetype:xlsx OR filetype:pdf "${name}" "danh sách" "điện thoại"`;
+                const linkFile = `https://www.google.com/search?q=${encodeURIComponent(dorkFile)}`;
 
-        async function processCompany(companyName) {
-            try {
-                // Timeout logic (40s max per request)
-                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 40000));
-
-                const aiRequest = async () => {
-                    const prompt = `
-                    Bạn là chuyên gia Headhunter. Tìm thông tin liên hệ tuyển dụng (HR) của công ty: "${companyName}" tại Việt Nam.
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-gray-800 border-r">${name}</td>
                     
-                    Ưu tiên tìm dữ liệu từ: Facebook Group Tuyển dụng, LinkedIn, Trang chủ công ty.
-                    Mục tiêu:
-                    1. Số điện thoại di động (Mobile) của HR/Recruiter.
-                    2. Số bàn (nếu không có mobile).
-                    3. Link nguồn (bắt buộc).
+                    <td class="p-2 text-center">
+                        <a href="${linkMobile}" target="_blank" onclick="markVisited(this)" 
+                           class="btn-hunt inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 text-xs font-bold w-full justify-center">
+                           <i class="fa-brands fa-facebook"></i> Quét SĐT Social
+                        </a>
+                    </td>
 
-                    Trả về JSON duy nhất:
-                    {
-                        "company": "${companyName}",
-                        "position": "Vị trí người liên hệ (hoặc Phòng Tuyển dụng)",
-                        "phone": "Số điện thoại (hoặc 'Không có')",
-                        "source": "Tên nguồn (VD: Facebook, LinkedIn...)",
-                        "found": true nếu tìm thấy số đt, false nếu không
-                    }
-                    `;
-                    
-                    const result = await model.generateContent(prompt);
-                    const response = await result.response;
-                    let text = response.text();
-                    text = text.replace(/```json|```/g, '').trim();
-                    return JSON.parse(text);
-                };
+                    <td class="p-2 text-center">
+                        <a href="${linkJob}" target="_blank" onclick="markVisited(this)"
+                           class="btn-hunt inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded shadow-sm hover:bg-green-700 text-xs font-bold w-full justify-center">
+                           <i class="fa-solid fa-briefcase"></i> Web Tuyển dụng
+                        </a>
+                    </td>
 
-                const data = await Promise.race([aiRequest(), timeout]);
-                return data;
-
-            } catch (error) {
-                console.error(error);
-                return {
-                    company: companyName,
-                    position: "Lỗi / Quá hạn",
-                    phone: "N/A",
-                    source: "Lỗi kết nối hoặc API limit",
-                    found: false,
-                    isError: true
-                };
-            }
-        }
-
-        function addRowToTable(data) {
-            const tbody = document.getElementById('resultTableBody');
-            const row = document.createElement('tr');
-            row.className = "hover:bg-blue-50 transition duration-150 group";
-
-            // Style phone number
-            let phoneHtml = `<span class="text-gray-400 italic">Không có</span>`;
-            if (data.phone && data.phone !== "Không có" && data.phone !== "N/A") {
-                phoneHtml = `<span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded select-all cursor-copy">${data.phone}</span>`;
-            }
-
-            // Status indicator
-            const statusColor = data.found ? "border-l-4 border-green-500" : (data.isError ? "border-l-4 border-red-500" : "border-l-4 border-gray-300");
-            
-            row.innerHTML = `
-                <td class="p-3 ${statusColor} font-medium text-gray-800">${data.company}</td>
-                <td class="p-3 text-gray-600">${data.position}</td>
-                <td class="p-3">${phoneHtml}</td>
-                <td class="p-3 text-xs text-gray-500 truncate max-w-[200px]" title="${data.source}">${data.source}</td>
-            `;
-            tbody.appendChild(row);
-            
-            // Auto scroll to bottom
-            const container = document.querySelector('.overflow-x-auto');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function updateProgress(currentIndex, total) {
-            const percent = Math.round(((currentIndex) / total) * 100);
-            document.getElementById('progressBar').style.width = `${percent}%`;
-            document.getElementById('progressText').innerText = `${percent}%`;
-        }
-
-        function finishProcess(total) {
-            isProcessing = false;
-            updateProgress(total, total);
-            document.getElementById('statusMessage').innerText = "Hoàn tất tìm kiếm!";
-            document.getElementById('statusIcon').style.animation = "none";
-            
-            const startBtn = document.getElementById('startBtn');
-            startBtn.disabled = false;
-            startBtn.classList.remove('bg-gray-400');
-            startBtn.classList.add('bg-blue-600');
-            startBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Quét lại / Quét mới';
-        }
-
-        window.exportToCSV = function() {
-            if (results.length === 0 && document.querySelectorAll('#resultTableBody tr').length <= 1) {
-                alert("Chưa có dữ liệu!"); return;
-            }
-            
-            // Scrape table data directly to ensure WYSIWYG
-            const rows = document.querySelectorAll('#resultTableBody tr');
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for Excel encoding
-            csvContent += "Công Ty,Vị Trí,Số Điện Thoại,Nguồn\n";
-
-            rows.forEach(row => {
-                if(row.id === "emptyRow") return;
-                const cols = row.querySelectorAll('td');
-                const company = cols[0].innerText;
-                const position = cols[1].innerText;
-                const phone = cols[2].innerText;
-                const source = cols[3].innerText;
-                csvContent += `"${company}","${position}","'${phone}","${source}"\n`;
+                    <td class="p-2 text-center">
+                        <a href="${linkFile}" target="_blank" onclick="markVisited(this)"
+                           class="btn-hunt inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded shadow-sm hover:bg-orange-600 text-xs font-bold w-full justify-center">
+                           <i class="fa-solid fa-file-excel"></i> Quét File DS
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
+        }
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `HR_Leads_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        function markVisited(element) {
+            // Hiệu ứng visual để biết đã bấm vào rồi
+            element.classList.add('visited');
+            element.innerHTML = '<i class="fa-solid fa-check"></i> Đã kiểm tra';
+        }
+
+        function clearAll() {
+            document.getElementById('inputList').value = '';
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">Đã xóa dữ liệu.</td></tr>';
+            document.getElementById('resultCount').innerText = 'Danh sách chờ quét (0)';
         }
     </script>
 </body>

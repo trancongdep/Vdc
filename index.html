@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v22.7 - Full Control</title>
+    <title>VDC COMMANDER PRO v22.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,67 +13,75 @@
         .page-content.active { display: flex; flex-direction: column; }
         #sidebar { transition: transform 0.3s ease; z-index: 100; }
         .sidebar-closed { transform: translateX(-100%); }
-        .sidebar-open { transform: translateX(0); }
-        #sidebarOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 90; }
-        #sidebarOverlay.active { display: block; }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen overflow-hidden font-sans text-sm">
 
-    <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-[90] hidden"></div>
 
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-gray-900 border-r border-gray-800 sidebar-closed flex flex-col shadow-2xl">
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-80 bg-gray-900 border-r border-gray-800 sidebar-closed flex flex-col shadow-2xl z-[100]">
         <div class="p-6 flex justify-between items-center border-b border-gray-800">
-            <h2 class="text-blue-500 font-bold uppercase text-xs italic">VDC Commander</h2>
+            <h2 class="text-blue-500 font-bold uppercase text-xs italic">VDC Commander v22.8</h2>
             <button onclick="toggleSidebar()" class="text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         
-        <div class="flex-1 p-4 space-y-5 overflow-y-auto">
-            <div class="space-y-2">
-                <button onclick="switchPage('stats')" class="w-full flex items-center gap-4 p-3 rounded-xl bg-blue-900/20 text-blue-400 border-l-4 border-blue-500 font-bold"><i class="fa-solid fa-chart-pie"></i> GIÁM SÁT</button>
-                <button onclick="switchPage('leads')" class="w-full flex items-center gap-4 p-3 rounded-xl text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-address-book"></i> DỮ LIỆU KH</button>
+        <div class="flex-1 p-4 space-y-6 overflow-y-auto">
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="switchPage('stats')" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-blue-900/20 text-blue-400 border border-blue-500/30 font-bold"><i class="fa-solid fa-chart-pie"></i><span class="text-[10px]">GIÁM SÁT</span></button>
+                <button onclick="switchPage('leads')" class="flex flex-col items-center gap-2 p-3 rounded-xl text-gray-400 hover:bg-gray-800 border border-transparent"><i class="fa-solid fa-address-book"></i><span class="text-[10px]">DỮ LIỆU</span></button>
             </div>
 
             <hr class="border-gray-800">
 
             <div class="space-y-4">
                 <div>
-                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">1. NGÀNH NGHỀ TÂM ĐIỂM</label>
+                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Mục tiêu Ngành nghề</label>
                     <select id="target_job" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 mt-2 text-xs text-white focus:border-blue-500 outline-none">
-                        <option value="Công ty may mặc">May mặc / Da giày</option>
-                        <option value="Khu công nghiệp">Khu công nghiệp</option>
-                        <option value="Công ty sản xuất gỗ">Sản xuất Gỗ</option>
-                        <option value="Công ty cơ khí">Cơ khí / Chế tạo</option>
-                        <option value="Công ty xây dựng">Xây dựng / VLXD</option>
-                        <option value="Bệnh viện">Y tế / Bệnh viện</option>
-                        <option value="Trường học">Giáo dục / Trường học</option>
+                        <option value="Tất cả các ngành">-- TẤT CẢ CÁC NGÀNH --</option>
+                        <optgroup label="Sản xuất & Công nghiệp">
+                            <option value="Công ty may mặc">May mặc / Da giày</option>
+                            <option value="Công ty cơ khí">Cơ khí / Chế tạo</option>
+                            <option value="Công ty gỗ">Sản xuất Gỗ</option>
+                            <option value="Công ty điện tử">Điện tử / Linh kiện</option>
+                            <option value="Công ty thực phẩm">Thực phẩm / Đồ uống</option>
+                            <option value="Công ty bao bì">Bao bì / In ấn</option>
+                            <option value="Công ty hóa chất">Hóa chất / Nhựa</option>
+                            <option value="Khu công nghiệp">Khu công nghiệp (KCN)</option>
+                        </optgroup>
+                        <optgroup label="Xây dựng & Hạ tầng">
+                            <option value="Công ty xây dựng">Xây dựng / Thầu</option>
+                            <option value="Công ty vật liệu xây dựng">Vật liệu xây dựng</option>
+                            <option value="Công ty điện lực">Điện / Năng lượng</option>
+                        </optgroup>
+                        <optgroup label="Dịch vụ & Công cộng">
+                            <option value="Bệnh viện">Y tế / Bệnh viện</option>
+                            <option value="Trường học">Giáo dục / Trường học</option>
+                            <option value="Siêu thị trung tâm thương mại">Siêu thị / TTTM</option>
+                            <option value="Khách sạn">Khách sạn / Resort</option>
+                            <option value="Công ty Logistics">Vận tải / Logistics</option>
+                        </optgroup>
                     </select>
                 </div>
 
                 <div>
-                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">2. KHU VỰC TÁC CHIẾN</label>
-                    <select id="target_loc" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 mt-2 text-xs text-white focus:border-blue-500 outline-none">
-                        <option value="Bình Dương">Bình Dương</option>
-                        <option value="Đồng Nai">Đồng Nai</option>
-                        <option value="Long An">Long An</option>
-                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                        <option value="Tây Ninh">Tây Ninh</option>
-                        <option value="Bà Rịa - Vũng Tàu">Vũng Tàu</option>
+                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Khu vực Tác chiến</label>
+                    <select id="target_loc" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 mt-2 text-[11px] text-white focus:border-blue-500 outline-none">
+                        <option value="Toàn quốc">-- TOÀN QUỐC --</option>
+                        <option value="An Giang">An Giang</option><option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option><option value="Bắc Giang">Bắc Giang</option><option value="Bắc Kạn">Bắc Kạn</option><option value="Bạc Liêu">Bạc Liêu</option><option value="Bắc Ninh">Bắc Ninh</option><option value="Bến Tre">Bến Tre</option><option value="Bình Định">Bình Định</option><option value="Bình Dương">Bình Dương</option><option value="Bình Phước">Bình Phước</option><option value="Bình Thuận">Bình Thuận</option><option value="Cà Mau">Cà Mau</option><option value="Cần Thơ">Cần Thơ</option><option value="Cao Bằng">Cao Bằng</option><option value="Đà Nẵng">Đà Nẵng</option><option value="Đắk Lắk">Đắk Lắk</option><option value="Đắk Nông">Đắk Nông</option><option value="Điện Biên">Điện Biên</option><option value="Đồng Nai">Đồng Nai</option><option value="Đồng Tháp">Đồng Tháp</option><option value="Gia Lai">Gia Lai</option><option value="Hà Giang">Hà Giang</option><option value="Hà Nam">Hà Nam</option><option value="Hà Nội">Hà Nội</option><option value="Hà Tĩnh">Hà Tĩnh</option><option value="Hải Dương">Hải Dương</option><option value="Hải Phòng">Hải Phòng</option><option value="Hậu Giang">Hậu Giang</option><option value="Hòa Bình">Hòa Bình</option><option value="Hưng Yên">Hưng Yên</option><option value="Khánh Hòa">Khánh Hòa</option><option value="Kiên Giang">Kiên Giang</option><option value="Kon Tum">Kon Tum</option><option value="Lai Châu">Lai Châu</option><option value="Lâm Đồng">Lâm Đồng</option><option value="Lạng Sơn">Lạng Sơn</option><option value="Lào Cai">Lào Cai</option><option value="Long An">Long An</option><option value="Nam Định">Nam Định</option><option value="Nghệ An">Nghệ An</option><option value="Ninh Bình">Ninh Bình</option><option value="Ninh Thuận">Ninh Thuận</option><option value="Phú Thọ">Phú Thọ</option><option value="Phú Yên">Phú Yên</option><option value="Quảng Bình">Quảng Bình</option><option value="Quảng Nam">Quảng Nam</option><option value="Quảng Ngãi">Quảng Ngãi</option><option value="Quảng Ninh">Quảng Ninh</option><option value="Quảng Trị">Quảng Trị</option><option value="Sóc Trăng">Sóc Trăng</option><option value="Sơn La">Sơn La</option><option value="Tây Ninh">Tây Ninh</option><option value="Thái Bình">Thái Bình</option><option value="Thái Nguyên">Thái Nguyên</option><option value="Thanh Hóa">Thanh Hóa</option><option value="Thừa Thiên Huế">Thừa Thiên Huế</option><option value="Tiền Giang">Tiền Giang</option><option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option><option value="Trà Vinh">Trà Vinh</option><option value="Tuyên Quang">Tuyên Quang</option><option value="Vĩnh Long">Vĩnh Long</option><option value="Vĩnh Phúc">Vĩnh Phúc</option><option value="Yên Bái">Yên Bái</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">3. CHẾ ĐỘ BOT</label>
+                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Chế độ Hoạt động</label>
                     <button onclick="handleModeCycle()" id="modeToggleBtn" class="w-full py-3 rounded-lg font-bold text-[11px] uppercase border border-blue-500/30 text-blue-400 mt-2 bg-blue-500/5 hover:bg-blue-500/10 transition-all"></button>
                 </div>
 
-                <button onclick="saveTargetConfig()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-900/20 active:scale-95 transition-all">
-                    <i class="fa-solid fa-crosshairs mr-2"></i> XÁC NHẬN MỤC TIÊU
+                <button onclick="saveTargetConfig()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all uppercase text-xs">
+                    <i class="fa-solid fa-crosshairs mr-2"></i> Kích hoạt mục tiêu mới
                 </button>
             </div>
         </div>
-        
-        <div class="p-4 text-[9px] text-gray-700 text-center border-t border-gray-800 font-black tracking-widest uppercase">Version 22.7</div>
+        <div class="p-4 text-[9px] text-gray-700 text-center border-t border-gray-800 font-black tracking-widest uppercase">Version 22.8 - VDC SOUTHERN</div>
     </aside>
 
     <main class="h-screen flex flex-col">
@@ -82,30 +90,36 @@
                 <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-lg text-blue-500"><i class="fa-solid fa-bars"></i></button>
                 <div>
                     <h1 id="pageTitle" class="font-bold text-gray-100 uppercase text-sm leading-none">Giám sát</h1>
-                    <span class="text-[8px] text-blue-600 font-black">VDC COMMANDER v22.7</span>
+                    <span class="text-[8px] text-blue-600 font-black tracking-widest">VDC COMMANDER v22.8</span>
                 </div>
             </div>
             <button id="powerBtn" onclick="handlePowerToggle()" class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-xl transition-all"></button>
         </nav>
 
-        <div class="flex-1 overflow-hidden">
+        <div class="flex-1 overflow-hidden relative">
             <div id="page-stats" class="page-content active p-4 space-y-4 overflow-y-auto">
                 <div class="grid grid-cols-2 gap-3 text-center">
-                    <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 font-bold"><div class="text-4xl text-blue-400" id="queueCount">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Hàng đợi</div></div>
-                    <div class="bg-emerald-900/10 border border-emerald-500/20 rounded-2xl p-6 font-bold"><div class="text-4xl text-emerald-400" id="leadCountStat">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Tổng số Lead</div></div>
+                    <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 font-bold">
+                        <div class="text-4xl text-blue-400" id="queueCount">0</div>
+                        <div class="text-[9px] text-gray-500 mt-2 uppercase">Hàng đợi</div>
+                    </div>
+                    <div class="bg-emerald-900/10 border border-emerald-500/20 rounded-2xl p-6 font-bold">
+                        <div class="text-4xl text-emerald-400" id="leadCountStat">0</div>
+                        <div class="text-[9px] text-gray-500 mt-2 uppercase">Tổng số Lead</div>
+                    </div>
                 </div>
-                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-inner">
-                    <div id="botStatusText" class="text-blue-300 font-medium text-xs leading-loose min-h-[150px]">Hệ thống sẵn sàng...</div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <div id="botStatusText" class="text-blue-300 font-medium text-xs leading-loose min-h-[150px]">Đang khởi động hệ thống...</div>
                 </div>
             </div>
 
             <div id="page-leads" class="page-content">
                 <div class="flex-1 overflow-auto bg-gray-950">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-900 sticky top-0 border-b border-gray-800">
+                        <thead class="bg-gray-900 sticky top-0 border-b border-gray-800 z-10">
                             <tr class="text-[9px] text-gray-500 uppercase font-bold">
                                 <th class="p-4">Doanh nghiệp</th>
-                                <th class="p-4 w-24 text-center">Cập nhật</th>
+                                <th class="p-4 w-20 text-center">Gần nhất</th>
                                 <th class="p-4 w-32 text-center">Liên hệ</th>
                                 <th class="p-4 w-10"></th>
                             </tr>
@@ -126,19 +140,30 @@
         
         let currentMode = 'SCOUT', currentStatus = 'PAUSED', rawLeadsData = {};
 
-        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebarOverlay').classList.toggle('active'); };
-        window.switchPage = (p) => { document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active')); document.getElementById('page-'+p).classList.add('active'); toggleSidebar(); };
+        window.toggleSidebar = () => { 
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            sb.classList.toggle('sidebar-closed'); 
+            ov.classList.toggle('hidden');
+        };
+        
+        window.switchPage = (p) => { 
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active')); 
+            document.getElementById('page-'+p).classList.add('active'); 
+            document.getElementById('pageTitle').innerText = p === 'stats' ? 'Giám sát' : 'Dữ liệu';
+            toggleSidebar(); 
+        };
 
         window.saveTargetConfig = () => {
             const job = document.getElementById('target_job').value;
             const loc = document.getElementById('target_loc').value;
-            set(ref(db, 'config_target'), { job: job, location: loc, mode: currentMode });
-            alert("Đã xác nhận mục tiêu: " + job + " tại " + loc);
+            set(ref(db, 'config_target'), { job, location: loc, mode: currentMode, updated_at: Date.now() });
+            alert(`Mục tiêu xác nhận: ${job} tại ${loc}`);
         };
 
         window.handleModeCycle = () => {
-            let n = currentMode === 'SCOUT' ? 'REFRESH' : 'SCOUT';
-            set(ref(db, 'config_target/mode'), n);
+            currentMode = currentMode === 'SCOUT' ? 'REFRESH' : 'SCOUT';
+            set(ref(db, 'config_target/mode'), currentMode);
         };
 
         window.handlePowerToggle = () => set(ref(db, 'config_system/status'), currentStatus === 'RUNNING' ? 'PAUSED' : 'RUNNING');
@@ -147,7 +172,7 @@
             onValue(ref(db, 'hr_status/bot_VDC_CORE'), s => { if(s.val()) document.getElementById('botStatusText').innerHTML = s.val().message.replace(/\n/g, '<br>'); });
             onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; document.getElementById('leadCountStat').innerText = Object.keys(rawLeadsData).length; renderLeads(); });
             onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = Object.keys(s.val()||{}).length; });
-            onValue(ref(db, 'config_target'), s => { const d = s.val() || {}; currentMode = d.mode || 'SCOUT'; updateModeUI(); document.getElementById('target_job').value = d.job || ''; document.getElementById('target_loc').value = d.location || ''; });
+            onValue(ref(db, 'config_target'), s => { const d = s.val() || {}; currentMode = d.mode || 'SCOUT'; updateModeUI(); document.getElementById('target_job').value = d.job || 'Công ty sản xuất'; document.getElementById('target_loc').value = d.location || 'TP. Hồ Chí Minh'; });
             onValue(ref(db, 'config_system/status'), s => { currentStatus = s.val() || 'PAUSED'; updatePowerUI(); });
         }
 
@@ -156,8 +181,8 @@
             Object.entries(rawLeadsData).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
                 const phone = v.phone?.split(' - ')[0].replace(/[^0-9]/g, '') || '';
                 const row = document.createElement('tr');
-                row.className = "border-b border-gray-900 hover:bg-gray-900/50 transition";
-                row.innerHTML = `<td class="p-4"><div class="font-bold text-gray-200 text-xs uppercase leading-tight">${v.company || v.name}</div><div class="text-[9px] text-emerald-500 font-mono mt-1">${v.tax_id || '---'}</div></td><td class="p-4 text-center font-mono text-[9px] text-blue-500">${new Date(v.timestamp).getHours()}:${new Date(v.timestamp).getMinutes()}</td><td class="p-4 text-center"><div class="flex justify-center gap-4 text-lg">${phone ? `<a href="tel:${phone}" class="text-emerald-400"><i class="fa-solid fa-phone"></i></a><a href="https://zalo.me/${phone}" target="_blank" class="text-blue-400"><i class="fa-solid fa-comment"></i></a>` : ''}${v.email ? `<a href="mailto:${v.email}" class="text-purple-400"><i class="fa-solid fa-envelope"></i></a>` : ''}</div></td><td class="p-4 text-center"><button onclick="remove(ref(db,'hr_leads/${k}'))" class="text-gray-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>`;
+                row.className = "border-b border-gray-900 hover:bg-gray-900/50";
+                row.innerHTML = `<td class="p-4"><div class="font-bold text-gray-200 text-xs uppercase leading-snug">${v.company || v.name}</div><div class="text-[9px] text-emerald-500 font-mono mt-1">${v.tax_id || '---'}</div></td><td class="p-4 text-center font-mono text-[9px] text-blue-500">${new Date(v.timestamp).getHours().toString().padStart(2,'0')}:${new Date(v.timestamp).getMinutes().toString().padStart(2,'0')}</td><td class="p-4 text-center"><div class="flex justify-center gap-4 text-lg">${phone ? `<a href="tel:${phone}" class="text-emerald-400"><i class="fa-solid fa-phone"></i></a><a href="https://zalo.me/${phone}" target="_blank" class="text-blue-400"><i class="fa-solid fa-comment"></i></a>` : ''}${v.email ? `<a href="mailto:${v.email}" class="text-purple-400"><i class="fa-solid fa-envelope"></i></a>` : ''}</div></td><td class="p-4 text-center"><button onclick="if(confirm('Xóa lead?')) remove(ref(db,'hr_leads/${k}'))" class="text-gray-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>`;
                 tbody.appendChild(row);
             });
         }
@@ -165,7 +190,7 @@
         function updateModeUI() { document.getElementById('modeToggleBtn').innerText = currentMode + ' MODE'; }
         function updatePowerUI() {
             const b = document.getElementById('powerBtn');
-            b.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
+            b.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg pulse-active" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
             b.innerHTML = '<i class="fa-solid fa-power-off text-xl"></i>';
         }
         init();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM COMMAND v17.3</title>
+    <title>VDC CRM COMMAND v17.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -26,9 +26,9 @@
         <header class="flex flex-col xl:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-4 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group"></i> VDC COMMAND v17.3
+                    <i class="fa-solid fa-address-card"></i> VDC COMMAND v17.4
                 </h1>
-                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest text-emerald-500">Hệ thống hợp nhất dữ liệu bảo toàn</p>
+                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest text-emerald-500">Giao diện kết quả tối ưu</p>
             </div>
 
             <div class="bg-gray-900 border border-blue-500/30 rounded-lg p-3 grid grid-cols-2 md:grid-cols-5 gap-3 shadow-2xl w-full xl:w-auto">
@@ -39,6 +39,7 @@
                         <option value="Xây dựng điện">Xây dựng điện</option>
                         <option value="Kỹ thuật điện">Kỹ thuật điện</option>
                         <option value="Điện mặt trời">Điện mặt trời</option>
+                        <option value="Cơ điện M&E">Cơ điện M&E</option>
                         <option value="ALL">Tất cả ngành</option>
                     </select>
                 </div>
@@ -48,6 +49,8 @@
                         <option value="Bình Dương">Bình Dương</option>
                         <option value="Đồng Nai">Đồng Nai</option>
                         <option value="TP Hồ Chí Minh">TP Hồ Chí Minh</option>
+                        <option value="Long An">Long An</option>
+                        <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
                         <option value="RANDOM">Ngẫu nhiên</option>
                     </select>
                 </div>
@@ -305,7 +308,14 @@
                 const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer";
                 row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_leads', k); };
                 const hasP = v.phone && v.phone !== "Chưa có";
-                row.innerHTML = `<td class="p-2"><div class="font-bold text-gray-300 group-hover:text-emerald-300 transition">${v.company}</div><div class="text-[9px] text-gray-600 truncate w-64">${v.address || (v.province || '---')}</div></td><td class="p-2 text-yellow-400 font-bold text-xs">${v.contact_desc || '---'}</td><td class="p-2"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600'} font-mono">${v.phone||'---'}</span></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.last_updated ? v.last_updated.replace(' ', '<br>') : ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>`;
+                
+                // LOGIC UI 17.4: Nếu contact_desc chứa chữ 'Khác' hoặc 'Chưa rõ', để trống
+                let contactDisplay = v.contact_desc || "";
+                if(contactDisplay.toLowerCase().includes("khác") || contactDisplay.toLowerCase().includes("chưa rõ") || contactDisplay.toLowerCase().includes("phụ trách khác")) {
+                    contactDisplay = "";
+                }
+
+                row.innerHTML = `<td class="p-2"><div class="font-bold text-gray-300 group-hover:text-emerald-300 transition">${v.company}</div><div class="text-[9px] text-gray-600 truncate w-64">${v.address || (v.province || '---')}</div></td><td class="p-2 text-yellow-400 font-bold text-xs">${contactDisplay}</td><td class="p-2"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600'} font-mono">${v.phone||'---'}</span></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.last_updated ? v.last_updated.replace(' ', '<br>') : ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>`;
                 tbody.appendChild(row);
             });
         }

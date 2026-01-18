@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v19.24 - Sale Intelligence</title>
+    <title>VDC CRM PRO v19.26 - Refresh Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -35,13 +35,15 @@
                 <button onclick="switchPage('leads')" id="nav-leads" class="w-full flex items-center gap-4 p-4 rounded-xl transition text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-address-book text-lg"></i> Danh sách KH</button>
             </nav>
             <div class="space-y-4 px-2">
-                <label class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Cấu hình Mục tiêu</label>
+                <label class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Chế độ hoạt động</label>
+                <button id="modeToggleBtn" onclick="handleModeCycle()" class="w-full py-4 rounded-xl text-[10px] font-bold uppercase border transition-all shadow-lg text-center"></button>
+                
+                <label class="text-[9px] text-gray-600 font-bold uppercase tracking-widest block mt-4">Mục tiêu quét mới</label>
                 <select id="targetIndustry" onchange="updateConfigOnServer()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-white outline-none"></select>
                 <select id="targetProvince" onchange="updateConfigOnServer()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-white outline-none"></select>
-                <button id="modeToggleBtn" onclick="handleModeToggle()" class="w-full py-3 rounded-lg text-[10px] font-bold uppercase border transition-all"></button>
             </div>
         </div>
-        <div class="p-4 text-[9px] text-gray-700 text-center uppercase border-t border-gray-800 tracking-widest">VDC CRM v19.24</div>
+        <div class="p-4 text-[9px] text-gray-700 text-center uppercase border-t border-gray-800 tracking-widest">VDC CRM v19.26</div>
     </aside>
 
     <main class="h-screen flex flex-col">
@@ -68,12 +70,10 @@
 
                 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-inner">
                     <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
-                        <label class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Bot Activity Log</label>
-                        <span id="targetDisplay" class="text-[10px] bg-blue-900/30 text-blue-400 px-2 py-1 rounded font-bold">---</span>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Nhật ký Bot</label>
+                        <span id="targetDisplay" class="text-[10px] bg-blue-900/30 text-blue-400 px-2 py-1 rounded font-bold uppercase">---</span>
                     </div>
-                    <div id="botLogContainer" class="space-y-2 min-h-[120px]">
-                        <div id="botStatusText" class="text-blue-300 font-medium leading-relaxed italic">Đang chờ tín hiệu...</div>
-                    </div>
+                    <div id="botStatusText" class="text-blue-300 font-medium leading-relaxed italic text-center min-h-[60px] flex items-center justify-center">Đang chờ tín hiệu...</div>
                 </div>
             </div>
 
@@ -103,13 +103,11 @@
         <div class="fixed inset-0 bg-black/95" onclick="closeModal()"></div>
         <div class="relative bg-gray-900 border border-gray-700 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/50">
-                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px] truncate pr-4">Chi tiết hồ sơ</h3>
+                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px] truncate pr-4">Hồ sơ khách hàng</h3>
                 <button onclick="closeModal()" class="text-red-500 bg-red-500/10 w-8 h-8 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="modalBody" class="p-5 space-y-4 text-xs bg-gray-950 overflow-y-auto max-h-[70vh]"></div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
-                <button onclick="closeModal()" class="bg-blue-600 text-white py-3.5 rounded-xl font-bold uppercase w-full shadow-lg">Xác nhận</button>
-            </div>
+            <div class="p-4 bg-gray-900 border-t border-gray-800" id="modalFooter"></div>
         </div>
     </div>
 
@@ -124,8 +122,7 @@
 
         window.toggleSidebar = () => { 
             document.getElementById('sidebar').classList.toggle('sidebar-closed'); 
-            const overlay = document.getElementById('sidebarOverlay');
-            overlay.classList.toggle('hidden');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
         };
 
         window.switchPage = (pageId) => {
@@ -140,7 +137,7 @@
 
         async function init() {
             onValue(ref(db, 'config_params'), snap => {
-                const data = snap.val() || { industry: "Điện, Xây dựng", province: "Bình Dương, Đồng Nai" };
+                const data = snap.val() || { industry: "Điện", province: "Bình Dương" };
                 ['industry', 'province'].forEach(type => {
                     const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
                     select.innerHTML = `<option value="ALL">Xoay vòng</option>` + data[type].split(',').map(i => `<option value="${i.trim()}">${i.trim()}</option>`).join('');
@@ -150,7 +147,7 @@
             onValue(ref(db, 'config_target'), snap => {
                 const val = snap.val() || {};
                 currentMode = val.mode || 'SCOUT';
-                document.getElementById('targetDisplay').innerText = `${val.industry || 'ALL'} | ${val.province || 'ALL'}`;
+                document.getElementById('targetDisplay').innerText = currentMode === 'REFRESH' ? "♻️ Chế độ làm sạch dữ liệu" : `${val.industry || 'ALL'} | ${val.province || 'ALL'}`;
                 updateModeUI();
             });
 
@@ -165,7 +162,14 @@
             });
         }
 
-        window.handleModeToggle = () => set(ref(db, 'config_target/mode'), currentMode === 'SCOUT' ? 'MAPS' : 'SCOUT');
+        window.handleModeCycle = () => {
+            let nextMode = 'SCOUT';
+            if(currentMode === 'SCOUT') nextMode = 'MAPS';
+            else if(currentMode === 'MAPS') nextMode = 'REFRESH';
+            else nextMode = 'SCOUT';
+            set(ref(db, 'config_target/mode'), nextMode);
+        };
+
         window.handlePowerToggle = () => set(ref(db, 'config_system/status'), currentStatus === 'RUNNING' ? 'PAUSED' : 'RUNNING');
         window.updateConfigOnServer = () => {
             set(ref(db, 'config_target/industry'), document.getElementById('targetIndustry').value);
@@ -175,13 +179,21 @@
 
         function updateModeUI() {
             const btn = document.getElementById('modeToggleBtn');
-            btn.innerHTML = currentMode === 'SCOUT' ? '<i class="fa-solid fa-globe mr-2"></i> WEB MODE' : '<i class="fa-solid fa-map mr-2"></i> MAPS MODE';
-            btn.className = currentMode === 'SCOUT' ? "w-full py-3 rounded-lg text-[10px] font-bold bg-blue-900/20 text-blue-400 border-blue-500/30" : "w-full py-3 rounded-lg text-[10px] font-bold bg-orange-900/20 text-orange-400 border-orange-500/30";
+            if(currentMode === 'SCOUT') {
+                btn.innerHTML = '<i class="fa-solid fa-globe text-xl mb-1"></i><br>WEB MODE';
+                btn.className = "w-full py-4 rounded-xl text-[10px] font-bold bg-blue-900/20 text-blue-400 border border-blue-500/30";
+            } else if(currentMode === 'MAPS') {
+                btn.innerHTML = '<i class="fa-solid fa-map-location-dot text-xl mb-1"></i><br>MAPS MODE';
+                btn.className = "w-full py-4 rounded-xl text-[10px] font-bold bg-orange-900/20 text-orange-400 border border-orange-500/30";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-sync text-xl mb-1 fa-spin"></i><br>REFRESH MODE';
+                btn.className = "w-full py-4 rounded-xl text-[10px] font-bold bg-emerald-900/20 text-emerald-400 border border-emerald-500/30";
+            }
         }
 
         function updatePowerUI() {
             const btn = document.getElementById('powerBtn');
-            btn.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg shadow-emerald-900/40 pulse-active" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white shadow-none";
+            btn.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg pulse-active" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
         }
 
         function renderLeads() {
@@ -215,40 +227,52 @@
 
         window.showDetail = (key) => {
             const v = rawLeadsData[key];
-            document.getElementById('modalHeader').innerText = v.company || v.name;
             document.getElementById('modalBody').innerHTML = `
                 <div class="space-y-4">
                     <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Mã số thuế</p>
-                        <p class="text-emerald-400 font-mono font-bold text-base">${v.tax_id || '---'}</p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Địa chỉ doanh nghiệp</p>
-                        <p class="text-gray-200 font-medium leading-relaxed">${v.address || v.province || '---'}</p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
-                        <p class="text-[9px] text-blue-400 uppercase font-bold mb-1">Quy mô lao động</p>
-                        <p class="text-white font-bold text-lg">${v.labor_size || 'Đang cập nhật...'}</p>
-                        <p class="text-[9px] text-gray-500 mt-1 italic">Hệ thống đang truy vấn số liệu bảo hiểm/tuyển dụng.</p>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Tên công ty</p>
+                        <input id="edit_company" type="text" value="${v.company || v.name}" class="w-full bg-transparent text-blue-400 font-bold text-xs outline-none border-b border-gray-700 focus:border-blue-500 pb-1">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                            <p class="text-[9px] text-emerald-400 uppercase font-bold mb-1">Điện thoại</p>
-                            <p class="text-white font-bold truncate">${v.phone || '---'}</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Mã số thuế</p>
+                            <input id="edit_tax_id" type="text" value="${v.tax_id || ''}" class="w-full bg-transparent text-emerald-400 font-mono font-bold text-sm outline-none border-b border-gray-700 pb-1">
                         </div>
-                        <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                            <p class="text-[9px] text-purple-400 uppercase font-bold mb-1">Email</p>
-                            <p class="text-white font-bold truncate">${v.email || '---'}</p>
+                        <div class="bg-gray-900 p-4 rounded-xl border border-blue-500/20 bg-blue-500/5">
+                            <p class="text-[9px] text-blue-400 uppercase font-bold mb-1">Lao động</p>
+                            <input id="edit_labor" type="text" value="${v.labor_size || ''}" class="w-full bg-transparent text-white font-bold text-sm outline-none border-b border-blue-500/30 pb-1">
                         </div>
                     </div>
                     <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Đầu mối liên hệ</p>
-                        <p class="text-yellow-400 font-bold">${v.contact_desc || 'Chưa xác định'}</p>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Phone</p>
+                        <input id="edit_phone" type="text" value="${v.phone || ''}" class="w-full bg-transparent text-white font-bold text-sm outline-none border-b border-gray-700 pb-1">
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-[9px] text-purple-400 uppercase font-bold mb-1">Email</p>
+                        <input id="edit_email" type="text" value="${v.email || ''}" class="w-full bg-transparent text-white font-bold text-sm outline-none border-b border-gray-700 pb-1">
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Địa chỉ / Ghi chú</p>
+                        <textarea id="edit_address" rows="2" class="w-full bg-transparent text-gray-300 text-[11px] outline-none mt-1">${v.address || v.province || ''}</textarea>
                     </div>
                 </div>
             `;
+            document.getElementById('modalFooter').innerHTML = `<button onclick="saveLeadChanges('${key}')" class="bg-emerald-600 text-white py-3.5 rounded-xl font-bold uppercase w-full shadow-lg active:scale-95 transition">Lưu thay đổi</button>`;
             document.getElementById('leadModal').classList.remove('hidden');
             document.getElementById('leadModal').classList.add('flex');
+        };
+
+        window.saveLeadChanges = (key) => {
+            const updated = {
+                company: document.getElementById('edit_company').value,
+                tax_id: document.getElementById('edit_tax_id').value,
+                labor_size: document.getElementById('edit_labor').value,
+                phone: document.getElementById('edit_phone').value,
+                email: document.getElementById('edit_email').value,
+                address: document.getElementById('edit_address').value,
+                timestamp: Date.now()
+            };
+            set(ref(db, `hr_leads/${key}`), {...rawLeadsData[key], ...updated}).then(() => { closeModal(); });
         };
 
         window.closeModal = () => {
@@ -257,11 +281,8 @@
         };
 
         window.exportToExcel = () => { 
-            const data = Object.values(rawLeadsData).map(v => ({
-                "Công ty": v.company, "MST": v.tax_id, "Lao động": v.labor_size, "Phone": v.phone, "Email": v.email, "Địa chỉ": v.address
-            }));
-            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); 
-            XLSX.utils.book_append_sheet(wb, ws, "VDC_Data"); XLSX.writeFile(wb, "VDC_CRM_Export.xlsx"); 
+            const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData)); const wb = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(wb, ws, "VDC_Data"); XLSX.writeFile(wb, "VDC_CRM.xlsx"); 
         };
         
         init();

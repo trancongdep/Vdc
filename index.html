@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM COMMAND v18.5</title>
+    <title>VDC CRM COMMAND v18.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -21,31 +21,31 @@
         <header class="flex flex-col xl:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-4 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-microchip"></i> VDC COMMAND v18.5
+                    <i class="fa-solid fa-file-import"></i> VDC COMMAND v18.7
                 </h1>
-                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest text-emerald-500">Tối ưu hóa dữ liệu & Excel Master</p>
+                <p class="text-[10px] text-emerald-500 uppercase font-bold tracking-widest">Hỗ trợ nạp SĐT trực tiếp từ Excel</p>
             </div>
 
-            <div class="bg-gray-900 border border-blue-500/30 rounded-lg p-3 grid grid-cols-2 md:grid-cols-6 gap-3 shadow-2xl w-full xl:w-auto">
+            <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-lg p-3 grid grid-cols-2 md:grid-cols-6 gap-3 shadow-2xl w-full xl:w-auto">
                 <div class="flex flex-col gap-1">
                     <label class="text-[9px] text-blue-400 font-bold uppercase flex justify-between">Ngành <i class="fa-solid fa-pen-nib cursor-pointer" onclick="openParamModal('industry')"></i></label>
-                    <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-white"></select>
+                    <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-white outline-none focus:border-blue-500"></select>
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-[9px] text-emerald-400 font-bold uppercase flex justify-between">Tỉnh <i class="fa-solid fa-pen-nib cursor-pointer" onclick="openParamModal('province')"></i></label>
-                    <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-white h-[26px]"></select>
+                    <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-white h-[26px] outline-none focus:border-emerald-500"></select>
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-[9px] text-orange-400 font-bold uppercase flex justify-between">Web <i class="fa-solid fa-pen-nib cursor-pointer" onclick="openParamModal('site')"></i></label>
-                    <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-white"></select>
+                    <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-white outline-none focus:border-orange-500"></select>
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-[9px] text-purple-400 font-bold uppercase">Quota</label>
-                    <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-center text-white" value="100">
+                    <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs text-center text-white outline-none focus:border-purple-500" value="100">
                 </div>
                 <div class="flex items-end gap-2 md:col-span-2">
-                    <button onclick="saveGlobalConfig('SCOUT')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-1 rounded text-[10px] font-bold shadow-lg transition">QUÉT WEB</button>
-                    <button onclick="saveGlobalConfig('MAPS')" class="flex-1 bg-red-700 hover:bg-red-600 text-white py-1 rounded text-[10px] font-bold shadow-lg transition border border-red-500/50">QUÉT MAPS</button>
+                    <button onclick="saveGlobalConfig('SCOUT')" id="btnScout" class="flex-1 bg-gray-800 hover:bg-blue-600 text-white py-1 rounded text-[10px] font-bold shadow-lg transition border border-gray-700">QUÉT WEB</button>
+                    <button onclick="saveGlobalConfig('MAPS')" id="btnMaps" class="flex-1 bg-gray-800 hover:bg-red-700 text-white py-1 rounded text-[10px] font-bold shadow-lg transition border border-gray-700">QUÉT MAPS</button>
                 </div>
             </div>
         </header>
@@ -63,48 +63,44 @@
             </div>
             <div class="lg:col-span-1 bg-gray-900 border border-gray-700 rounded p-3 flex flex-col justify-center items-center">
                 <div class="flex gap-4 w-full">
-                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold transition">CHẠY</button>
-                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-red-600 text-white py-2 rounded font-bold transition">DỪNG</button>
+                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold transition shadow-lg">CHẠY</button>
+                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-red-600 text-white py-2 rounded font-bold transition shadow-lg">DỪNG</button>
                 </div>
                 <div id="systemStatusText" class="mt-2 text-[10px] font-bold tracking-widest uppercase">...</div>
             </div>
             <div class="lg:col-span-2 bg-gray-900/50 border border-gray-800 rounded p-2">
-                <div id="botGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2 h-[80px] overflow-y-auto"></div>
+                <div id="botGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2 h-[80px] overflow-y-auto pr-1"></div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-280px)]">
-            <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden text-xs text-gray-300">
+            <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden text-xs">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-blue-400 uppercase pl-1">Kho chờ (Queue)</h3>
+                    <h3 class="font-bold text-blue-400 uppercase pl-1">Kho chờ</h3>
                     <div class="flex gap-2">
                         <button onclick="downloadTemplate()" class="bg-gray-700 hover:bg-gray-600 text-white text-[9px] px-2 py-1 rounded border border-gray-600 font-bold">MẪU</button>
-                        <label class="bg-blue-700 hover:bg-blue-600 text-[9px] px-2 py-1 rounded cursor-pointer font-bold">NHẬP EXCEL<input type="file" accept=".xlsx,.csv" class="hidden" onchange="handleFileUpload(this)"></label>
+                        <label class="bg-blue-700 hover:bg-blue-600 text-[9px] px-2 py-1 rounded cursor-pointer font-bold uppercase">Nhập<input type="file" accept=".xlsx,.csv" class="hidden" onchange="handleFileUpload(this)"></label>
                         <button onclick="clearAllQueue()" class="text-[9px] bg-red-900/40 hover:bg-red-700 text-red-400 px-2 py-1 rounded transition">XÓA</button>
                     </div>
                 </div>
                 <div class="overflow-auto flex-1 bg-gray-950">
                     <table class="w-full text-left table-fixed-header">
                         <thead><tr class="text-[10px] text-gray-500 bg-gray-800 border-b border-gray-700"><th class="p-2 w-8">#</th><th class="p-2">Công ty</th><th class="p-2 w-20 text-center">Ngày</th><th class="p-2 w-8"></th></tr></thead>
-                        <tbody id="queueTableBody" class="divide-y divide-gray-800"></tbody>
+                        <tbody id="queueTableBody" class="divide-y divide-gray-800 text-gray-300"></tbody>
                     </table>
                 </div>
             </div>
-
-            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden text-xs text-gray-300">
+            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden text-xs">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-emerald-400 uppercase pl-1">Kết quả (Leads)</h3>
+                    <h3 class="font-bold text-emerald-400 uppercase pl-1">Kết quả</h3>
                     <div class="flex gap-2">
-                        <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-950 text-[10px] border border-gray-700 rounded px-2 py-1 text-white">
-                            <option value="ALL">Tất cả</option>
-                            <option value="PHONE_ONLY">Chỉ có SĐT</option>
-                        </select>
-                        <button onclick="exportToExcel()" class="bg-emerald-700 text-[9px] px-3 py-1 rounded font-bold hover:bg-emerald-600 transition shadow-lg">XUẤT EXCEL</button>
+                        <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-950 text-[10px] border border-gray-700 rounded px-2 py-1 text-white"><option value="ALL">Tất cả</option><option value="PHONE_ONLY">Chỉ SĐT</option></select>
+                        <button onclick="exportToExcel()" class="bg-emerald-700 text-[9px] px-3 py-1 rounded font-bold hover:bg-emerald-600 transition">XUẤT EXCEL</button>
                     </div>
                 </div>
                 <div class="overflow-auto flex-1 bg-gray-950">
-                    <table class="w-full text-left table-fixed-header">
-                        <thead><tr class="text-[10px] text-gray-500 bg-gray-800 border-b border-gray-700"><th class="p-2">Tên & Địa chỉ (Click sửa)</th><th class="p-2 w-44 text-yellow-500">Người liên hệ</th><th class="p-2 w-32">Phone</th><th class="p-2 w-24 text-center">Update</th><th class="p-2 w-8"></th></tr></thead>
+                    <table class="w-full text-left table-fixed-header text-gray-300">
+                        <thead><tr class="text-[10px] text-gray-500 bg-gray-800 border-b border-gray-700"><th class="p-2">Tên & Địa chỉ (Click sửa)</th><th class="p-2 w-44 text-yellow-500">Người liên hệ</th><th class="p-2 w-32 text-emerald-500">Phone</th><th class="p-2 w-24 text-center">Cập nhật</th><th class="p-2 w-8"></th></tr></thead>
                         <tbody id="leadTableBody" class="divide-y divide-gray-800"></tbody>
                     </table>
                 </div>
@@ -116,7 +112,7 @@
         <div class="modal-overlay absolute inset-0 bg-black/90" onclick="closeParamModal()"></div>
         <div class="modal-container bg-gray-900 w-11/12 md:max-w-md mx-auto rounded-lg shadow-2xl border border-gray-700">
             <div class="flex justify-between items-center px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-lg"><h3 class="font-bold text-orange-400 uppercase text-xs" id="paramModalHeader">Tham số</h3><button onclick="closeParamModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button></div>
-            <div class="p-6 space-y-4"><textarea id="paramInput" class="w-full h-48 bg-gray-950 border border-gray-800 rounded p-3 text-sm text-blue-300 font-mono outline-none"></textarea><button onclick="saveParams()" class="w-full bg-orange-600 text-white py-2 rounded font-bold text-xs">CẬP NHẬT</button></div>
+            <div class="p-6 space-y-4"><textarea id="paramInput" class="w-full h-48 bg-gray-950 border border-gray-800 rounded p-3 text-sm text-blue-300 font-mono outline-none"></textarea><button onclick="saveParams()" class="w-full bg-orange-600 text-white py-2 rounded font-bold text-xs shadow-lg">CẬP NHẬT</button></div>
         </div>
     </div>
 
@@ -126,13 +122,13 @@
             <div class="flex justify-between items-center px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-lg"><h3 class="font-bold text-blue-400" id="modalHeader">Chi tiết</h3><button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button></div>
             <form id="editForm" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                 <input type="hidden" id="editPath"><input type="hidden" id="editKey">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2"><label class="text-[10px] text-gray-500 font-bold uppercase">Công ty</label><input type="text" id="editName" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-blue-300 font-bold"></div>
                     <div><label class="text-[10px] text-gray-500 font-bold uppercase">MST</label><input type="text" id="editTax" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-emerald-400 font-mono"></div>
                     <div><label class="text-[10px] text-gray-500 font-bold uppercase">Tỉnh</label><input type="text" id="editProv" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2"></div>
-                    <div class="md:col-span-2"><label class="text-[10px] text-gray-500 font-bold uppercase">Địa chỉ</label><input type="text" id="editAddress" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2"></div>
-                    <div><label class="text-[10px] text-gray-500 font-bold uppercase">Số điện thoại</label><input type="text" id="editPhone" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-emerald-400 font-mono"></div>
-                    <div><label class="text-[10px] text-gray-500 font-bold uppercase">Người liên hệ</label><input type="text" id="editContact" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-yellow-400 font-bold"></div>
+                    <div class="md:col-span-2"><label class="text-[10px] text-gray-500 font-bold uppercase">Địa chỉ</label><input type="text" id="editAddress" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-xs"></div>
+                    <div><label class="text-[10px] text-gray-500 font-bold uppercase">SĐT</label><input type="text" id="editPhone" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-emerald-400 font-mono"></div>
+                    <div><label class="text-[10px] text-gray-500 font-bold uppercase">Liên hệ</label><input type="text" id="editContact" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-yellow-400 font-bold text-xs"></div>
                 </div>
             </form>
             <div class="flex justify-end gap-3 px-6 py-4 bg-gray-800 border-t border-gray-700 rounded-b-lg"><button onclick="closeModal()" class="px-4 py-2 text-xs">HỦY</button><button onclick="saveEdit()" class="px-6 py-2 bg-blue-600 text-white text-xs font-bold rounded">LƯU THAY ĐỔI</button></div>
@@ -147,98 +143,92 @@
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
         let rawQueueData = {}; let rawLeadsData = {}; let currentFilter = 'ALL'; let currentEditingParam = '';
 
-        function parseDateTime(s) { if (!s) return 0; if (s.includes('T')) return new Date(s).getTime(); try { const p = s.split(' '); const d = p[1].split('/'); const t = p[0].split(':'); return new Date(d[2], d[1]-1, d[0], t[0], t[1]).getTime(); } catch(e) { return 0; } }
-        window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
-        window.deleteNode = (p, n) => { if(confirm(`Xóa: ${n}?`)) remove(ref(db, p)); };
-        window.clearAllQueue = () => { if(confirm("Xóa toàn bộ kho chờ?")) remove(ref(db, 'hr_queue')); };
-        
-        window.saveGlobalConfig = (mode) => {
-            set(ref(db, 'config_target'), {
-                mode: mode,
-                industry: document.getElementById('targetIndustry').value,
-                province: document.getElementById('targetProvince').value,
-                target_site: document.getElementById('targetSite').value,
-                quota: parseInt(document.getElementById('scoutQuota').value),
-                updated_at: Date.now()
-            }).then(() => alert(`🎯 LỆNH ĐÃ PHÁT: ${mode}!`));
-        };
-
-        // --- EXCEL LOGIC ---
+        // --- EXCEL TEMPLATE V18.7 (ADD PHONE COLUMN) ---
         window.downloadTemplate = () => {
             const wb = XLSX.utils.book_new();
-            const ws_data = [['Name', 'Address', 'Province', 'Industry']];
-            ws_data.push(['Công ty TNHH Mẫu VDC', '123 Đường X, KCN B', 'Bình Dương', 'Dệt may']);
+            const ws_data = [['Name', 'Address', 'Province', 'Industry', 'Phone']];
+            ws_data.push(['Công ty TNHH Mẫu VDC', '123 Đường X, KCN Sóng Thần', 'Bình Dương', 'Xây lắp điện', '0901234567']);
             const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            XLSX.utils.book_append_sheet(wb, ws, "Mau_Nhap_Lieu");
-            XLSX.writeFile(wb, "VDC_Data_Template.xlsx");
-        };
-
-        window.exportToExcel = () => {
-            const data = Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "Địa chỉ": v.address, "MST": v.tax_id, "Điện thoại": v.phone, "Liên hệ": v.contact_desc, "Tỉnh": v.province, "Ngành": v.industry, "Nguồn": v.source }));
-            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "VDC_Leads");
-            XLSX.writeFile(wb, `VDC_LEADS_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "VDC_Template");
+            XLSX.writeFile(wb, "VDC_Import_Template.xlsx");
         };
 
         window.handleFileUpload = (input) => {
             const file = input.files[0]; if (!file) return;
-            const reader = new FileReader(); reader.onload = async (e) => {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
                 const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
                 const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1}).slice(1);
                 let added = 0; const updates = {};
-                json.forEach(r => { if (r[0]) {
-                    const key = "tax_manual_" + Date.now() + Math.floor(Math.random()*1000);
-                    updates['hr_queue/' + key] = { name: r[0], company_name: r[0], address: r[1]||"", province: r[2]||"", industry: r[3]||"", created_at: new Date().toISOString() };
-                    added++;
-                }});
-                if (added > 0) await update(ref(db), updates); input.value = "";
-            }; reader.readAsArrayBuffer(file);
+                const existing = new Set([...Object.values(rawQueueData).map(i=>i.name.toLowerCase()), ...Object.values(rawLeadsData).map(i=>i.company.toLowerCase())]);
+
+                json.forEach(r => {
+                    const name = r[0] ? String(r[0]).trim() : "";
+                    const phone = r[4] ? String(r[4]).trim() : "";
+                    if (name && !existing.has(name.toLowerCase())) {
+                        const key = "tax_man_" + Date.now() + Math.floor(Math.random()*1000);
+                        updates['hr_queue/' + key] = { 
+                            name: name, company_name: name, 
+                            address: r[1]||"", province: r[2]||"", industry: r[3]||"", 
+                            phone: phone, source: "Excel Import", created_at: new Date().toISOString() 
+                        };
+                        added++; existing.add(name.toLowerCase());
+                    }
+                });
+                if (added > 0) { await update(ref(db), updates); alert(`✅ Đã nạp thành công ${added} công ty mới!`); }
+                input.value = "";
+            };
+            reader.readAsArrayBuffer(file);
         };
 
-        // --- MONITOR RENDER ---
-        function loadDynamicParams() {
-            onValue(ref(db, 'config_params'), snap => {
-                const data = snap.val() || { industry: "Xây lắp điện, Dệt may", province: "Bình Dương, Long An", site: "site:hosocongty.vn" };
+        // --- MONITOR LOGIC ---
+        async function loadDynamicParams() {
+            onValue(ref(db, 'config_params'), async snap => {
+                const data = snap.val() || { industry: "Xây lắp điện, Dệt may", province: "Bình Dương, Đồng Nai", site: "site:hosocongty.vn" };
                 ['industry', 'province', 'site'].forEach(type => {
                     const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
                     const list = data[type].split(',').map(i => i.trim());
                     select.innerHTML = (type !== 'site' ? `<option value="ALL">Tất cả</option>` : '') + list.map(item => `<option value="${item}">${item}</option>`).join('');
                 });
+                const configSnap = await get(ref(db, 'config_target')); const cfg = configSnap.val();
+                if(cfg) {
+                    if(cfg.industry) document.getElementById('targetIndustry').value = cfg.industry;
+                    if(cfg.province) document.getElementById('targetProvince').value = cfg.province;
+                    if(cfg.target_site) document.getElementById('targetSite').value = cfg.target_site;
+                    if(cfg.quota) document.getElementById('scoutQuota').value = cfg.quota;
+                    updateButtonStyles(cfg.mode);
+                }
             });
+        }
+
+        function updateButtonStyles(mode) {
+            const btnScout = document.getElementById('btnScout'); const btnMaps = document.getElementById('btnMaps'); const box = document.getElementById('commandBox');
+            if(mode === 'MAPS') { btnMaps.className = "flex-1 bg-red-700 text-white py-1 rounded text-[10px] font-bold border border-red-400"; btnScout.className = "flex-1 bg-gray-800 text-gray-500 py-1 rounded text-[10px] font-bold border border-gray-700"; box.className = "bg-gray-900 border border-red-500/30 rounded-lg p-3 grid grid-cols-2 md:grid-cols-6 gap-3 shadow-2xl transition-all"; }
+            else { btnScout.className = "flex-1 bg-blue-600 text-white py-1 rounded text-[10px] font-bold border border-blue-400"; btnMaps.className = "flex-1 bg-gray-800 text-gray-500 py-1 rounded text-[10px] font-bold border border-gray-700"; box.className = "bg-gray-900 border border-blue-500/30 rounded-lg p-3 grid grid-cols-2 md:grid-cols-6 gap-3 shadow-2xl transition-all"; }
         }
 
         window.openParamModal = async (type) => { currentEditingParam = type; document.getElementById('paramModalHeader').innerText = "SỬA DANH SÁCH: " + type.toUpperCase(); const snap = await get(ref(db, 'config_params/' + type)); document.getElementById('paramInput').value = snap.val() || ""; document.getElementById('paramModal').classList.remove('opacity-0', 'pointer-events-none'); document.body.classList.add('modal-active'); };
         window.closeParamModal = () => { document.getElementById('paramModal').classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); };
         window.saveParams = async () => { await set(ref(db, 'config_params/' + currentEditingParam), document.getElementById('paramInput').value); alert("Lưu tham số thành công!"); closeParamModal(); };
+        window.saveGlobalConfig = (mode) => { set(ref(db, 'config_target'), { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, target_site: document.getElementById('targetSite').value, quota: parseInt(document.getElementById('scoutQuota').value), updated_at: Date.now() }).then(() => { alert(`🎯 SERVER ĐÃ NHẬN LỆNH: ${mode}`); updateButtonStyles(mode); }); };
+        function parseDateTime(s) { if (!s) return 0; if (s.includes('T')) return new Date(s).getTime(); try { const p = s.split(' '); const d = p[1].split('/'); const t = p[0].split(':'); return new Date(d[2], d[1]-1, d[0], t[0], t[1]).getTime(); } catch(e) { return 0; } }
+        window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
+        window.deleteNode = (p, n) => { if(confirm(`Xóa: ${n}?`)) remove(ref(db, p)); };
+        window.clearAllQueue = () => { if(confirm("Xóa toàn bộ kho chờ?")) remove(ref(db, 'hr_queue')); };
+        window.exportToExcel = () => { const data = Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "Địa chỉ": v.address, "MST": v.tax_id, "Điện thoại": v.phone, "Liên hệ": v.contact_desc, "Tỉnh": v.province, "Ngành": v.industry })); const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "VDC_Leads"); XLSX.writeFile(wb, `VDC_LEADS_${new Date().toISOString().slice(0,10)}.xlsx`); };
 
-        window.openDetail = (table, key) => {
-            const data = (table === 'hr_queue') ? rawQueueData[key] : rawLeadsData[key]; if(!data) return;
-            document.getElementById('editPath').value = table; document.getElementById('editKey').value = key;
-            document.getElementById('editName').value = data.company_name || data.company || "";
-            document.getElementById('editTax').value = data.tax_id || "";
-            document.getElementById('editProv').value = data.province || "";
-            document.getElementById('editAddress').value = data.address || "";
-            document.getElementById('editPhone').value = data.phone || "";
-            document.getElementById('editContact').value = data.contact_desc || "";
-            document.getElementById('unifiedModal').classList.remove('opacity-0', 'pointer-events-none');
-            document.body.classList.add('modal-active');
-        };
-        window.closeModal = () => { document.getElementById('unifiedModal').classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); };
-        window.saveEdit = async function() {
-            const table = document.getElementById('editPath').value; const key = document.getElementById('editKey').value;
-            const newData = { province: document.getElementById('editProv').value, address: document.getElementById('editAddress').value, phone: document.getElementById('editPhone').value, contact_desc: document.getElementById('editContact').value, tax_id: document.getElementById('editTax').value, last_updated: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " " + new Date().toLocaleDateString('en-GB') };
-            if(table === 'hr_queue') { newData.name = document.getElementById('editName').value; newData.company_name = newData.name; }
-            else { newData.company = document.getElementById('editName').value; }
-            await update(ref(db, `${table}/${key}`), newData); closeModal();
-        };
-
-        onValue(ref(db, 'config_system/status'), s => { const v = s.val(); const txt = document.getElementById('systemStatusText'); if(v==='RUNNING'){ txt.innerText="Đang chạy"; txt.className="mt-2 text-[10px] font-bold text-emerald-500 animate-pulse"; } else { txt.innerText="Tạm dừng"; txt.className="mt-2 text-[10px] font-bold text-red-400"; }});
-        onValue(ref(db, 'hr_queue'), s => { rawQueueData = s.val() || {}; document.getElementById('queueCount').innerText = s.size; const tbody = document.getElementById('queueTableBody'); tbody.innerHTML = ''; Object.entries(rawQueueData).sort((a,b) => parseDateTime(b[1].created_at) - parseDateTime(a[1].created_at)).forEach(([k,v], i) => { const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer"; row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_queue', k); }; row.innerHTML = `<td class="p-2 text-gray-600">${i+1}</td><td class="p-2"><div class="font-bold text-blue-300">${v.name}</div><div class="text-[9px] text-gray-600 truncate w-40">${v.address||''}</div></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.created_at ? v.created_at.split('T')[0].slice(2) : '---'}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_queue/${k}', '${v.name}')" class="text-gray-700 hover:text-red-500 transition"><i class="fa-solid fa-trash-can"></i></button></td>`; tbody.appendChild(row); }); });
+        onValue(ref(db, 'config_system/status'), s => { const v = s.val(); const txt = document.getElementById('systemStatusText'); if(v==='RUNNING'){ txt.innerText="Hệ thống đang chạy"; txt.className="mt-2 text-[10px] font-bold text-emerald-500 animate-pulse"; } else { txt.innerText="Hệ thống tạm dừng"; txt.className="mt-2 text-[10px] font-bold text-red-400"; }});
+        onValue(ref(db, 'hr_queue'), s => { rawQueueData = s.val() || {}; document.getElementById('queueCount').innerText = s.size; const tbody = document.getElementById('queueTableBody'); tbody.innerHTML = ''; Object.entries(rawQueueData).sort((a,b) => parseDateTime(b[1].created_at) - parseDateTime(a[1].created_at)).forEach(([k,v], i) => { const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer"; row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_queue', k); }; row.innerHTML = `<td class="p-2 text-gray-600">${i+1}</td><td class="p-2"><div class="font-bold text-blue-300">${v.name}</div><div class="text-[9px] text-gray-600 truncate w-40">${v.address||''}</div></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.created_at ? v.created_at.split('T')[0].slice(2) : '---'}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_queue/${k}', '${v.name}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></td>`; tbody.appendChild(row); }); });
         onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; document.getElementById('leadCount').innerText = s.size; renderLeadsTable(); });
 
-        function renderLeadsTable() { const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = ''; let arr = Object.entries(rawLeadsData); if(currentFilter==='PHONE_ONLY') arr = arr.filter(([k,v]) => v.phone && v.phone!=="Chưa có"); arr.sort((a,b) => parseDateTime(b[1].last_updated) - parseDateTime(a[1].last_updated)).forEach(([k,v]) => { const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer"; row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_leads', k); }; const hasP = v.phone && v.phone !== "Chưa có"; let contactDisp = v.contact_desc || ""; if(contactDisp.toLowerCase().includes("khác") || contactDisp.toLowerCase().includes("chưa rõ")) contactDisp = ""; row.innerHTML = `<td class="p-2"><div class="font-bold text-gray-300 group-hover:text-emerald-300 transition">${v.company}</div><div class="text-[9px] text-gray-600 truncate w-64">${v.address || (v.province || '---')}</div></td><td class="p-2 text-yellow-400 font-bold text-xs">${contactDisp}</td><td class="p-2"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded font-mono':'text-gray-600'}">${v.phone||'---'}</span></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.last_updated ? v.last_updated.replace(' ', '<br>') : ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>`; tbody.appendChild(row); }); }
+        function renderLeadsTable() { const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = ''; let arr = Object.entries(rawLeadsData); if(currentFilter==='PHONE_ONLY') arr = arr.filter(([k,v]) => v.phone && v.phone!=="Chưa có"); arr.sort((a,b) => parseDateTime(b[1].last_updated) - parseDateTime(a[1].last_updated)).forEach(([k,v]) => { const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer"; row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_leads', k); }; const hasP = v.phone && v.phone !== "Chưa có"; let contactDisp = v.contact_desc || ""; if(contactDisp.toLowerCase().includes("khác") || contactDisp.toLowerCase().includes("chưa rõ")) contactDisp = ""; row.innerHTML = `<td class="p-2"><div class="font-bold text-gray-300 group-hover:text-emerald-300 transition text-[11px]">${v.company}</div><div class="text-[9px] text-gray-600 truncate w-64">${v.address || (v.province || '---')}</div></td><td class="p-2 text-yellow-400 font-bold text-[10px]">${contactDisp}</td><td class="p-2"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded font-mono':'text-gray-600'}">${v.phone||'---'}</span></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.last_updated ? v.last_updated.replace(' ', '<br>') : ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>`; tbody.appendChild(row); }); }
         window.applyFilter = (v) => { currentFilter = v; renderLeadsTable(); };
+        
+        onValue(ref(db, 'hr_status'), s => { const grid = document.getElementById('botGrid'); grid.innerHTML = ''; const now = Math.floor(Date.now()/1000); Object.values(s.val()||{}).forEach(b => { if((now-(b.timestamp||0))>120) return; let borderColor = b.type === "SCOUT" ? "border-purple-500" : "border-blue-500"; grid.innerHTML+=`<div class="bot-card bg-gray-900 ${borderColor} border rounded p-2 flex items-center gap-2 h-9 shadow-inner"><i class="fa-solid fa-robot text-xs ${b.type==='SCOUT'?'text-purple-400':'text-blue-400'}"></i><div class="overflow-hidden leading-none"><div class="font-bold text-[9px] truncate w-20">${b.name}</div><div class="text-[8px] opacity-60 truncate w-28 mt-1">${b.message}</div></div></div>`; }); });
+        window.openDetail = (table, key) => { const data = (table === 'hr_queue') ? rawQueueData[key] : rawLeadsData[key]; if(!data) return; document.getElementById('editPath').value = table; document.getElementById('editKey').value = key; document.getElementById('editName').value = data.company_name || data.company || ""; document.getElementById('editTax').value = data.tax_id || ""; document.getElementById('editProv').value = data.province || ""; document.getElementById('editAddress').value = data.address || ""; document.getElementById('editPhone').value = data.phone || ""; document.getElementById('editContact').value = data.contact_desc || ""; document.getElementById('unifiedModal').classList.remove('opacity-0', 'pointer-events-none'); document.body.classList.add('modal-active'); };
+        window.closeModal = () => { document.getElementById('unifiedModal').classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); };
+        window.saveEdit = async function() { const table = document.getElementById('editPath').value; const key = document.getElementById('editKey').value; const newData = { province: document.getElementById('editProv').value, address: document.getElementById('editAddress').value, phone: document.getElementById('editPhone').value, contact_desc: document.getElementById('editContact').value, tax_id: document.getElementById('editTax').value, last_updated: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " " + new Date().toLocaleDateString('en-GB') }; if(table === 'hr_queue') { newData.name = document.getElementById('editName').value; newData.company_name = newData.name; } else { newData.company = document.getElementById('editName').value; } await update(ref(db, `${table}/${key}`), newData); closeModal(); };
 
-        onValue(ref(db, 'hr_status'), s => { const grid = document.getElementById('botGrid'); grid.innerHTML = ''; const now = Math.floor(Date.now()/1000); Object.values(s.val()||{}).forEach(b => { if((now-(b.timestamp||0))>120) return; let borderColor = b.type === "SCOUT" ? "border-purple-500" : "border-blue-500"; grid.innerHTML+=`<div class="bot-card bg-gray-900 ${borderColor} border rounded p-2 flex items-center gap-2 h-9 shadow-inner"><i class="fa-solid fa-robot text-xs ${b.type==='SCOUT'?'text-purple-400':'text-blue-400'}"></i><div class="overflow-hidden leading-none"><div class="font-bold text-[9px] truncate w-20">${b.name}</div><div class="text-[8px] opacity-60 truncate w-24 mt-1">${b.message}</div></div></div>`; }); });
         loadDynamicParams();
     </script>
 </body>

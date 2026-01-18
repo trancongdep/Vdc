@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v22.4 - Responsive UX</title>
+    <title>VDC CRM PRO v22.7 - Full Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,14 +16,6 @@
         .sidebar-open { transform: translateX(0); }
         #sidebarOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 90; }
         #sidebarOverlay.active { display: block; }
-        .pulse-active { animation: pulse-power 2s infinite; }
-        @keyframes pulse-power { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        
-        /* Tối ưu bảng cho tên công ty dài */
-        table { table-layout: auto; width: 100%; }
-        .col-company { width: auto; min-width: 200px; }
-        .col-time { width: 100px; }
-        .col-action { width: 120px; }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen overflow-hidden font-sans text-sm">
@@ -32,51 +24,89 @@
 
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-gray-900 border-r border-gray-800 sidebar-closed flex flex-col shadow-2xl">
         <div class="p-6 flex justify-between items-center border-b border-gray-800">
-            <h2 class="text-blue-500 font-bold uppercase text-xs">VDC Management</h2>
+            <h2 class="text-blue-500 font-bold uppercase text-xs italic">VDC Commander</h2>
             <button onclick="toggleSidebar()" class="text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
-        <div class="flex-1 p-4 space-y-4">
-            <button onclick="switchPage('stats')" id="nav-stats" class="w-full flex items-center gap-4 p-4 rounded-xl transition bg-blue-900/20 border-l-4 border-blue-500 text-blue-400 font-bold"><i class="fa-solid fa-chart-pie"></i> Giám sát</button>
-            <button onclick="switchPage('leads')" id="nav-leads" class="w-full flex items-center gap-4 p-4 rounded-xl transition text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-list-check"></i> Dữ liệu KH</button>
-            <div class="p-4 bg-gray-800/50 rounded-xl border border-gray-700 mt-6">
-                <label class="text-[9px] text-gray-500 font-bold uppercase">Chế độ Bot:</label>
-                <button onclick="handleModeCycle()" id="modeToggleBtn" class="w-full py-3 rounded-lg font-bold text-[10px] uppercase border border-blue-500/30 text-blue-400 mt-2"></button>
+        
+        <div class="flex-1 p-4 space-y-5 overflow-y-auto">
+            <div class="space-y-2">
+                <button onclick="switchPage('stats')" class="w-full flex items-center gap-4 p-3 rounded-xl bg-blue-900/20 text-blue-400 border-l-4 border-blue-500 font-bold"><i class="fa-solid fa-chart-pie"></i> GIÁM SÁT</button>
+                <button onclick="switchPage('leads')" class="w-full flex items-center gap-4 p-3 rounded-xl text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-address-book"></i> DỮ LIỆU KH</button>
+            </div>
+
+            <hr class="border-gray-800">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">1. NGÀNH NGHỀ TÂM ĐIỂM</label>
+                    <select id="target_job" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 mt-2 text-xs text-white focus:border-blue-500 outline-none">
+                        <option value="Công ty may mặc">May mặc / Da giày</option>
+                        <option value="Khu công nghiệp">Khu công nghiệp</option>
+                        <option value="Công ty sản xuất gỗ">Sản xuất Gỗ</option>
+                        <option value="Công ty cơ khí">Cơ khí / Chế tạo</option>
+                        <option value="Công ty xây dựng">Xây dựng / VLXD</option>
+                        <option value="Bệnh viện">Y tế / Bệnh viện</option>
+                        <option value="Trường học">Giáo dục / Trường học</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">2. KHU VỰC TÁC CHIẾN</label>
+                    <select id="target_loc" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 mt-2 text-xs text-white focus:border-blue-500 outline-none">
+                        <option value="Bình Dương">Bình Dương</option>
+                        <option value="Đồng Nai">Đồng Nai</option>
+                        <option value="Long An">Long An</option>
+                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                        <option value="Tây Ninh">Tây Ninh</option>
+                        <option value="Bà Rịa - Vũng Tàu">Vũng Tàu</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">3. CHẾ ĐỘ BOT</label>
+                    <button onclick="handleModeCycle()" id="modeToggleBtn" class="w-full py-3 rounded-lg font-bold text-[11px] uppercase border border-blue-500/30 text-blue-400 mt-2 bg-blue-500/5 hover:bg-blue-500/10 transition-all"></button>
+                </div>
+
+                <button onclick="saveTargetConfig()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-900/20 active:scale-95 transition-all">
+                    <i class="fa-solid fa-crosshairs mr-2"></i> XÁC NHẬN MỤC TIÊU
+                </button>
             </div>
         </div>
-        <div class="p-4 text-[9px] text-gray-700 text-center border-t border-gray-800 tracking-widest uppercase">Version 22.4</div>
+        
+        <div class="p-4 text-[9px] text-gray-700 text-center border-t border-gray-800 font-black tracking-widest uppercase">Version 22.7</div>
     </aside>
 
     <main class="h-screen flex flex-col">
-        <nav class="h-[70px] bg-gray-900 border-b border-gray-800 p-3 flex justify-between items-center z-10">
+        <nav class="h-[70px] bg-gray-900 border-b border-gray-800 p-3 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-lg text-blue-500"><i class="fa-solid fa-bars"></i></button>
                 <div>
                     <h1 id="pageTitle" class="font-bold text-gray-100 uppercase text-sm leading-none">Giám sát</h1>
-                    <span id="versionLabel" class="text-[8px] text-blue-600 font-black">SYSTEM PRO v22.4</span>
+                    <span class="text-[8px] text-blue-600 font-black">VDC COMMANDER v22.7</span>
                 </div>
             </div>
-            <button id="powerBtn" onclick="handlePowerToggle()" class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-xl active:scale-90 transition-all"></button>
+            <button id="powerBtn" onclick="handlePowerToggle()" class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-xl transition-all"></button>
         </nav>
 
         <div class="flex-1 overflow-hidden">
             <div id="page-stats" class="page-content active p-4 space-y-4 overflow-y-auto">
-                <div class="grid grid-cols-2 gap-3 text-center font-bold">
-                    <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 shadow-lg"><div class="text-4xl text-blue-400" id="queueCount">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Hàng đợi</div></div>
-                    <div class="bg-emerald-900/10 border border-emerald-500/20 rounded-2xl p-6 shadow-lg"><div class="text-4xl text-emerald-400" id="leadCountStat">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Tổng số Lead</div></div>
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 font-bold"><div class="text-4xl text-blue-400" id="queueCount">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Hàng đợi</div></div>
+                    <div class="bg-emerald-900/10 border border-emerald-500/20 rounded-2xl p-6 font-bold"><div class="text-4xl text-emerald-400" id="leadCountStat">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Tổng số Lead</div></div>
                 </div>
                 <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-inner">
-                    <div id="botStatusText" class="text-blue-300 font-medium text-xs leading-loose min-h-[150px]">Đang chờ báo cáo...</div>
+                    <div id="botStatusText" class="text-blue-300 font-medium text-xs leading-loose min-h-[150px]">Hệ thống sẵn sàng...</div>
                 </div>
             </div>
 
             <div id="page-leads" class="page-content">
                 <div class="flex-1 overflow-auto bg-gray-950">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-900 sticky top-0 z-20 border-b border-gray-800">
+                        <thead class="bg-gray-900 sticky top-0 border-b border-gray-800">
                             <tr class="text-[9px] text-gray-500 uppercase font-bold">
-                                <th class="p-4 col-company">Doanh nghiệp</th>
-                                <th class="p-4 col-time text-center text-blue-400">Cập nhật</th>
-                                <th class="p-4 col-action text-center">Liên hệ</th>
+                                <th class="p-4">Doanh nghiệp</th>
+                                <th class="p-4 w-24 text-center">Cập nhật</th>
+                                <th class="p-4 w-32 text-center">Liên hệ</th>
                                 <th class="p-4 w-10"></th>
                             </tr>
                         </thead>
@@ -87,14 +117,9 @@
         </div>
     </main>
 
-    <div id="leadModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/95" onclick="closeModal()"></div>
-        <div class="relative bg-gray-900 border border-gray-700 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl" id="modalBody"></div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
@@ -102,95 +127,47 @@
         let currentMode = 'SCOUT', currentStatus = 'PAUSED', rawLeadsData = {};
 
         window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebarOverlay').classList.toggle('active'); };
-        
-        window.switchPage = (p) => { 
-            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('page-'+p).classList.add('active');
-            document.getElementById('pageTitle').innerText = p === 'stats' ? 'Giám sát' : 'Dữ liệu';
-            if(!document.getElementById('sidebar').classList.contains('sidebar-closed')) toggleSidebar();
+        window.switchPage = (p) => { document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active')); document.getElementById('page-'+p).classList.add('active'); toggleSidebar(); };
+
+        window.saveTargetConfig = () => {
+            const job = document.getElementById('target_job').value;
+            const loc = document.getElementById('target_loc').value;
+            set(ref(db, 'config_target'), { job: job, location: loc, mode: currentMode });
+            alert("Đã xác nhận mục tiêu: " + job + " tại " + loc);
         };
 
-        function formatTime(ts) {
-            if(!ts) return '---';
-            const d = new Date(ts);
-            return d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0') + "<br>" + d.getDate() + "/" + (d.getMonth()+1);
+        window.handleModeCycle = () => {
+            let n = currentMode === 'SCOUT' ? 'REFRESH' : 'SCOUT';
+            set(ref(db, 'config_target/mode'), n);
+        };
+
+        window.handlePowerToggle = () => set(ref(db, 'config_system/status'), currentStatus === 'RUNNING' ? 'PAUSED' : 'RUNNING');
+
+        function init() {
+            onValue(ref(db, 'hr_status/bot_VDC_CORE'), s => { if(s.val()) document.getElementById('botStatusText').innerHTML = s.val().message.replace(/\n/g, '<br>'); });
+            onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; document.getElementById('leadCountStat').innerText = Object.keys(rawLeadsData).length; renderLeads(); });
+            onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = Object.keys(s.val()||{}).length; });
+            onValue(ref(db, 'config_target'), s => { const d = s.val() || {}; currentMode = d.mode || 'SCOUT'; updateModeUI(); document.getElementById('target_job').value = d.job || ''; document.getElementById('target_loc').value = d.location || ''; });
+            onValue(ref(db, 'config_system/status'), s => { currentStatus = s.val() || 'PAUSED'; updatePowerUI(); });
         }
 
         function renderLeads() {
             const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
-            const items = Object.entries(rawLeadsData).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
-            items.forEach(([k,v]) => {
-                const phoneClean = v.phone?.split(' - ')[0].replace(/[^0-9]/g, '') || '';
+            Object.entries(rawLeadsData).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
+                const phone = v.phone?.split(' - ')[0].replace(/[^0-9]/g, '') || '';
                 const row = document.createElement('tr');
-                row.className = `hover:bg-gray-900 border-b border-gray-800/30 ${v.status_code?.includes('Nghi vấn') ? 'bg-red-900/10' : ''}`;
-                
-                // Sửa logic hiển thị tên: bỏ truncate, cho phép wrap
-                row.innerHTML = `
-                    <td class="p-4" onclick="showDetail('${k}')">
-                        <div class="font-bold text-gray-200 text-xs uppercase leading-relaxed">${v.company || v.name}</div>
-                        <div class="text-[9px] text-emerald-500 font-mono mt-1">${v.tax_id || '---'}</div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <div class="text-[9px] font-mono text-blue-400 leading-tight">${formatTime(v.timestamp)}</div>
-                    </td>
-                    <td class="p-4">
-                        <div class="flex items-center justify-center gap-4">
-                            ${phoneClean ? `<a href="tel:${phoneClean}" class="text-emerald-400 text-lg"><i class="fa-solid fa-phone-volume"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800"></i>'}
-                            ${phoneClean ? `<a href="https://zalo.me/${phoneClean}" target="_blank" class="text-blue-400 text-lg"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
-                            ${v.email ? `<a href="mailto:${v.email}" class="text-purple-400 text-lg"><i class="fa-solid fa-envelope"></i></a>` : ''}
-                        </div>
-                    </td>
-                    <td class="p-4 text-center">
-                        <button onclick="if(confirm('Xóa?')) remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                `;
+                row.className = "border-b border-gray-900 hover:bg-gray-900/50 transition";
+                row.innerHTML = `<td class="p-4"><div class="font-bold text-gray-200 text-xs uppercase leading-tight">${v.company || v.name}</div><div class="text-[9px] text-emerald-500 font-mono mt-1">${v.tax_id || '---'}</div></td><td class="p-4 text-center font-mono text-[9px] text-blue-500">${new Date(v.timestamp).getHours()}:${new Date(v.timestamp).getMinutes()}</td><td class="p-4 text-center"><div class="flex justify-center gap-4 text-lg">${phone ? `<a href="tel:${phone}" class="text-emerald-400"><i class="fa-solid fa-phone"></i></a><a href="https://zalo.me/${phone}" target="_blank" class="text-blue-400"><i class="fa-solid fa-comment"></i></a>` : ''}${v.email ? `<a href="mailto:${v.email}" class="text-purple-400"><i class="fa-solid fa-envelope"></i></a>` : ''}</div></td><td class="p-4 text-center"><button onclick="remove(ref(db,'hr_leads/${k}'))" class="text-gray-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>`;
                 tbody.appendChild(row);
             });
         }
 
-        async function init() {
-            onValue(ref(db, 'hr_status/bot_VDC_CORE'), s => {
-                const d = s.val(); if(d) document.getElementById('botStatusText').innerHTML = (d.message || "").replace(/\n/g, '<br>');
-            });
-            onValue(ref(db, 'hr_leads'), s => { 
-                rawLeadsData = s.val() || {}; 
-                document.getElementById('leadCountStat').innerText = Object.keys(rawLeadsData).length;
-                renderLeads(); 
-            });
-            onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = Object.keys(s.val()||{}).length; });
-            onValue(ref(db, 'config_target/mode'), s => { currentMode = s.val() || 'SCOUT'; updateModeUI(); });
-            onValue(ref(db, 'config_system/status'), s => { currentStatus = s.val() || 'PAUSED'; updatePowerUI(); });
-        }
-
-        window.handleModeCycle = () => {
-            let n = currentMode === 'SCOUT' ? 'MAPS' : (currentMode === 'MAPS' ? 'REFRESH' : 'SCOUT');
-            set(ref(db, 'config_target/mode'), n);
-        };
-        window.handlePowerToggle = () => set(ref(db, 'config_system/status'), currentStatus === 'RUNNING' ? 'PAUSED' : 'RUNNING');
-        
         function updateModeUI() { document.getElementById('modeToggleBtn').innerText = currentMode + ' MODE'; }
         function updatePowerUI() {
             const b = document.getElementById('powerBtn');
-            b.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg pulse-active" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
+            b.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
             b.innerHTML = '<i class="fa-solid fa-power-off text-xl"></i>';
         }
-
-        window.showDetail = (k) => {
-            const v = rawLeadsData[k];
-            document.getElementById('modalBody').innerHTML = `
-                <div class="border-b border-gray-800 pb-2 mb-4"><h3 class="font-bold text-blue-400 uppercase text-xs leading-relaxed">${v.company}</h3></div>
-                <div class="space-y-3 text-xs">
-                    <p class="flex justify-between"><span class="text-gray-500 uppercase font-bold text-[10px]">MST:</span> <span class="text-emerald-400 font-mono">${v.tax_id || '---'}</span></p>
-                    <p class="flex justify-between"><span class="text-gray-500 uppercase font-bold text-[10px]">Email:</span> <span class="text-white">${v.email || '---'}</span></p>
-                    <p class="flex justify-between"><span class="text-gray-500 uppercase font-bold text-[10px]">Phone:</span> <span class="text-white">${v.phone || '---'}</span></p>
-                    <p class="flex justify-between"><span class="text-gray-500 uppercase font-bold text-[10px]">Quy mô:</span> <span class="text-yellow-400 font-bold">${v.labor_size || '---'}</span></p>
-                </div>
-                <button onclick="closeModal()" class="w-full bg-blue-600/20 text-blue-400 py-3 rounded-xl font-bold uppercase mt-4 active:scale-95 transition">Đóng hồ sơ</button>
-            `;
-            document.getElementById('leadModal').classList.remove('hidden');
-        };
-        window.closeModal = () => document.getElementById('leadModal').classList.add('hidden');
-
         init();
     </script>
 </body>

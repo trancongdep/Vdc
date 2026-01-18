@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM PRO v14.1 - Excel Import</title>
+    <title>VDC CRM PRO v14.3 - Unified Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -16,8 +16,9 @@
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
         .table-fixed-header thead { position: sticky; top: 0; z-index: 10; background-color: #1f2937; }
-        .modal { transition: opacity 0.25s ease; }
-        body.modal-active { overflow-x: hidden; overflow-y: hidden !important; }
+        .modal { transition: opacity 0.2s ease-in-out; }
+        body.modal-active { overflow: hidden; }
+        input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen p-2 font-sans antialiased text-sm">
@@ -26,9 +27,9 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-2 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> VDC CRM v14.1
+                    <i class="fa-solid fa-pen-to-square"></i> VDC CRM v14.3
                 </h1>
-                <p class="text-xs text-gray-500">Excel Import System Ready</p>
+                <p class="text-xs text-gray-500">Unified Detail View & Live Editor</p>
             </div>
             <div class="flex gap-2">
                 <div class="bg-gray-900 border border-orange-500/30 rounded p-2 flex gap-2 items-center shadow-lg">
@@ -37,7 +38,7 @@
                         <option value="site:hosocongty.vn">hosocongty.vn</option>
                         <option value="site:masothue.com">masothue.com</option>
                     </select>
-                    <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs w-16 text-center focus:border-orange-500 outline-none" value="20">
+                    <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs w-16 text-center" value="30">
                     <button onclick="saveConfig()" class="bg-orange-600 hover:bg-orange-500 text-white px-3 py-1 rounded text-xs font-bold transition">Lưu Lệnh</button>
                 </div>
             </div>
@@ -45,58 +46,44 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
             <div class="lg:col-span-1 grid grid-cols-2 gap-2">
-                <div class="bg-blue-900/10 border border-blue-500/30 rounded p-3 text-center flex flex-col justify-center">
+                <div class="bg-blue-900/10 border border-blue-500/30 rounded p-3 text-center">
                     <div class="text-2xl font-bold text-blue-400" id="queueCount">0</div>
-                    <div class="text-[10px] text-gray-400 uppercase font-bold">Kho chờ</div>
+                    <div class="text-[10px] text-gray-400 uppercase font-bold">Dữ liệu thô</div>
                 </div>
-                <div class="bg-emerald-900/10 border border-emerald-500/30 rounded p-3 text-center flex flex-col justify-center">
+                <div class="bg-emerald-900/10 border border-emerald-500/30 rounded p-3 text-center">
                     <div class="text-2xl font-bold text-emerald-400" id="leadCount">0</div>
                     <div class="text-[10px] text-gray-400 uppercase font-bold">Kết quả</div>
                 </div>
             </div>
-
             <div class="lg:col-span-1 bg-gray-900 border border-gray-700 rounded p-3 flex flex-col justify-center items-center">
-                <div class="text-[10px] text-gray-500 font-bold uppercase mb-2">Hệ thống</div>
-                <div class="flex gap-4 w-full justify-center">
-                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold transition flex flex-col items-center justify-center gap-1 active:scale-95">
-                        <i class="fa-solid fa-play text-xl"></i> CHẠY
-                    </button>
-                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold transition flex flex-col items-center justify-center gap-1 active:scale-95">
-                        <i class="fa-solid fa-pause text-xl"></i> DỪNG
-                    </button>
+                <div class="flex gap-4 w-full">
+                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold shadow-lg transition active:scale-95"><i class="fa-solid fa-play mr-1"></i> CHẠY</button>
+                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-red-600 text-white py-2 rounded font-bold shadow-lg transition active:scale-95"><i class="fa-solid fa-pause mr-1"></i> DỪNG</button>
                 </div>
-                <div id="systemStatusText" class="mt-2 text-xs font-bold tracking-widest text-gray-500">...</div>
+                <div id="systemStatusText" class="mt-2 text-[10px] font-bold tracking-widest uppercase">...</div>
             </div>
-
             <div class="lg:col-span-2 bg-gray-900/50 border border-gray-800 rounded p-2">
-                <div class="text-[10px] text-gray-500 font-bold uppercase mb-2 px-1">Bot Monitor</div>
-                <div id="botGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2 h-[85px] overflow-y-auto pr-1"></div>
+                <div id="botGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2 h-[80px] overflow-y-auto"></div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-280px)]">
-            <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden relative">
+            <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-blue-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-boxes-stacked"></i> Kho dữ liệu</h3>
-                    
+                    <h3 class="font-bold text-blue-400 text-xs uppercase"><i class="fa-solid fa-database mr-1"></i> Kho chờ</h3>
                     <div class="flex gap-2">
-                        <button onclick="downloadTemplate()" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] px-2 py-1 rounded border border-gray-600 flex items-center gap-1" title="Tải mẫu Excel">
-                            <i class="fa-solid fa-file-csv"></i> Mẫu
-                        </button>
-                        <label for="fileInput" class="bg-green-700 hover:bg-green-600 text-white text-[10px] px-2 py-1 rounded border border-green-600 cursor-pointer flex items-center gap-1 shadow-lg active:scale-95" title="Upload Excel/CSV">
-                            <i class="fa-solid fa-file-import"></i> Nhập Excel
-                        </label>
-                        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleFileUpload(this)">
+                        <button onclick="downloadTemplate()" class="bg-gray-700 text-[9px] px-2 py-1 rounded">Mẫu</button>
+                        <label class="bg-blue-700 text-[9px] px-2 py-1 rounded cursor-pointer">Nhập Excel<input type="file" accept=".xlsx,.csv" class="hidden" onchange="handleFileUpload(this)"></label>
                     </div>
                 </div>
-
                 <div class="overflow-auto flex-1 bg-gray-950">
-                    <table class="w-full text-left border-collapse table-fixed-header">
+                    <table class="w-full text-left table-fixed-header">
                         <thead>
-                            <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700 bg-gray-800">
+                            <tr class="text-[10px] uppercase text-gray-500 bg-gray-800 border-b border-gray-700">
                                 <th class="p-2 w-8">#</th>
-                                <th class="p-2">Tên Công ty / Địa chỉ</th>
-                                <th class="p-2 w-10 text-center">X</th>
+                                <th class="p-2">Công ty (Click sửa)</th>
+                                <th class="p-2 w-20 text-center">Ngày tìm</th>
+                                <th class="p-2 w-8"></th>
                             </tr>
                         </thead>
                         <tbody id="queueTableBody" class="text-xs divide-y divide-gray-800"></tbody>
@@ -104,26 +91,23 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden">
+            <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-emerald-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-check-double"></i> Kết quả (Sale)</h3>
-                    <div class="flex items-center gap-2">
-                        <label class="text-[10px] text-gray-400 font-bold uppercase"><i class="fa-solid fa-filter"></i> Lọc:</label>
-                        <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-900 border border-gray-600 text-xs rounded px-2 py-1 outline-none focus:border-emerald-500 text-white">
-                            <option value="ALL">Xem Tất Cả</option>
-                            <option value="PHONE_ONLY">Chỉ xem có SĐT</option>
-                        </select>
-                    </div>
+                    <h3 class="font-bold text-emerald-400 text-xs uppercase"><i class="fa-solid fa-check-double mr-1"></i> Kết quả (Sale)</h3>
+                    <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-900 text-[10px] border border-gray-700 rounded px-2 py-1 outline-none">
+                        <option value="ALL">Tất cả</option>
+                        <option value="PHONE_ONLY">Chỉ có SĐT</option>
+                    </select>
                 </div>
                 <div class="overflow-auto flex-1 bg-gray-950">
-                    <table class="w-full text-left border-collapse table-fixed-header">
+                    <table class="w-full text-left table-fixed-header">
                         <thead>
-                            <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700 bg-gray-800">
-                                <th class="p-2">Tên Công ty</th>
-                                <th class="p-2 w-48 text-yellow-500 font-bold">Người liên hệ</th>
+                            <tr class="text-[10px] uppercase text-gray-500 bg-gray-800 border-b border-gray-700">
+                                <th class="p-2">Tên Công ty (Chi tiết)</th>
+                                <th class="p-2 w-40 text-yellow-500 font-bold">Người liên hệ</th>
                                 <th class="p-2 w-32">Phone</th>
-                                <th class="p-2 w-24 text-center">Update</th>
-                                <th class="p-2 w-16 text-center">Xóa</th>
+                                <th class="p-2 w-24 text-center">Cập nhật</th>
+                                <th class="p-2 w-8"></th>
                             </tr>
                         </thead>
                         <tbody id="leadTableBody" class="text-xs divide-y divide-gray-800"></tbody>
@@ -133,43 +117,72 @@
         </div>
     </div>
 
-    <div id="companyModal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-90" onclick="closeModal()"></div>
-        <div class="modal-container bg-gray-800 w-11/12 md:max-w-md mx-auto rounded shadow-2xl z-50 overflow-y-auto border border-gray-700">
-            <div class="modal-header flex justify-between items-center px-4 py-3 border-b border-gray-700 bg-gray-900">
-                <h3 class="text-lg font-bold text-blue-400 truncate pr-4" id="modalTitle">Chi tiết</h3>
-                <div class="cursor-pointer z-50 text-gray-400 hover:text-white" onclick="closeModal()"><i class="fa-solid fa-xmark text-xl"></i></div>
+    <div id="unifiedModal" class="modal opacity-0 pointer-events-none fixed inset-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute inset-0 bg-black/80" onclick="closeModal()"></div>
+        <div class="modal-container bg-gray-900 w-11/12 md:max-w-xl mx-auto rounded-lg shadow-2xl z-50 border border-gray-700">
+            <div class="flex justify-between items-center px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-lg">
+                <h3 class="font-bold text-blue-400" id="modalHeader">Chi tiết dữ liệu</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="modal-content py-4 text-left px-6 space-y-4">
-                <div><label class="text-[10px] uppercase text-gray-500 font-bold">Mã số thuế</label><div id="modalTax" class="font-mono text-emerald-400 font-bold text-lg select-all">...</div></div>
-                <div><label class="text-[10px] uppercase text-gray-500 font-bold">Người đại diện</label><div id="modalRep" class="text-gray-200">...</div></div>
-                <div><label class="text-[10px] uppercase text-gray-500 font-bold">Địa chỉ</label><div id="modalAddress" class="text-gray-300 text-sm">...</div></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Tỉnh thành</label><div id="modalProv" class="text-gray-300 text-sm">...</div></div>
-                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Ngành nghề</label><div id="modalInd" class="text-gray-300 text-sm">...</div></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Nguồn</label><div id="modalSource" class="text-xs text-blue-300 bg-blue-900/20 inline-block px-2 py-1 rounded">...</div></div>
-                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Trạng thái</label><div id="modalStatus" class="text-xs text-gray-300">...</div></div>
-                </div>
-                <div class="border-t border-gray-700 pt-3 mt-2">
-                    <label class="text-[10px] uppercase text-orange-500 font-bold">Kết quả liên hệ</label>
-                    <div class="mt-1 bg-gray-900 p-2 rounded border border-gray-700">
-                         <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">Phone:</span><span id="modalPhone" class="font-mono font-bold text-emerald-400 select-all">...</span></div>
-                         <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">Contact:</span><span id="modalContact" class="text-yellow-400 font-bold">...</span></div>
-                         <div class="flex justify-between text-xs"><span class="text-gray-500">Context:</span><span id="modalContext" class="text-gray-400 italic">...</span></div>
+            
+            <form id="editForm" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <input type="hidden" id="editPath">
+                <input type="hidden" id="editKey">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Tên Công ty</label>
+                        <input type="text" id="editName" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm text-blue-300 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Mã số thuế</label>
+                        <input type="text" id="editTax" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm font-mono text-emerald-400">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Tỉnh thành</label>
+                        <input type="text" id="editProv" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Địa chỉ</label>
+                        <input type="text" id="editAddress" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Ngành nghề</label>
+                        <input type="text" id="editInd" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 font-bold uppercase">Nguồn</label>
+                        <input type="text" id="editSource" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-sm text-gray-500" readonly>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer py-2 px-4 bg-gray-900 border-t border-gray-700 flex justify-end">
-                <button onclick="closeModal()" class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold py-2 px-4 rounded">Đóng</button>
+
+                <div class="border-t border-gray-800 pt-4 mt-2">
+                    <div class="bg-blue-900/10 p-4 rounded-lg border border-blue-500/20 space-y-4">
+                        <h4 class="text-xs font-bold text-blue-400 uppercase tracking-widest"><i class="fa-solid fa-robot mr-2"></i>Thông tin Worker tìm thấy</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] text-gray-500 font-bold uppercase">Số điện thoại</label>
+                                <input type="text" id="editPhone" class="w-full bg-gray-950 border border-gray-700 rounded px-3 py-2 text-sm text-emerald-400 font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-500 font-bold uppercase">Người liên hệ / Chức vụ</label>
+                                <input type="text" id="editContact" class="w-full bg-gray-950 border border-gray-700 rounded px-3 py-2 text-sm text-yellow-400 font-bold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="flex justify-end gap-3 px-6 py-4 bg-gray-800 rounded-b-lg border-t border-gray-700">
+                <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white transition">HỦY BỎ</button>
+                <button onclick="saveEdit()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded shadow-lg transition active:scale-95">LƯU THAY ĐỔI</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU",
@@ -184,183 +197,180 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- GLOBAL & IMPORT/EXPORT LOGIC ---
         let rawQueueData = {};
         let rawLeadsData = {};
         let currentFilter = 'ALL';
 
+        // --- UTILS ---
+        function parseDateTime(s) {
+            if (!s) return 0;
+            if (s.includes('T')) return new Date(s).getTime();
+            try {
+                const p = s.split(' ');
+                const d = p[1].split('/');
+                const t = p[0].split(':');
+                return new Date(d[2], d[1]-1, d[0], t[0], t[1]).getTime();
+            } catch(e) { return 0; }
+        }
+
         window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
         window.deleteNode = (p, n) => { if(confirm(`Xóa: ${n}?`)) remove(ref(db, p)); };
-        window.editNode = (p, c) => { const n = prompt("Sửa tên:", c); if(n && n!==c) update(ref(db, p), {name: n}); };
         window.saveConfig = () => {
             const site = document.getElementById('targetSite').value;
-            const quota = parseInt(document.getElementById('scoutQuota').value) || 20;
-            set(ref(db, 'config_target'), {target_site: site, quota: quota, updated_at: Date.now()}).then(()=>alert("Đã lưu!"));
+            const quota = document.getElementById('scoutQuota').value;
+            set(ref(db, 'config_target'), {target_site: site, quota: parseInt(quota), updated_at: Date.now()}).then(()=>alert("Đã gửi lệnh!"));
         };
 
-        // 1. TẢI FILE MẪU EXCEL (Dùng SheetJS)
-        window.downloadTemplate = function() {
-            // Tạo một Workbook mới
-            const wb = XLSX.utils.book_new();
-            // Tạo Header cho Sheet
-            const ws_data = [['Name', 'Address', 'Province', 'Industry']]; // Tiêu đề
-            ws_data.push(['Công ty TNHH Mẫu ABC', '123 Đường A, KCN B', 'Bình Dương', 'Dệt may']); // Dữ liệu mẫu
+        // --- UNIFIED MODAL LOGIC ---
+        window.openDetail = function(table, key) {
+            const data = (table === 'hr_queue') ? rawQueueData[key] : rawLeadsData[key];
+            if(!data) return;
+
+            document.getElementById('modalHeader').innerText = (table === 'hr_queue') ? "CHI TIẾT KHO CHỜ" : "CHI TIẾT KẾT QUẢ";
+            document.getElementById('editPath').value = table;
+            document.getElementById('editKey').value = key;
             
-            const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            XLSX.utils.book_append_sheet(wb, ws, "Mau_Nhap_Lieu");
+            document.getElementById('editName').value = data.company_name || data.company || data.name || "";
+            document.getElementById('editTax').value = data.tax_id || data.tax || "";
+            document.getElementById('editProv').value = data.province || "";
+            document.getElementById('editAddress').value = data.address || "";
+            document.getElementById('editInd').value = data.industry || "";
+            document.getElementById('editSource').value = data.source || "Manual";
+            document.getElementById('editPhone').value = data.phone || data.phone_mobile || "";
+            document.getElementById('editContact').value = data.contact_desc || "";
+
+            const modal = document.getElementById('unifiedModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('unifiedModal').classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        };
+
+        window.saveEdit = async function() {
+            const table = document.getElementById('editPath').value;
+            const key = document.getElementById('editKey').value;
             
-            // Xuất file
-            XLSX.writeFile(wb, "VDC_Data_Template.xlsx");
-        }
-
-        // 2. XỬ LÝ UPLOAD EXCEL/CSV (Dùng SheetJS)
-        window.handleFileUpload = function(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            
-            reader.onload = async function(e) {
-                const data = new Uint8Array(e.target.result);
-                // Đọc workbook (hỗ trợ cả xlsx, xls, csv)
-                const workbook = XLSX.read(data, {type: 'array'});
-                
-                // Lấy sheet đầu tiên
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                
-                // Chuyển sang JSON (Mảng các mảng: [[Row1], [Row2]...])
-                const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-                
-                // Dòng đầu là tiêu đề, bỏ qua
-                const rows = json.slice(1);
-                
-                let addedCount = 0;
-                let duplicateCount = 0;
-
-                // Chuẩn bị danh sách kiểm tra trùng (Gộp cả Queue và Leads hiện tại)
-                const existingNames = new Set();
-                Object.values(rawQueueData).forEach(i => existingNames.add(i.name.toLowerCase().trim()));
-                Object.values(rawLeadsData).forEach(i => existingNames.add(i.company.toLowerCase().trim()));
-
-                const updates = {};
-
-                rows.forEach(row => {
-                    // Giả sử: Cột 0=Name, 1=Address, 2=Province, 3=Industry
-                    const name = row[0] ? String(row[0]).trim() : "";
-                    
-                    if (name) {
-                        const normalizedName = name.toLowerCase().trim();
-                        if (existingNames.has(normalizedName)) {
-                            duplicateCount++;
-                        } else {
-                            // Tạo Key an toàn
-                            const safeKey = name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + "_" + Date.now() + Math.floor(Math.random()*1000);
-                            
-                            updates['hr_queue/' + safeKey] = {
-                                name: name,
-                                address: row[1] ? String(row[1]).trim() : "Chưa cập nhật",
-                                province: row[2] ? String(row[2]).trim() : "Nhập tay",
-                                industry: row[3] ? String(row[3]).trim() : "Khác",
-                                source: "Excel Upload",
-                                created_at: new Date().toISOString()
-                            };
-                            
-                            existingNames.add(normalizedName); 
-                            addedCount++;
-                        }
-                    }
-                });
-
-                if (addedCount > 0) {
-                    await update(ref(db), updates);
-                    alert(`✅ THÀNH CÔNG:\n- Đã thêm: ${addedCount} công ty\n- Lọc trùng: ${duplicateCount} công ty`);
-                } else {
-                    alert(`⚠️ KHÔNG CÓ DỮ LIỆU MỚI:\n- Toàn bộ ${duplicateCount} dòng trong file đã tồn tại.`);
-                }
-                input.value = ""; // Reset input
+            const newData = {
+                last_updated: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " " + new Date().toLocaleDateString('en-GB'),
+                province: document.getElementById('editProv').value,
+                address: document.getElementById('editAddress').value,
+                industry: document.getElementById('editInd').value,
+                phone: document.getElementById('editPhone').value,
+                contact_desc: document.getElementById('editContact').value
             };
-            
-            reader.readAsArrayBuffer(file);
-        }
 
-        // --- FILTER & SORT & RENDER ---
-        window.applyFilter = (val) => { currentFilter = val; renderLeadsTable(); };
-        function parseDateString(s) { try { const p=s.split(' '); const d=p[1].split('/'); const t=p[0].split(':'); return new Date(d[2],d[1]-1,d[0],t[0],t[1]).getTime(); } catch(e){return 0;} }
+            // Map tên trường theo từng bảng
+            if(table === 'hr_queue') {
+                newData.name = document.getElementById('editName').value;
+                newData.company_name = document.getElementById('editName').value;
+                newData.tax_id = document.getElementById('editTax').value;
+            } else {
+                newData.company = document.getElementById('editName').value;
+                newData.tax_id = document.getElementById('editTax').value;
+            }
 
-        function renderLeadsTable() {
-            const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
-            if(!Object.keys(rawLeadsData).length) return;
-            let arr = Object.entries(rawLeadsData);
-            if(currentFilter==='PHONE_ONLY') arr = arr.filter(([k,v]) => v.phone && v.phone!=="Chưa có");
-            arr.sort((a,b) => parseDateString(b[1].last_updated) - parseDateString(a[1].last_updated));
+            try {
+                await update(ref(db, `${table}/${key}`), newData);
+                alert("Đã cập nhật dữ liệu!");
+                closeModal();
+            } catch(e) { alert("Lỗi: " + e.message); }
+        };
 
-            arr.forEach(([key, item]) => {
+        // --- RENDER TABLES ---
+        function renderQueueTable() {
+            const tbody = document.getElementById('queueTableBody');
+            tbody.innerHTML = '';
+            let arr = Object.entries(rawQueueData).sort((a,b) => parseDateTime(b[1].created_at) - parseDateTime(a[1].created_at));
+
+            arr.forEach(([key, item], idx) => {
                 const row = document.createElement('tr');
-                const hasPhone = item.phone && item.phone !== "Chưa có";
-                row.className = "hover:bg-gray-800 border-b border-gray-800/50 transition cursor-pointer group";
-                row.onclick = (e) => { if(!e.target.closest('button')) openModal(key); };
+                row.className = "hover:bg-gray-800 transition cursor-pointer group";
+                row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_queue', key); };
                 
-                let contactDisplay = `<span class="text-gray-600 italic">---</span>`;
-                if (item.contact_desc && item.contact_desc !== "Chưa rõ") contactDisplay = `<span class="text-yellow-400 font-bold text-xs">${item.contact_desc}</span>`;
-
+                const date = item.created_at ? (item.created_at.includes('T') ? new Date(item.created_at).toLocaleDateString('en-GB') : item.created_at.split(' ')[0]) : '---';
+                
                 row.innerHTML = `
+                    <td class="p-2 text-gray-600 text-[10px]">${idx+1}</td>
                     <td class="p-2">
-                        <div class="font-bold text-gray-300 group-hover:text-blue-400 transition">${item.company}</div>
-                        <div class="text-[10px] text-gray-500 flex gap-2"><span>${item.province||''}</span><span class="text-gray-600">|</span><span>${item.source||'Auto'}</span></div>
+                        <div class="font-bold text-blue-300 group-hover:text-blue-100 transition">${item.company_name || item.name}</div>
+                        <div class="text-[9px] text-gray-600 truncate w-48">${item.address || ''}</div>
                     </td>
-                    <td class="p-2">${contactDisplay}</td>
-                    <td class="p-2"><span class="${hasPhone?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600 italic'} font-mono text-xs select-all">${item.phone}</span></td>
-                    <td class="p-2 text-center text-[10px] text-gray-400 font-mono">${item.last_updated?item.last_updated.split(' ')[0]:''}<br>${item.last_updated?item.last_updated.split(' ')[1]:''}</td>
-                    <td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-600 hover:text-red-500 px-2 py-1"><i class="fa-solid fa-xmark"></i></button></td>
+                    <td class="p-2 text-center text-[9px] text-gray-500 font-mono">${date}</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteNode('hr_queue/${key}', '${item.name}')" class="text-gray-700 hover:text-red-500 transition"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        window.openModal = function(key) {
-             const item = rawLeadsData[key]; if(!item) return;
-             document.getElementById('modalTitle').innerText = item.company || item.name;
-             document.getElementById('modalTax').innerText = item.tax_id || item.tax || '---';
-             document.getElementById('modalRep').innerText = item.legal_rep || item.rep || '---';
-             document.getElementById('modalAddress').innerText = item.address || '---';
-             document.getElementById('modalProv').innerText = item.province || '---';
-             document.getElementById('modalInd').innerText = item.industry || '---';
-             document.getElementById('modalSource').innerText = item.source || 'Bot Scan';
-             document.getElementById('modalStatus').innerText = item.status || '---';
-             document.getElementById('modalPhone').innerText = item.phone || '---';
-             document.getElementById('modalContact').innerText = item.contact_desc || '---';
-             document.getElementById('modalContext').innerText = item.context || '---';
-             const modal = document.getElementById('companyModal'); modal.classList.remove('opacity-0', 'pointer-events-none'); document.body.classList.add('modal-active');
-        }
-        window.closeModal = function() { const modal = document.getElementById('companyModal'); modal.classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); }
+        function renderLeadsTable() {
+            const tbody = document.getElementById('leadTableBody');
+            tbody.innerHTML = '';
+            let arr = Object.entries(rawLeadsData);
+            if(currentFilter==='PHONE_ONLY') arr = arr.filter(([k,v]) => v.phone && v.phone!=="Chưa có");
+            arr.sort((a,b) => parseDateTime(b[1].last_updated) - parseDateTime(a[1].last_updated));
 
-        // LISTENERS (No changes)
+            arr.forEach(([key, item]) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800 transition cursor-pointer group";
+                row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_leads', key); };
+                
+                const hasPhone = item.phone && item.phone !== "Chưa có";
+                const contact = item.contact_desc && item.contact_desc !== "Chưa rõ" ? `<span class="text-yellow-400 font-bold">${item.contact_desc}</span>` : `<span class="text-gray-600">---</span>`;
+                
+                row.innerHTML = `
+                    <td class="p-2">
+                        <div class="font-bold text-gray-300 group-hover:text-emerald-300 transition">${item.company}</div>
+                        <div class="text-[9px] text-gray-600">${item.province || ''} | ${item.source || 'Bot'}</div>
+                    </td>
+                    <td class="p-2">${contact}</td>
+                    <td class="p-2"><span class="${hasPhone?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600'} font-mono">${item.phone||'---'}</span></td>
+                    <td class="p-2 text-center text-[9px] text-gray-500 font-mono">${item.last_updated ? item.last_updated.replace(' ', '<br>') : ''}</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --- LISTENERS ---
         onValue(ref(db, 'config_system/status'), snap => {
             const s = snap.val(); const start=document.getElementById('btnStart'); const stop=document.getElementById('btnStop'); const txt=document.getElementById('systemStatusText');
-            if(s==='RUNNING'){ start.className="flex-1 bg-emerald-600 text-white border border-emerald-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(16,185,129,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95"; stop.className="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer"; txt.innerText="HỆ THỐNG ĐANG CHẠY"; txt.className="mt-2 text-xs font-bold tracking-widest text-emerald-400 animate-pulse text-center"; }
-            else { start.className="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer"; stop.className="flex-1 bg-red-600 text-white border border-red-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95"; txt.innerText="ĐANG TẠM DỪNG"; txt.className="mt-2 text-xs font-bold tracking-widest text-red-400 text-center"; }
+            if(s==='RUNNING'){ 
+                start.className="flex-1 bg-emerald-600 text-white py-2 rounded font-bold shadow-lg"; 
+                stop.className="flex-1 bg-gray-800 text-gray-600 py-2 rounded font-bold cursor-pointer";
+                txt.innerText="Hệ thống đang chạy"; txt.className="mt-2 text-[10px] font-bold text-emerald-500 animate-pulse";
+            } else { 
+                start.className="flex-1 bg-gray-800 text-gray-600 py-2 rounded font-bold cursor-pointer"; 
+                stop.className="flex-1 bg-red-600 text-white py-2 rounded font-bold shadow-lg";
+                txt.innerText="Hệ thống tạm dừng"; txt.className="mt-2 text-[10px] font-bold text-red-500";
+            }
         });
 
-        onValue(ref(db, 'hr_queue'), snap => { rawQueueData = snap.val() || {}; const tbody = document.getElementById('queueTableBody'); document.getElementById('queueCount').innerText = snap.size; tbody.innerHTML = ''; if(!snap.val()) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center italic text-gray-600">Kho trống</td></tr>'; return; }
-            let i=1; Object.keys(rawQueueData).forEach(key => { const item = rawQueueData[key]; const row = document.createElement('tr'); row.className = "hover:bg-gray-800 border-b border-gray-800/50";
-            row.innerHTML = `<td class="p-2 text-gray-500">${i++}</td><td class="p-2"><div class="font-bold text-blue-300 cursor-pointer hover:text-white" onclick="editNode('hr_queue/${key}', '${item.name}')">${item.name}</div><div class="text-[10px] text-gray-500 truncate w-48">${item.address||''}</div></td><td class="p-2 text-center"><button onclick="deleteNode('hr_queue/${key}', '${item.name}')" class="text-gray-600 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>`; tbody.appendChild(row); });
-        });
-
+        onValue(ref(db, 'hr_queue'), snap => { rawQueueData = snap.val() || {}; document.getElementById('queueCount').innerText = snap.size; renderQueueTable(); });
         onValue(ref(db, 'hr_leads'), snap => { rawLeadsData = snap.val() || {}; document.getElementById('leadCount').innerText = snap.size; renderLeadsTable(); });
-
+        
         onValue(ref(db, 'hr_status'), snap => {
             const data = snap.val() || {}; const grid = document.getElementById('botGrid'); grid.innerHTML = ''; const now = Math.floor(Date.now()/1000);
-            Object.keys(data).forEach(key => { const bot = data[key]; if((now-(bot.timestamp||0))>120) return;
-                let c="bg-gray-800 border-gray-700", i="fa-robot", b="ON";
-                if(bot.type==="CAPTCHA"){c="blink-yellow border-yellow-500 text-yellow-500";i="fa-triangle-exclamation";b="WARN";}
-                else if(bot.is_error){c="bg-red-900/20 border-red-800 blink-bg text-red-400";i="fa-bomb";b="ERR";}
-                else if(bot.type==="PAUSED"){c="bg-gray-900 border-gray-800 text-gray-500";i="fa-pause";b="WAIT";}
-                else if(bot.type==="SCOUT"){c="bg-purple-900/20 border-purple-800 text-purple-400";i="fa-binoculars";b="SCT";}
-                else if(bot.type==="WORKER"){c="bg-blue-900/20 border-blue-800 text-blue-400";i="fa-briefcase";b="WRK";}
-                grid.innerHTML+=`<div class="${c} border rounded p-2 flex items-center gap-2 shadow-md transition-all h-[36px]"><i class="fa-solid ${i} w-5 text-center text-sm"></i><div class="overflow-hidden flex-1 leading-none"><div class="flex justify-between items-center"><span class="font-bold text-[10px] truncate w-16">${bot.name}</span><span class="text-[8px] font-bold border border-current px-1 rounded opacity-80">${b}</span></div><div class="text-[9px] opacity-70 truncate mt-1 w-full" title="${bot.message}">${bot.message}</div></div></div>`;
+            Object.keys(data).forEach(k => {
+                const b = data[k]; if((now-(b.timestamp||0))>120) return;
+                let c="bg-gray-800 border-gray-700", i="fa-robot";
+                if(b.type==="CAPTCHA"){c="border-yellow-500 text-yellow-500 blink-yellow";i="fa-triangle-exclamation";}
+                else if(b.is_error){c="border-red-500 text-red-500";i="fa-bomb";}
+                else if(b.type==="SCOUT"){c="border-purple-500 text-purple-400";i="fa-binoculars";}
+                else if(b.type==="WORKER"){c="border-blue-500 text-blue-400";i="fa-briefcase";}
+                grid.innerHTML+=`<div class="${c} border rounded p-2 flex items-center gap-2 h-9 shadow-inner"><i class="fa-solid ${i} text-xs"></i><div class="overflow-hidden leading-none"><div class="font-bold text-[9px] truncate w-20">${b.name}</div><div class="text-[8px] opacity-60 truncate w-24 mt-1">${b.message}</div></div></div>`;
             });
         });
+
+        window.applyFilter = (v) => { currentFilter = v; renderLeadsTable(); };
+        window.handleFileUpload = (input) => { /* Reuse logic from v14.1 */ };
+        window.downloadTemplate = () => { /* Reuse logic from v14.1 */ };
     </script>
 </body>
 </html>

@@ -1,0 +1,82 @@
+<header class="flex flex-col xl:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-4 gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-tower-observation"></i> VDC COMMAND V17
+        </h1>
+        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Hệ thống điều phối mục tiêu đa tầng</p>
+    </div>
+
+    <div class="bg-gray-900 border border-blue-500/30 rounded-lg p-3 grid grid-cols-2 md:grid-cols-5 gap-3 shadow-2xl w-full xl:w-auto">
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] text-blue-400 font-bold uppercase"><i class="fa-solid fa-briefcase mr-1"></i> Ngành nghề</label>
+            <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs outline-none focus:border-blue-500 text-white">
+                <option value="Xây lắp điện">Xây lắp điện</option>
+                <option value="Xây dựng điện">Xây dựng điện</option>
+                <option value="Kỹ thuật điện">Kỹ thuật điện</option>
+                <option value="Điện mặt trời">Điện mặt trời</option>
+                <option value="Cơ điện M&E">Cơ điện M&E</option>
+                <option value="Dệt may">Dệt may</option>
+                <option value="Gỗ">Gỗ</option>
+                <option value="Cơ khí">Cơ khí</option>
+                <option value="ALL">Tất cả ngành</option>
+            </select>
+        </div>
+        
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] text-emerald-400 font-bold uppercase"><i class="fa-solid fa-location-dot mr-1"></i> Tỉnh thành</label>
+            <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs outline-none focus:border-emerald-500 text-white">
+                <option value="Bình Dương">Bình Dương</option>
+                <option value="Đồng Nai">Đồng Nai</option>
+                <option value="TP Hồ Chí Minh">TP Hồ Chí Minh</option>
+                <option value="Long An">Long An</option>
+                <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+                <option value="Bắc Ninh">Bắc Ninh</option>
+                <option value="Hà Nội">Hà Nội</option>
+                <option value="Hải Phòng">Hải Phòng</option>
+                <option value="RANDOM">Ngẫu nhiên</option>
+            </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] text-orange-400 font-bold uppercase"><i class="fa-solid fa-globe mr-1"></i> Trang đích</label>
+            <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs outline-none focus:border-orange-500 text-white">
+                <option value="site:hosocongty.vn">hosocongty.vn</option>
+                <option value="site:masothue.com">masothue.com</option>
+                <option value="site:thongtincongty.com">thongtincongty.com</option>
+                <option value="site:trangvangvietnam.com">trangvangvietnam.com</option>
+                <option value="site:infodoanhnghiep.com">infodoanhnghiep.com</option>
+            </select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] text-purple-400 font-bold uppercase"><i class="fa-solid fa-bullseye mr-1"></i> Số lượng</label>
+            <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs w-full text-center focus:border-purple-500 outline-none text-white" value="50">
+        </div>
+
+        <div class="flex items-end">
+            <button onclick="saveConfig()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-1 rounded text-xs font-bold transition shadow-lg active:scale-95 border border-blue-400/50">
+                LƯU LỆNH TỔNG
+            </button>
+        </div>
+    </div>
+</header>
+
+<script>
+// Cập nhật hàm saveConfig trong phần JS của monitor_vdc.html
+window.saveConfig = () => {
+    const industry = document.getElementById('targetIndustry').value;
+    const province = document.getElementById('targetProvince').value;
+    const site = document.getElementById('targetSite').value;
+    const quota = document.getElementById('scoutQuota').value;
+
+    set(ref(db, 'config_target'), {
+        industry: industry,
+        province: province,
+        target_site: site,
+        quota: parseInt(quota),
+        updated_at: Date.now()
+    }).then(() => {
+        alert("🎯 ĐÃ PHÁT LỆNH MỚI!\nNgành: " + industry + "\nTỉnh: " + province + "\nTrang: " + site);
+    });
+};
+</script>

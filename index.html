@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM v19.12 - Smart Icons</title>
+    <title>VDC CRM PRO v19.13 - Action UI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,21 +11,23 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
         .table-fixed-header thead { position: sticky; top: 0; z-index: 10; background-color: #1f2937; }
-        .modal { transition: all 0.3s; z-index: 9999; display: none; }
+        .modal { transition: all 0.2s; z-index: 9999; display: none; }
         .modal.active { display: flex; opacity: 1; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 10000; }
         .modal-container { position: relative; z-index: 10001; background: #111827; border: 1px solid #4b5563; width: 95%; max-width: 500px; border-radius: 1rem; overflow: hidden; }
+        .action-icon { transition: transform 0.2s; }
+        .action-icon:active { transform: scale(1.3); }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen p-1 font-sans text-sm">
     <div class="max-w-[1900px] mx-auto">
         <header class="flex flex-col gap-2 mb-3 border-b border-gray-800 pb-3">
             <div class="flex justify-between items-center px-2">
-                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC COMMAND v19.12</h1>
+                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC COMMAND v19.13</h1>
                 <div id="systemStatusText" class="text-[9px] font-bold uppercase py-1 px-2 rounded bg-gray-900 border border-gray-700">Connecting...</div>
             </div>
 
-            <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-6 gap-2">
+            <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-6 gap-2 shadow-xl">
                 <div class="flex flex-col gap-1">
                     <label class="text-[9px] text-blue-400 font-bold uppercase">Ngành <i class="fa-solid fa-pen-nib ml-1" onclick="openParamModal('industry')"></i></label>
                     <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none"></select>
@@ -35,8 +37,8 @@
                     <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none"></select>
                 </div>
                 <div class="flex gap-2 col-span-2 md:col-span-2">
-                    <button onclick="saveGlobalConfig('SCOUT')" id="btnScout" class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Web</button>
-                    <button onclick="saveGlobalConfig('MAPS')" id="btnMaps" class="flex-1 bg-red-700 text-white py-3 rounded-lg text-xs font-bold uppercase">Maps</button>
+                    <button onclick="saveGlobalConfig('SCOUT')" class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Web</button>
+                    <button onclick="saveGlobalConfig('MAPS')" class="flex-1 bg-red-700 text-white py-3 rounded-lg text-xs font-bold uppercase">Maps</button>
                 </div>
                 <div class="flex gap-2 col-span-2 md:col-span-2">
                     <button onclick="setSystemStatus('RUNNING')" class="flex-1 bg-emerald-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Chạy</button>
@@ -45,19 +47,24 @@
             </div>
         </header>
 
-        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-200px)]">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-210px)]">
             <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center px-4">
-                <h3 class="font-bold text-emerald-400 uppercase text-xs">Dữ liệu vợt số</h3>
-                <div class="flex gap-2">
-                    <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-950 text-[10px] border border-gray-700 rounded px-1 py-1 text-white">
-                        <option value="ALL">Tất cả</option>
-                        <option value="PHONE_ONLY">Chỉ có số</option>
-                    </select>
+                <h3 class="font-bold text-emerald-400 uppercase text-xs">Dữ liệu doanh nghiệp</h3>
+                <div class="flex gap-2 items-center">
+                    <div class="text-[10px] text-gray-500 font-bold"><span id="leadCount">0</span> Leads</div>
+                    <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-2 py-1 rounded font-bold uppercase"><i class="fa-solid fa-file-excel"></i></button>
                 </div>
             </div>
             <div class="overflow-auto flex-1 bg-gray-950">
                 <table class="w-full text-left table-fixed-header text-xs">
-                    <thead><tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800"><th class="p-2">Doanh nghiệp</th><th class="p-2 w-36 text-center">Số điện thoại</th><th class="p-2 w-24 text-center">Liên kết</th><th class="p-2 w-8 text-center">X</th></tr></thead>
+                    <thead>
+                        <tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800">
+                            <th class="p-3">Doanh nghiệp & MST</th>
+                            <th class="p-3 w-36 text-center">Gọi nhanh</th>
+                            <th class="p-3 w-32 text-center">Kết nối</th>
+                            <th class="p-3 w-10 text-center">X</th>
+                        </tr>
+                    </thead>
                     <tbody id="leadTableBody" class="divide-y divide-gray-900 text-gray-300"></tbody>
                 </table>
             </div>
@@ -67,13 +74,13 @@
     <div id="unifiedModal" class="modal fixed inset-0 items-center justify-center">
         <div class="modal-overlay" onclick="closeModal()"></div>
         <div class="modal-container">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800 shadow-lg">
-                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px]">Thông tin chi tiết</h3>
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800">
+                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px] truncate pr-4">Thông tin đầy đủ</h3>
                 <button onclick="closeModal()" class="text-white bg-red-600 px-2 py-1 rounded-md"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="modalBody" class="p-5 space-y-4 text-xs leading-relaxed max-h-[65vh] overflow-y-auto bg-gray-950"></div>
             <div class="p-4 bg-gray-900 border-t border-gray-800 text-right">
-                 <button onclick="closeModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold uppercase">Đóng</button>
+                 <button onclick="closeModal()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold uppercase shadow-lg">Xác nhận</button>
             </div>
         </div>
     </div>
@@ -84,54 +91,48 @@
 
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-        let rawLeadsData = {}; let currentFilter = 'ALL';
-
-        function getPhoneIcon(phone) {
-            if (!phone || phone === "Chưa có") return "";
-            const firstTwo = phone.substring(0, 2);
-            // Đầu số bàn thường là 02x
-            if (firstTwo === "02") return '<i class="fa-solid fa-phone-office text-orange-400 mr-1" title="Số bàn"></i>';
-            // Còn lại là di động
-            return '<i class="fa-solid fa-mobile-screen-button text-emerald-400 mr-1" title="Số di động"></i>';
-        }
+        let rawLeadsData = {};
 
         function renderLeads() {
             const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
-            let items = Object.entries(rawLeadsData);
-            if(currentFilter === 'PHONE_ONLY') items = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có");
-
-            items.sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
-                const phoneArr = v.phone ? v.phone.split(' - ') : [];
+            Object.entries(rawLeadsData).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
+                const phoneArr = v.phone && v.phone !== "Chưa có" ? v.phone.split(' - ') : [];
                 const mainPhone = phoneArr[0] || '';
                 const cleanPhone = mainPhone.replace(/[^0-9]/g, '');
-                const isMobile = !mainPhone.startsWith('02');
                 
+                // Phân loại icon
+                let phoneIconClass = "fa-solid fa-mobile-screen-button text-emerald-400";
+                let callTitle = "Gọi Di động";
+                if (mainPhone.startsWith('02')) {
+                    phoneIconClass = "fa-solid fa-phone-office text-orange-400";
+                    callTitle = "Gọi Số bàn";
+                }
+
                 const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800 transition border-b border-gray-900";
+                row.className = "hover:bg-gray-800/50 transition border-b border-gray-900 cursor-pointer";
                 row.innerHTML = `
-                    <td class="p-2 leading-tight" onclick="showDetail('${k}')">
+                    <td class="p-3 leading-tight" onclick="showDetail('${k}')">
                         <div class="font-bold text-gray-200 text-[11px]">${v.company || v.name}</div>
                         <div class="text-[10px] text-emerald-500 font-mono mt-1">${v.tax_id || '---'}</div>
                     </td>
-                    <td class="p-2 text-center">
-                        ${mainPhone ? `
-                            <div class="flex flex-col items-center gap-1">
-                                <div class="flex items-center font-mono text-[11px] font-bold text-white">
-                                    ${getPhoneIcon(mainPhone)}
-                                    <a href="tel:${cleanPhone}">${mainPhone}</a>
-                                </div>
-                                ${phoneArr.length > 1 ? `<div class="text-[9px] text-gray-500 italic">+${phoneArr.length-1} số khác</div>` : ''}
+                    <td class="p-3 text-center">
+                        ${cleanPhone ? `
+                            <div class="flex justify-center gap-6">
+                                <a href="tel:${cleanPhone}" class="action-icon text-2xl ${phoneIconClass}" title="${callTitle}">
+                                    <i class="${phoneIconClass}"></i>
+                                </a>
+                                ${phoneArr.length > 1 ? `<div class="text-[10px] text-gray-600 self-end font-bold">+${phoneArr.length-1}</div>` : ''}
                             </div>
-                        ` : '<span class="text-gray-700 italic">---</span>'}
+                        ` : '<i class="fa-solid fa-phone-slash text-gray-800 text-xl"></i>'}
                     </td>
-                    <td class="p-2">
-                        <div class="flex justify-center gap-3">
-                            ${(isMobile && cleanPhone) ? `<a href="https://zalo.me/${cleanPhone}" target="_blank" class="text-blue-400 text-xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
-                            ${cleanPhone ? `<a href="https://www.google.com/search?q=%22${cleanPhone}%22" target="_blank" class="text-gray-500 text-lg"><i class="fa-brands fa-google"></i></a>` : ''}
+                    <td class="p-3">
+                        <div class="flex justify-center gap-5">
+                            ${(!mainPhone.startsWith('02') && cleanPhone) ? `<a href="https://zalo.me/${cleanPhone}" target="_blank" class="action-icon text-blue-400 text-2xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
+                            <a href="https://www.google.com/search?q=%22${cleanPhone || v.company}%22" target="_blank" class="action-icon text-gray-500 text-xl"><i class="fa-brands fa-google"></i></a>
                         </div>
                     </td>
-                    <td class="p-2 text-center">
-                        <button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-800 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    <td class="p-3 text-center">
+                        <button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-trash-can text-lg"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -142,26 +143,25 @@
             const v = rawLeadsData[key];
             document.getElementById('modalHeader').innerText = v.company || v.name;
             document.getElementById('modalBody').innerHTML = `
-                <div class="space-y-3">
-                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
-                        <p class="text-gray-500 text-[9px] uppercase font-bold">Vị trí & Ngành</p>
-                        <p class="text-blue-300 font-bold">${v.address || v.province || '---'}</p>
-                        <p class="text-gray-500 italic mt-1 text-[10px]">${v.industry || '---'}</p>
+                <div class="space-y-4">
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-gray-500 text-[9px] uppercase font-bold mb-2">Thông tin định danh</p>
+                        <p class="text-emerald-400 font-mono font-bold text-sm">MST: ${v.tax_id || 'Chưa cập nhật'}</p>
+                        <p class="text-blue-300 mt-2 font-bold">${v.address || v.province || '---'}</p>
+                        <p class="text-gray-500 italic mt-1 text-[10px]">Ngành: ${v.industry || '---'}</p>
                     </div>
-                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800 flex justify-between">
-                        <div><p class="text-gray-500 text-[9px] uppercase font-bold">MST</p><p class="text-emerald-400 font-mono font-bold">${v.tax_id || '---'}</p></div>
-                        <div class="text-right"><p class="text-gray-500 text-[9px] uppercase font-bold">Loại số</p><p class="text-white">${v.phone?.startsWith('02') ? 'Số bàn' : 'Di động'}</p></div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-gray-500 text-[9px] uppercase font-bold mb-2">Liên hệ chi tiết</p>
+                        <p class="text-white font-bold text-base select-all tracking-wider">${v.phone || 'Chưa có số'}</p>
+                        <p class="text-yellow-400 font-bold mt-2"><i class="fa-solid fa-user-tie mr-2"></i>${v.contact_desc || 'Chưa tìm thấy người phụ trách'}</p>
                     </div>
-                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
-                        <p class="text-gray-500 text-[9px] uppercase font-bold">Số điện thoại đầy đủ</p>
-                        <p class="text-white font-bold text-sm select-all">${v.phone || '---'}</p>
-                    </div>
+                    <div class="text-[9px] text-gray-600 text-center uppercase tracking-widest">Nguồn: ${v.source}</div>
                 </div>
             `;
             document.getElementById('unifiedModal').classList.add('active');
         };
 
-        // --- CORE LOGIC SYNC ---
+        // SYNC LOGIC
         async function initSync() {
             onValue(ref(db, 'config_params'), snap => {
                 const data = snap.val(); if(!data) return;
@@ -173,11 +173,9 @@
             });
         }
         window.closeModal = () => document.getElementById('unifiedModal').classList.remove('active');
-        window.applyFilter = (v) => { currentFilter = v; renderLeads(); };
-        window.saveGlobalConfig = (mode) => { const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, quota: 200, updated_at: Date.now() }; set(ref(db, 'config_target'), cfg).then(() => alert("Đã phát lệnh!")); };
+        window.saveGlobalConfig = (mode) => { const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, quota: 200, updated_at: Date.now() }; set(ref(db, 'config_target'), cfg).then(() => alert("Phát lệnh!")); };
         window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
         onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeads(); document.getElementById('leadCount').innerText = s.size; });
-        onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = s.size; });
         onValue(ref(db, 'config_system/status'), s => { document.getElementById('systemStatusText').innerText = s.val(); });
         initSync();
     </script>

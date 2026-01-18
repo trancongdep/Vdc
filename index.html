@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM PRO v14.0 - Import Master</title>
+    <title>VDC CRM PRO v14.1 - Excel Import</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         .blink-bg { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { background-color: rgba(185, 28, 28, 0.7); } }
@@ -25,9 +26,9 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-2 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> VDC CRM v14.0
+                    <i class="fa-solid fa-file-excel"></i> VDC CRM v14.1
                 </h1>
-                <p class="text-xs text-gray-500">Import System & Anti-Duplicate</p>
+                <p class="text-xs text-gray-500">Excel Import System Ready</p>
             </div>
             <div class="flex gap-2">
                 <div class="bg-gray-900 border border-orange-500/30 rounded p-2 flex gap-2 items-center shadow-lg">
@@ -76,16 +77,16 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-280px)]">
             <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden relative">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-blue-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-boxes-stacked"></i> Kho dữ liệu thô</h3>
+                    <h3 class="font-bold text-blue-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-boxes-stacked"></i> Kho dữ liệu</h3>
                     
                     <div class="flex gap-2">
-                        <button onclick="downloadTemplate()" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] px-2 py-1 rounded border border-gray-600" title="Tải file mẫu CSV">
-                            <i class="fa-solid fa-download"></i> Mẫu
+                        <button onclick="downloadTemplate()" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] px-2 py-1 rounded border border-gray-600 flex items-center gap-1" title="Tải mẫu Excel">
+                            <i class="fa-solid fa-file-csv"></i> Mẫu
                         </button>
-                        <label for="fileInput" class="bg-blue-700 hover:bg-blue-600 text-white text-[10px] px-2 py-1 rounded border border-blue-600 cursor-pointer flex items-center gap-1 shadow-lg active:scale-95" title="Upload dữ liệu">
-                            <i class="fa-solid fa-upload"></i> Upload
+                        <label for="fileInput" class="bg-green-700 hover:bg-green-600 text-white text-[10px] px-2 py-1 rounded border border-green-600 cursor-pointer flex items-center gap-1 shadow-lg active:scale-95" title="Upload Excel/CSV">
+                            <i class="fa-solid fa-file-import"></i> Nhập Excel
                         </label>
-                        <input type="file" id="fileInput" accept=".csv" class="hidden" onchange="handleFileUpload(this)">
+                        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleFileUpload(this)">
                     </div>
                 </div>
 
@@ -197,30 +198,47 @@
             set(ref(db, 'config_target'), {target_site: site, quota: quota, updated_at: Date.now()}).then(()=>alert("Đã lưu!"));
         };
 
-        // 1. TẢI FILE MẪU CSV
+        // 1. TẢI FILE MẪU EXCEL (Dùng SheetJS)
         window.downloadTemplate = function() {
-            const csvContent = "data:text/csv;charset=utf-8,Name,Address,Province,Industry\nCông ty TNHH ABC,Số 1 Đường A,Bình Dương,Dệt may\n";
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "vdc_data_template.csv");
-            document.body.appendChild(link);
-            link.click();
+            // Tạo một Workbook mới
+            const wb = XLSX.utils.book_new();
+            // Tạo Header cho Sheet
+            const ws_data = [['Name', 'Address', 'Province', 'Industry']]; // Tiêu đề
+            ws_data.push(['Công ty TNHH Mẫu ABC', '123 Đường A, KCN B', 'Bình Dương', 'Dệt may']); // Dữ liệu mẫu
+            
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, "Mau_Nhap_Lieu");
+            
+            // Xuất file
+            XLSX.writeFile(wb, "VDC_Data_Template.xlsx");
         }
 
-        // 2. XỬ LÝ UPLOAD & LỌC TRÙNG
+        // 2. XỬ LÝ UPLOAD EXCEL/CSV (Dùng SheetJS)
         window.handleFileUpload = function(input) {
             const file = input.files[0];
             if (!file) return;
 
             const reader = new FileReader();
+            
             reader.onload = async function(e) {
-                const text = e.target.result;
-                const rows = text.split("\n").slice(1); // Bỏ header
+                const data = new Uint8Array(e.target.result);
+                // Đọc workbook (hỗ trợ cả xlsx, xls, csv)
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                // Lấy sheet đầu tiên
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Chuyển sang JSON (Mảng các mảng: [[Row1], [Row2]...])
+                const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                
+                // Dòng đầu là tiêu đề, bỏ qua
+                const rows = json.slice(1);
+                
                 let addedCount = 0;
                 let duplicateCount = 0;
 
-                // Chuẩn bị danh sách kiểm tra trùng (Gộp cả Queue và Leads)
+                // Chuẩn bị danh sách kiểm tra trùng (Gộp cả Queue và Leads hiện tại)
                 const existingNames = new Set();
                 Object.values(rawQueueData).forEach(i => existingNames.add(i.name.toLowerCase().trim()));
                 Object.values(rawLeadsData).forEach(i => existingNames.add(i.company.toLowerCase().trim()));
@@ -228,40 +246,42 @@
                 const updates = {};
 
                 rows.forEach(row => {
-                    const cols = row.split(","); // Cắt CSV đơn giản
-                    if (cols.length >= 1) {
-                        const name = cols[0].trim();
-                        if (name) {
-                            const normalizedName = name.toLowerCase().trim();
-                            if (existingNames.has(normalizedName)) {
-                                duplicateCount++;
-                            } else {
-                                // Tạo Key an toàn
-                                const safeKey = name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + "_" + Date.now();
-                                updates['hr_queue/' + safeKey] = {
-                                    name: name,
-                                    address: cols[1] ? cols[1].trim() : "",
-                                    province: cols[2] ? cols[2].trim() : "Nhập tay",
-                                    industry: cols[3] ? cols[3].trim() : "Khác",
-                                    source: "User Upload",
-                                    created_at: new Date().toISOString()
-                                };
-                                existingNames.add(normalizedName); // Thêm vào set tạm để check dòng tiếp theo trong file
-                                addedCount++;
-                            }
+                    // Giả sử: Cột 0=Name, 1=Address, 2=Province, 3=Industry
+                    const name = row[0] ? String(row[0]).trim() : "";
+                    
+                    if (name) {
+                        const normalizedName = name.toLowerCase().trim();
+                        if (existingNames.has(normalizedName)) {
+                            duplicateCount++;
+                        } else {
+                            // Tạo Key an toàn
+                            const safeKey = name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + "_" + Date.now() + Math.floor(Math.random()*1000);
+                            
+                            updates['hr_queue/' + safeKey] = {
+                                name: name,
+                                address: row[1] ? String(row[1]).trim() : "Chưa cập nhật",
+                                province: row[2] ? String(row[2]).trim() : "Nhập tay",
+                                industry: row[3] ? String(row[3]).trim() : "Khác",
+                                source: "Excel Upload",
+                                created_at: new Date().toISOString()
+                            };
+                            
+                            existingNames.add(normalizedName); 
+                            addedCount++;
                         }
                     }
                 });
 
                 if (addedCount > 0) {
                     await update(ref(db), updates);
-                    alert(`✅ Đã thêm: ${addedCount} công ty.\n🗑️ Đã lọc trùng: ${duplicateCount} công ty.`);
+                    alert(`✅ THÀNH CÔNG:\n- Đã thêm: ${addedCount} công ty\n- Lọc trùng: ${duplicateCount} công ty`);
                 } else {
-                    alert(`⚠️ Không có dữ liệu mới. Tất cả ${duplicateCount} dòng đều bị trùng!`);
+                    alert(`⚠️ KHÔNG CÓ DỮ LIỆU MỚI:\n- Toàn bộ ${duplicateCount} dòng trong file đã tồn tại.`);
                 }
                 input.value = ""; // Reset input
             };
-            reader.readAsText(file);
+            
+            reader.readAsArrayBuffer(file);
         }
 
         // --- FILTER & SORT & RENDER ---
@@ -315,7 +335,7 @@
         }
         window.closeModal = function() { const modal = document.getElementById('companyModal'); modal.classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); }
 
-        // LISTENERS
+        // LISTENERS (No changes)
         onValue(ref(db, 'config_system/status'), snap => {
             const s = snap.val(); const start=document.getElementById('btnStart'); const stop=document.getElementById('btnStop'); const txt=document.getElementById('systemStatusText');
             if(s==='RUNNING'){ start.className="flex-1 bg-emerald-600 text-white border border-emerald-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(16,185,129,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95"; stop.className="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer"; txt.innerText="HỆ THỐNG ĐANG CHẠY"; txt.className="mt-2 text-xs font-bold tracking-widest text-emerald-400 animate-pulse text-center"; }

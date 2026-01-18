@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM PRO v13.2</title>
+    <title>VDC CRM PRO v14.0 - Import Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -15,7 +15,6 @@
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
         .table-fixed-header thead { position: sticky; top: 0; z-index: 10; background-color: #1f2937; }
-        
         .modal { transition: opacity 0.25s ease; }
         body.modal-active { overflow-x: hidden; overflow-y: hidden !important; }
     </style>
@@ -26,9 +25,9 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-2 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-filter"></i> VDC CRM v13.2
+                    <i class="fa-solid fa-cloud-arrow-up"></i> VDC CRM v14.0
                 </h1>
-                <p class="text-xs text-gray-500">Filter & Sorting System</p>
+                <p class="text-xs text-gray-500">Import System & Anti-Duplicate</p>
             </div>
             <div class="flex gap-2">
                 <div class="bg-gray-900 border border-orange-500/30 rounded p-2 flex gap-2 items-center shadow-lg">
@@ -75,10 +74,21 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-280px)]">
-            <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden">
-                <div class="p-3 bg-gray-800 border-b border-gray-700">
-                    <h3 class="font-bold text-blue-400 text-xs uppercase tracking-wider"><i class="fa-solid fa-boxes-stacked"></i> Dữ liệu thô</h3>
+            <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden relative">
+                <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+                    <h3 class="font-bold text-blue-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-boxes-stacked"></i> Kho dữ liệu thô</h3>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="downloadTemplate()" class="bg-gray-700 hover:bg-gray-600 text-white text-[10px] px-2 py-1 rounded border border-gray-600" title="Tải file mẫu CSV">
+                            <i class="fa-solid fa-download"></i> Mẫu
+                        </button>
+                        <label for="fileInput" class="bg-blue-700 hover:bg-blue-600 text-white text-[10px] px-2 py-1 rounded border border-blue-600 cursor-pointer flex items-center gap-1 shadow-lg active:scale-95" title="Upload dữ liệu">
+                            <i class="fa-solid fa-upload"></i> Upload
+                        </label>
+                        <input type="file" id="fileInput" accept=".csv" class="hidden" onchange="handleFileUpload(this)">
+                    </div>
                 </div>
+
                 <div class="overflow-auto flex-1 bg-gray-950">
                     <table class="w-full text-left border-collapse table-fixed-header">
                         <thead>
@@ -96,7 +106,6 @@
             <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
                     <h3 class="font-bold text-emerald-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-check-double"></i> Kết quả (Sale)</h3>
-                    
                     <div class="flex items-center gap-2">
                         <label class="text-[10px] text-gray-400 font-bold uppercase"><i class="fa-solid fa-filter"></i> Lọc:</label>
                         <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-900 border border-gray-600 text-xs rounded px-2 py-1 outline-none focus:border-emerald-500 text-white">
@@ -105,15 +114,14 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="overflow-auto flex-1 bg-gray-950">
                     <table class="w-full text-left border-collapse table-fixed-header">
                         <thead>
                             <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700 bg-gray-800">
-                                <th class="p-2">Tên Công ty (Click xem chi tiết)</th>
+                                <th class="p-2">Tên Công ty</th>
                                 <th class="p-2 w-48 text-yellow-500 font-bold">Người liên hệ</th>
                                 <th class="p-2 w-32">Phone</th>
-                                <th class="p-2 w-24 text-center">Cập nhật lúc</th>
+                                <th class="p-2 w-24 text-center">Update</th>
                                 <th class="p-2 w-16 text-center">Xóa</th>
                             </tr>
                         </thead>
@@ -160,7 +168,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU",
@@ -175,56 +183,123 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- GLOBAL STATE ---
-        let rawLeadsData = {}; // Lưu trữ dữ liệu gốc để lọc
-        let currentFilter = 'ALL'; // Trạng thái bộ lọc
+        // --- GLOBAL & IMPORT/EXPORT LOGIC ---
+        let rawQueueData = {};
+        let rawLeadsData = {};
+        let currentFilter = 'ALL';
 
-        // --- HELPER FUNC: PARSE DATE ---
-        function parseDateString(dateStr) {
-            // Format: "HH:MM DD/MM/YYYY" (ví dụ: "14:30 18/01/2026")
-            if (!dateStr) return 0;
-            try {
-                const parts = dateStr.split(' ');
-                if (parts.length < 2) return 0;
-                
-                const timeParts = parts[0].split(':');
-                const dateParts = parts[1].split('/');
-                
-                // Tạo Date Object (Month bắt đầu từ 0)
-                const d = new Date(
-                    dateParts[2], // Year
-                    dateParts[1] - 1, // Month
-                    dateParts[0], // Day
-                    timeParts[0], // Hour
-                    timeParts[1] // Minute
-                );
-                return d.getTime();
-            } catch (e) { return 0; }
-        }
-
-        // --- GLOBAL ACTIONS ---
-        window.setSystemStatus = function(status) { set(ref(db, 'config_system/status'), status); }
-        window.deleteNode = function(path, name) { if(confirm(`Xóa:\n${name}?`)) remove(ref(db, path)); }
-        window.editNode = function(path, currentName) {
-            const newName = prompt("Sửa tên:", currentName);
-            if(newName && newName !== currentName) update(ref(db, path), { name: newName });
-        }
-        window.saveConfig = function() {
+        window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
+        window.deleteNode = (p, n) => { if(confirm(`Xóa: ${n}?`)) remove(ref(db, p)); };
+        window.editNode = (p, c) => { const n = prompt("Sửa tên:", c); if(n && n!==c) update(ref(db, p), {name: n}); };
+        window.saveConfig = () => {
             const site = document.getElementById('targetSite').value;
             const quota = parseInt(document.getElementById('scoutQuota').value) || 20;
-            set(ref(db, 'config_target'), { target_site: site, quota: quota, updated_at: Date.now() }).then(() => alert("Đã lưu!"));
-        }
-        
-        // --- FILTER ACTION ---
-        window.applyFilter = function(filterValue) {
-            currentFilter = filterValue;
-            renderLeadsTable(); // Vẽ lại bảng với bộ lọc mới
+            set(ref(db, 'config_target'), {target_site: site, quota: quota, updated_at: Date.now()}).then(()=>alert("Đã lưu!"));
+        };
+
+        // 1. TẢI FILE MẪU CSV
+        window.downloadTemplate = function() {
+            const csvContent = "data:text/csv;charset=utf-8,Name,Address,Province,Industry\nCông ty TNHH ABC,Số 1 Đường A,Bình Dương,Dệt may\n";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "vdc_data_template.csv");
+            document.body.appendChild(link);
+            link.click();
         }
 
-        // --- MODAL ---
+        // 2. XỬ LÝ UPLOAD & LỌC TRÙNG
+        window.handleFileUpload = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const rows = text.split("\n").slice(1); // Bỏ header
+                let addedCount = 0;
+                let duplicateCount = 0;
+
+                // Chuẩn bị danh sách kiểm tra trùng (Gộp cả Queue và Leads)
+                const existingNames = new Set();
+                Object.values(rawQueueData).forEach(i => existingNames.add(i.name.toLowerCase().trim()));
+                Object.values(rawLeadsData).forEach(i => existingNames.add(i.company.toLowerCase().trim()));
+
+                const updates = {};
+
+                rows.forEach(row => {
+                    const cols = row.split(","); // Cắt CSV đơn giản
+                    if (cols.length >= 1) {
+                        const name = cols[0].trim();
+                        if (name) {
+                            const normalizedName = name.toLowerCase().trim();
+                            if (existingNames.has(normalizedName)) {
+                                duplicateCount++;
+                            } else {
+                                // Tạo Key an toàn
+                                const safeKey = name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + "_" + Date.now();
+                                updates['hr_queue/' + safeKey] = {
+                                    name: name,
+                                    address: cols[1] ? cols[1].trim() : "",
+                                    province: cols[2] ? cols[2].trim() : "Nhập tay",
+                                    industry: cols[3] ? cols[3].trim() : "Khác",
+                                    source: "User Upload",
+                                    created_at: new Date().toISOString()
+                                };
+                                existingNames.add(normalizedName); // Thêm vào set tạm để check dòng tiếp theo trong file
+                                addedCount++;
+                            }
+                        }
+                    }
+                });
+
+                if (addedCount > 0) {
+                    await update(ref(db), updates);
+                    alert(`✅ Đã thêm: ${addedCount} công ty.\n🗑️ Đã lọc trùng: ${duplicateCount} công ty.`);
+                } else {
+                    alert(`⚠️ Không có dữ liệu mới. Tất cả ${duplicateCount} dòng đều bị trùng!`);
+                }
+                input.value = ""; // Reset input
+            };
+            reader.readAsText(file);
+        }
+
+        // --- FILTER & SORT & RENDER ---
+        window.applyFilter = (val) => { currentFilter = val; renderLeadsTable(); };
+        function parseDateString(s) { try { const p=s.split(' '); const d=p[1].split('/'); const t=p[0].split(':'); return new Date(d[2],d[1]-1,d[0],t[0],t[1]).getTime(); } catch(e){return 0;} }
+
+        function renderLeadsTable() {
+            const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
+            if(!Object.keys(rawLeadsData).length) return;
+            let arr = Object.entries(rawLeadsData);
+            if(currentFilter==='PHONE_ONLY') arr = arr.filter(([k,v]) => v.phone && v.phone!=="Chưa có");
+            arr.sort((a,b) => parseDateString(b[1].last_updated) - parseDateString(a[1].last_updated));
+
+            arr.forEach(([key, item]) => {
+                const row = document.createElement('tr');
+                const hasPhone = item.phone && item.phone !== "Chưa có";
+                row.className = "hover:bg-gray-800 border-b border-gray-800/50 transition cursor-pointer group";
+                row.onclick = (e) => { if(!e.target.closest('button')) openModal(key); };
+                
+                let contactDisplay = `<span class="text-gray-600 italic">---</span>`;
+                if (item.contact_desc && item.contact_desc !== "Chưa rõ") contactDisplay = `<span class="text-yellow-400 font-bold text-xs">${item.contact_desc}</span>`;
+
+                row.innerHTML = `
+                    <td class="p-2">
+                        <div class="font-bold text-gray-300 group-hover:text-blue-400 transition">${item.company}</div>
+                        <div class="text-[10px] text-gray-500 flex gap-2"><span>${item.province||''}</span><span class="text-gray-600">|</span><span>${item.source||'Auto'}</span></div>
+                    </td>
+                    <td class="p-2">${contactDisplay}</td>
+                    <td class="p-2"><span class="${hasPhone?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600 italic'} font-mono text-xs select-all">${item.phone}</span></td>
+                    <td class="p-2 text-center text-[10px] text-gray-400 font-mono">${item.last_updated?item.last_updated.split(' ')[0]:''}<br>${item.last_updated?item.last_updated.split(' ')[1]:''}</td>
+                    <td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-600 hover:text-red-500 px-2 py-1"><i class="fa-solid fa-xmark"></i></button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         window.openModal = function(key) {
-             const item = rawLeadsData[key];
-             if(!item) return;
+             const item = rawLeadsData[key]; if(!item) return;
              document.getElementById('modalTitle').innerText = item.company || item.name;
              document.getElementById('modalTax').innerText = item.tax_id || item.tax || '---';
              document.getElementById('modalRep').innerText = item.legal_rep || item.rep || '---';
@@ -236,164 +311,34 @@
              document.getElementById('modalPhone').innerText = item.phone || '---';
              document.getElementById('modalContact').innerText = item.contact_desc || '---';
              document.getElementById('modalContext').innerText = item.context || '---';
-
-             const modal = document.getElementById('companyModal');
-             modal.classList.remove('opacity-0', 'pointer-events-none');
-             document.body.classList.add('modal-active');
+             const modal = document.getElementById('companyModal'); modal.classList.remove('opacity-0', 'pointer-events-none'); document.body.classList.add('modal-active');
         }
-        window.closeModal = function() {
-            const modal = document.getElementById('companyModal');
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            document.body.classList.remove('modal-active');
-        }
+        window.closeModal = function() { const modal = document.getElementById('companyModal'); modal.classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); }
 
-        // --- 1. SYSTEM STATUS ---
+        // LISTENERS
         onValue(ref(db, 'config_system/status'), snap => {
-            const status = snap.val();
-            const btnStart = document.getElementById('btnStart');
-            const btnStop = document.getElementById('btnStop');
-            const txt = document.getElementById('systemStatusText');
-
-            if (status === 'RUNNING') {
-                btnStart.className = "flex-1 bg-emerald-600 text-white border border-emerald-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(16,185,129,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95";
-                btnStop.className = "flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer";
-                txt.innerText = "HỆ THỐNG ĐANG CHẠY";
-                txt.className = "mt-2 text-xs font-bold tracking-widest text-emerald-400 animate-pulse text-center";
-            } else {
-                btnStart.className = "flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer";
-                btnStop.className = "flex-1 bg-red-600 text-white border border-red-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95";
-                txt.innerText = "ĐANG TẠM DỪNG";
-                txt.className = "mt-2 text-xs font-bold tracking-widest text-red-400 text-center";
-            }
+            const s = snap.val(); const start=document.getElementById('btnStart'); const stop=document.getElementById('btnStop'); const txt=document.getElementById('systemStatusText');
+            if(s==='RUNNING'){ start.className="flex-1 bg-emerald-600 text-white border border-emerald-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(16,185,129,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95"; stop.className="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer"; txt.innerText="HỆ THỐNG ĐANG CHẠY"; txt.className="mt-2 text-xs font-bold tracking-widest text-emerald-400 animate-pulse text-center"; }
+            else { start.className="flex-1 bg-gray-800 text-gray-500 border border-gray-700 py-2 rounded font-bold opacity-50 hover:opacity-100 transition flex flex-col items-center justify-center gap-1 cursor-pointer"; stop.className="flex-1 bg-red-600 text-white border border-red-500 py-2 rounded font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] flex flex-col items-center justify-center gap-1 active:scale-95"; txt.innerText="ĐANG TẠM DỪNG"; txt.className="mt-2 text-xs font-bold tracking-widest text-red-400 text-center"; }
         });
 
-        // --- 2. QUEUE RENDER ---
-        onValue(ref(db, 'hr_queue'), snap => {
-            const data = snap.val();
-            const tbody = document.getElementById('queueTableBody');
-            document.getElementById('queueCount').innerText = snap.size;
-            tbody.innerHTML = '';
-            if(!data) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center italic text-gray-600">Kho trống</td></tr>'; return; }
-            
-            let i = 1;
-            Object.keys(data).forEach(key => {
-                const item = data[key];
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800 border-b border-gray-800/50";
-                row.innerHTML = `
-                    <td class="p-2 text-gray-500">${i++}</td>
-                    <td class="p-2">
-                        <div class="font-bold text-blue-300 cursor-pointer hover:text-white" onclick="editNode('hr_queue/${key}', '${item.name}')">${item.name}</div>
-                        <div class="text-[10px] text-gray-500 truncate w-48">${item.address || ''}</div>
-                    </td>
-                    <td class="p-2 text-center">
-                        <button onclick="deleteNode('hr_queue/${key}', '${item.name}')" class="text-gray-600 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+        onValue(ref(db, 'hr_queue'), snap => { rawQueueData = snap.val() || {}; const tbody = document.getElementById('queueTableBody'); document.getElementById('queueCount').innerText = snap.size; tbody.innerHTML = ''; if(!snap.val()) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center italic text-gray-600">Kho trống</td></tr>'; return; }
+            let i=1; Object.keys(rawQueueData).forEach(key => { const item = rawQueueData[key]; const row = document.createElement('tr'); row.className = "hover:bg-gray-800 border-b border-gray-800/50";
+            row.innerHTML = `<td class="p-2 text-gray-500">${i++}</td><td class="p-2"><div class="font-bold text-blue-300 cursor-pointer hover:text-white" onclick="editNode('hr_queue/${key}', '${item.name}')">${item.name}</div><div class="text-[10px] text-gray-500 truncate w-48">${item.address||''}</div></td><td class="p-2 text-center"><button onclick="deleteNode('hr_queue/${key}', '${item.name}')" class="text-gray-600 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>`; tbody.appendChild(row); });
         });
 
-        // --- 3. LEADS RENDER (WITH FILTER & SORT LOGIC) ---
-        onValue(ref(db, 'hr_leads'), snap => {
-            rawLeadsData = snap.val() || {}; // Lưu dữ liệu gốc
-            document.getElementById('leadCount').innerText = snap.size;
-            renderLeadsTable(); // Vẽ lại bảng
-        });
+        onValue(ref(db, 'hr_leads'), snap => { rawLeadsData = snap.val() || {}; document.getElementById('leadCount').innerText = snap.size; renderLeadsTable(); });
 
-        function renderLeadsTable() {
-            const tbody = document.getElementById('leadTableBody');
-            tbody.innerHTML = '';
-            
-            if (Object.keys(rawLeadsData).length === 0) return;
-
-            // 1. Convert Object to Array
-            let leadsArr = Object.entries(rawLeadsData);
-
-            // 2. FILTER LOGIC
-            if (currentFilter === 'PHONE_ONLY') {
-                leadsArr = leadsArr.filter(([key, item]) => {
-                    return item.phone && item.phone !== "Chưa có" && item.phone !== "";
-                });
-            }
-
-            // 3. SORT LOGIC (Newest First)
-            leadsArr.sort((a, b) => {
-                const timeA = parseDateString(a[1].last_updated);
-                const timeB = parseDateString(b[1].last_updated);
-                return timeB - timeA; // Giảm dần (Mới nhất lên đầu)
-            });
-
-            // 4. RENDER
-            leadsArr.forEach(([key, item]) => {
-                const row = document.createElement('tr');
-                const hasPhone = item.phone && item.phone !== "Chưa có";
-                row.className = "hover:bg-gray-800 border-b border-gray-800/50 transition cursor-pointer group";
-                row.onclick = (e) => { if(!e.target.closest('button')) openModal(key); };
-
-                let contactDisplay = `<span class="text-gray-600 italic">---</span>`;
-                if (item.contact_desc && item.contact_desc !== "Chưa rõ") {
-                    contactDisplay = `<span class="text-yellow-400 font-bold text-xs">${item.contact_desc}</span>`;
-                }
-
-                row.innerHTML = `
-                    <td class="p-2">
-                        <div class="font-bold text-gray-300 group-hover:text-blue-400 transition">${item.company}</div>
-                        <div class="text-[10px] text-gray-500 flex gap-2">
-                            <span>${item.province || ''}</span>
-                            <span class="text-gray-600">|</span>
-                            <span>${item.source || 'Auto'}</span>
-                        </div>
-                    </td>
-                    <td class="p-2">${contactDisplay}</td>
-                    <td class="p-2">
-                        <span class="${hasPhone ? 'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded' : 'text-gray-600 italic'} font-mono text-xs select-all">${item.phone}</span>
-                    </td>
-                    <td class="p-2 text-center text-[10px] text-gray-400 font-mono">
-                        ${item.last_updated ? item.last_updated.split(' ')[0] : ''}<br>
-                        ${item.last_updated ? item.last_updated.split(' ')[1] : ''}
-                    </td>
-                    <td class="p-2 text-center">
-                        <button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-600 hover:text-red-500 px-2 py-1"><i class="fa-solid fa-xmark"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // 4. Bot Status
         onValue(ref(db, 'hr_status'), snap => {
-            const data = snap.val() || {};
-            const grid = document.getElementById('botGrid');
-            grid.innerHTML = '';
-            const now = Math.floor(Date.now() / 1000);
-
-            Object.keys(data).forEach(key => {
-                const bot = data[key];
-                if ((now - (bot.timestamp || 0)) > 120) return;
-                
-                let statusClass = "bg-gray-800 border-gray-700";
-                let icon = "fa-robot";
-                let badge = "ON";
-
-                if (bot.type === "CAPTCHA") { statusClass = "blink-yellow border-yellow-500 text-yellow-500"; icon = "fa-triangle-exclamation"; badge = "WARN"; }
-                else if(bot.is_error) { statusClass = "bg-red-900/20 border-red-800 blink-bg text-red-400"; icon = "fa-bomb"; badge = "ERR"; }
-                else if(bot.type === "PAUSED") { statusClass = "bg-gray-900 border-gray-800 text-gray-500"; icon = "fa-pause"; badge = "WAIT"; }
-                else if(bot.type === "SCOUT") { statusClass = "bg-purple-900/20 border-purple-800 text-purple-400"; icon = "fa-binoculars"; badge = "SCT"; }
-                else if(bot.type === "WORKER") { statusClass = "bg-blue-900/20 border-blue-800 text-blue-400"; icon = "fa-briefcase"; badge = "WRK"; }
-
-                grid.innerHTML += `
-                    <div class="${statusClass} border rounded p-2 flex items-center gap-2 shadow-md transition-all h-[36px]">
-                        <i class="fa-solid ${icon} w-5 text-center text-sm"></i>
-                        <div class="overflow-hidden flex-1 leading-none">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-[10px] truncate w-16">${bot.name}</span>
-                                <span class="text-[8px] font-bold border border-current px-1 rounded opacity-80">${badge}</span>
-                            </div>
-                            <div class="text-[9px] opacity-70 truncate mt-1 w-full" title="${bot.message}">${bot.message}</div>
-                        </div>
-                    </div>
-                `;
+            const data = snap.val() || {}; const grid = document.getElementById('botGrid'); grid.innerHTML = ''; const now = Math.floor(Date.now()/1000);
+            Object.keys(data).forEach(key => { const bot = data[key]; if((now-(bot.timestamp||0))>120) return;
+                let c="bg-gray-800 border-gray-700", i="fa-robot", b="ON";
+                if(bot.type==="CAPTCHA"){c="blink-yellow border-yellow-500 text-yellow-500";i="fa-triangle-exclamation";b="WARN";}
+                else if(bot.is_error){c="bg-red-900/20 border-red-800 blink-bg text-red-400";i="fa-bomb";b="ERR";}
+                else if(bot.type==="PAUSED"){c="bg-gray-900 border-gray-800 text-gray-500";i="fa-pause";b="WAIT";}
+                else if(bot.type==="SCOUT"){c="bg-purple-900/20 border-purple-800 text-purple-400";i="fa-binoculars";b="SCT";}
+                else if(bot.type==="WORKER"){c="bg-blue-900/20 border-blue-800 text-blue-400";i="fa-briefcase";b="WRK";}
+                grid.innerHTML+=`<div class="${c} border rounded p-2 flex items-center gap-2 shadow-md transition-all h-[36px]"><i class="fa-solid ${i} w-5 text-center text-sm"></i><div class="overflow-hidden flex-1 leading-none"><div class="flex justify-between items-center"><span class="font-bold text-[10px] truncate w-16">${bot.name}</span><span class="text-[8px] font-bold border border-current px-1 rounded opacity-80">${b}</span></div><div class="text-[9px] opacity-70 truncate mt-1 w-full" title="${bot.message}">${bot.message}</div></div></div>`;
             });
         });
     </script>

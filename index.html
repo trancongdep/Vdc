@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM PRO v13.1</title>
+    <title>VDC CRM PRO v13.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,7 +16,6 @@
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
         .table-fixed-header thead { position: sticky; top: 0; z-index: 10; background-color: #1f2937; }
         
-        /* Modal Animation */
         .modal { transition: opacity 0.25s ease; }
         body.modal-active { overflow-x: hidden; overflow-y: hidden !important; }
     </style>
@@ -27,9 +26,9 @@
         <header class="flex flex-col md:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-2 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-circle-nodes"></i> VDC CRM v13.1
+                    <i class="fa-solid fa-filter"></i> VDC CRM v13.2
                 </h1>
-                <p class="text-xs text-gray-500">Contact Intelligence & Detail View</p>
+                <p class="text-xs text-gray-500">Filter & Sorting System</p>
             </div>
             <div class="flex gap-2">
                 <div class="bg-gray-900 border border-orange-500/30 rounded p-2 flex gap-2 items-center shadow-lg">
@@ -85,7 +84,7 @@
                         <thead>
                             <tr class="text-[10px] uppercase text-gray-400 border-b border-gray-700 bg-gray-800">
                                 <th class="p-2 w-8">#</th>
-                                <th class="p-2">Công ty</th>
+                                <th class="p-2">Tên Công ty / Địa chỉ</th>
                                 <th class="p-2 w-10 text-center">X</th>
                             </tr>
                         </thead>
@@ -95,9 +94,18 @@
             </div>
 
             <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col shadow-xl overflow-hidden">
-                <div class="p-3 bg-gray-800 border-b border-gray-700">
-                    <h3 class="font-bold text-emerald-400 text-xs uppercase tracking-wider"><i class="fa-solid fa-check-double"></i> Kết quả (Sale)</h3>
+                <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+                    <h3 class="font-bold text-emerald-400 text-xs uppercase tracking-wider pl-1"><i class="fa-solid fa-check-double"></i> Kết quả (Sale)</h3>
+                    
+                    <div class="flex items-center gap-2">
+                        <label class="text-[10px] text-gray-400 font-bold uppercase"><i class="fa-solid fa-filter"></i> Lọc:</label>
+                        <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-900 border border-gray-600 text-xs rounded px-2 py-1 outline-none focus:border-emerald-500 text-white">
+                            <option value="ALL">Xem Tất Cả</option>
+                            <option value="PHONE_ONLY">Chỉ xem có SĐT</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div class="overflow-auto flex-1 bg-gray-950">
                     <table class="w-full text-left border-collapse table-fixed-header">
                         <thead>
@@ -105,7 +113,8 @@
                                 <th class="p-2">Tên Công ty (Click xem chi tiết)</th>
                                 <th class="p-2 w-48 text-yellow-500 font-bold">Người liên hệ</th>
                                 <th class="p-2 w-32">Phone</th>
-                                <th class="p-2 w-20 text-center">Xóa</th>
+                                <th class="p-2 w-24 text-center">Cập nhật lúc</th>
+                                <th class="p-2 w-16 text-center">Xóa</th>
                             </tr>
                         </thead>
                         <tbody id="leadTableBody" class="text-xs divide-y divide-gray-800"></tbody>
@@ -119,62 +128,27 @@
         <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-90" onclick="closeModal()"></div>
         <div class="modal-container bg-gray-800 w-11/12 md:max-w-md mx-auto rounded shadow-2xl z-50 overflow-y-auto border border-gray-700">
             <div class="modal-header flex justify-between items-center px-4 py-3 border-b border-gray-700 bg-gray-900">
-                <h3 class="text-lg font-bold text-blue-400 truncate pr-4" id="modalTitle">Chi tiết công ty</h3>
-                <div class="cursor-pointer z-50 text-gray-400 hover:text-white" onclick="closeModal()">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </div>
+                <h3 class="text-lg font-bold text-blue-400 truncate pr-4" id="modalTitle">Chi tiết</h3>
+                <div class="cursor-pointer z-50 text-gray-400 hover:text-white" onclick="closeModal()"><i class="fa-solid fa-xmark text-xl"></i></div>
             </div>
-            <div class="modal-content py-4 text-left px-6">
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[10px] uppercase text-gray-500 font-bold">Mã số thuế</label>
-                        <div id="modalTax" class="font-mono text-emerald-400 font-bold text-lg select-all">...</div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] uppercase text-gray-500 font-bold">Người đại diện</label>
-                        <div id="modalRep" class="text-gray-200">...</div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] uppercase text-gray-500 font-bold">Địa chỉ</label>
-                        <div id="modalAddress" class="text-gray-300 text-sm">...</div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 font-bold">Tỉnh thành</label>
-                            <div id="modalProv" class="text-gray-300 text-sm">...</div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 font-bold">Ngành nghề</label>
-                            <div id="modalInd" class="text-gray-300 text-sm">...</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 font-bold">Nguồn dữ liệu</label>
-                            <div id="modalSource" class="text-xs text-blue-300 bg-blue-900/20 inline-block px-2 py-1 rounded">...</div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 font-bold">Trạng thái</label>
-                            <div id="modalStatus" class="text-xs text-gray-300">...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-gray-700 pt-3 mt-2">
-                        <label class="text-[10px] uppercase text-orange-500 font-bold">Kết quả tìm kiếm (Worker)</label>
-                        <div class="mt-1 bg-gray-900 p-2 rounded border border-gray-700">
-                             <div class="flex justify-between text-xs mb-1">
-                                <span class="text-gray-500">Phone:</span>
-                                <span id="modalPhone" class="font-mono font-bold text-emerald-400 select-all">...</span>
-                             </div>
-                             <div class="flex justify-between text-xs mb-1">
-                                <span class="text-gray-500">Contact:</span>
-                                <span id="modalContact" class="text-yellow-400 font-bold">...</span>
-                             </div>
-                             <div class="flex justify-between text-xs">
-                                <span class="text-gray-500">Context:</span>
-                                <span id="modalContext" class="text-gray-400 italic">...</span>
-                             </div>
-                        </div>
+            <div class="modal-content py-4 text-left px-6 space-y-4">
+                <div><label class="text-[10px] uppercase text-gray-500 font-bold">Mã số thuế</label><div id="modalTax" class="font-mono text-emerald-400 font-bold text-lg select-all">...</div></div>
+                <div><label class="text-[10px] uppercase text-gray-500 font-bold">Người đại diện</label><div id="modalRep" class="text-gray-200">...</div></div>
+                <div><label class="text-[10px] uppercase text-gray-500 font-bold">Địa chỉ</label><div id="modalAddress" class="text-gray-300 text-sm">...</div></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Tỉnh thành</label><div id="modalProv" class="text-gray-300 text-sm">...</div></div>
+                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Ngành nghề</label><div id="modalInd" class="text-gray-300 text-sm">...</div></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Nguồn</label><div id="modalSource" class="text-xs text-blue-300 bg-blue-900/20 inline-block px-2 py-1 rounded">...</div></div>
+                    <div><label class="text-[10px] uppercase text-gray-500 font-bold">Trạng thái</label><div id="modalStatus" class="text-xs text-gray-300">...</div></div>
+                </div>
+                <div class="border-t border-gray-700 pt-3 mt-2">
+                    <label class="text-[10px] uppercase text-orange-500 font-bold">Kết quả liên hệ</label>
+                    <div class="mt-1 bg-gray-900 p-2 rounded border border-gray-700">
+                         <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">Phone:</span><span id="modalPhone" class="font-mono font-bold text-emerald-400 select-all">...</span></div>
+                         <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">Contact:</span><span id="modalContact" class="text-yellow-400 font-bold">...</span></div>
+                         <div class="flex justify-between text-xs"><span class="text-gray-500">Context:</span><span id="modalContext" class="text-gray-400 italic">...</span></div>
                     </div>
                 </div>
             </div>
@@ -201,7 +175,34 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- GLOBAL FUNCS ---
+        // --- GLOBAL STATE ---
+        let rawLeadsData = {}; // Lưu trữ dữ liệu gốc để lọc
+        let currentFilter = 'ALL'; // Trạng thái bộ lọc
+
+        // --- HELPER FUNC: PARSE DATE ---
+        function parseDateString(dateStr) {
+            // Format: "HH:MM DD/MM/YYYY" (ví dụ: "14:30 18/01/2026")
+            if (!dateStr) return 0;
+            try {
+                const parts = dateStr.split(' ');
+                if (parts.length < 2) return 0;
+                
+                const timeParts = parts[0].split(':');
+                const dateParts = parts[1].split('/');
+                
+                // Tạo Date Object (Month bắt đầu từ 0)
+                const d = new Date(
+                    dateParts[2], // Year
+                    dateParts[1] - 1, // Month
+                    dateParts[0], // Day
+                    timeParts[0], // Hour
+                    timeParts[1] // Minute
+                );
+                return d.getTime();
+            } catch (e) { return 0; }
+        }
+
+        // --- GLOBAL ACTIONS ---
         window.setSystemStatus = function(status) { set(ref(db, 'config_system/status'), status); }
         window.deleteNode = function(path, name) { if(confirm(`Xóa:\n${name}?`)) remove(ref(db, path)); }
         window.editNode = function(path, currentName) {
@@ -213,13 +214,17 @@
             const quota = parseInt(document.getElementById('scoutQuota').value) || 20;
             set(ref(db, 'config_target'), { target_site: site, quota: quota, updated_at: Date.now() }).then(() => alert("Đã lưu!"));
         }
+        
+        // --- FILTER ACTION ---
+        window.applyFilter = function(filterValue) {
+            currentFilter = filterValue;
+            renderLeadsTable(); // Vẽ lại bảng với bộ lọc mới
+        }
 
-        // --- MODAL LOGIC ---
-        let currentModalData = null;
+        // --- MODAL ---
         window.openModal = function(key) {
-             const item = currentModalData[key];
+             const item = rawLeadsData[key];
              if(!item) return;
-
              document.getElementById('modalTitle').innerText = item.company || item.name;
              document.getElementById('modalTax').innerText = item.tax_id || item.tax || '---';
              document.getElementById('modalRep').innerText = item.legal_rep || item.rep || '---';
@@ -228,7 +233,6 @@
              document.getElementById('modalInd').innerText = item.industry || '---';
              document.getElementById('modalSource').innerText = item.source || 'Bot Scan';
              document.getElementById('modalStatus').innerText = item.status || '---';
-             
              document.getElementById('modalPhone').innerText = item.phone || '---';
              document.getElementById('modalContact').innerText = item.contact_desc || '---';
              document.getElementById('modalContext').innerText = item.context || '---';
@@ -237,7 +241,6 @@
              modal.classList.remove('opacity-0', 'pointer-events-none');
              document.body.classList.add('modal-active');
         }
-
         window.closeModal = function() {
             const modal = document.getElementById('companyModal');
             modal.classList.add('opacity-0', 'pointer-events-none');
@@ -291,32 +294,42 @@
             });
         });
 
-        // --- 3. LEADS RENDER (FIX SORT & ADD CLICK EVENT) ---
+        // --- 3. LEADS RENDER (WITH FILTER & SORT LOGIC) ---
         onValue(ref(db, 'hr_leads'), snap => {
-            const data = snap.val();
-            currentModalData = data; // Lưu dữ liệu để dùng cho Modal
-            
-            const tbody = document.getElementById('leadTableBody');
+            rawLeadsData = snap.val() || {}; // Lưu dữ liệu gốc
             document.getElementById('leadCount').innerText = snap.size;
-            tbody.innerHTML = '';
-            if(!data) return;
+            renderLeadsTable(); // Vẽ lại bảng
+        });
 
-            // FIX SORT: Dùng last_updated nếu có, không thì dùng timestamp, không thì chuỗi rỗng
-            const leadsArr = Object.entries(data).sort((a, b) => {
-                const timeA = a[1].last_updated || a[1].timestamp || "";
-                const timeB = b[1].last_updated || b[1].timestamp || "";
-                return timeB.localeCompare(timeA); // Mới nhất lên đầu
+        function renderLeadsTable() {
+            const tbody = document.getElementById('leadTableBody');
+            tbody.innerHTML = '';
+            
+            if (Object.keys(rawLeadsData).length === 0) return;
+
+            // 1. Convert Object to Array
+            let leadsArr = Object.entries(rawLeadsData);
+
+            // 2. FILTER LOGIC
+            if (currentFilter === 'PHONE_ONLY') {
+                leadsArr = leadsArr.filter(([key, item]) => {
+                    return item.phone && item.phone !== "Chưa có" && item.phone !== "";
+                });
+            }
+
+            // 3. SORT LOGIC (Newest First)
+            leadsArr.sort((a, b) => {
+                const timeA = parseDateString(a[1].last_updated);
+                const timeB = parseDateString(b[1].last_updated);
+                return timeB - timeA; // Giảm dần (Mới nhất lên đầu)
             });
 
+            // 4. RENDER
             leadsArr.forEach(([key, item]) => {
                 const row = document.createElement('tr');
                 const hasPhone = item.phone && item.phone !== "Chưa có";
                 row.className = "hover:bg-gray-800 border-b border-gray-800/50 transition cursor-pointer group";
-                
-                // Click vào hàng để mở Modal (trừ nút xóa)
-                row.onclick = (e) => {
-                    if(!e.target.closest('button')) openModal(key);
-                };
+                row.onclick = (e) => { if(!e.target.closest('button')) openModal(key); };
 
                 let contactDisplay = `<span class="text-gray-600 italic">---</span>`;
                 if (item.contact_desc && item.contact_desc !== "Chưa rõ") {
@@ -332,11 +345,13 @@
                             <span>${item.source || 'Auto'}</span>
                         </div>
                     </td>
-                    <td class="p-2">
-                        ${contactDisplay}
-                    </td>
+                    <td class="p-2">${contactDisplay}</td>
                     <td class="p-2">
                         <span class="${hasPhone ? 'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded' : 'text-gray-600 italic'} font-mono text-xs select-all">${item.phone}</span>
+                    </td>
+                    <td class="p-2 text-center text-[10px] text-gray-400 font-mono">
+                        ${item.last_updated ? item.last_updated.split(' ')[0] : ''}<br>
+                        ${item.last_updated ? item.last_updated.split(' ')[1] : ''}
                     </td>
                     <td class="p-2 text-center">
                         <button onclick="deleteNode('hr_leads/${key}', '${item.company}')" class="text-gray-600 hover:text-red-500 px-2 py-1"><i class="fa-solid fa-xmark"></i></button>
@@ -344,7 +359,7 @@
                 `;
                 tbody.appendChild(row);
             });
-        });
+        }
 
         // 4. Bot Status
         onValue(ref(db, 'hr_status'), snap => {

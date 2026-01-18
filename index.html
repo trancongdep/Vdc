@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC COMMANDER PRO v24.2</title>
+    <title>VDC COMMANDER PRO v24.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,7 +13,8 @@
         .page-content.active { display: flex; flex-direction: column; }
         #sidebar { transition: transform 0.3s ease; z-index: 100; }
         .sidebar-closed { transform: translateX(-100%); }
-        .company-name-cell { white-space: normal !important; word-break: break-word !important; min-width: 220px; line-height: 1.4; }
+        .company-name-cell { white-space: normal !important; word-break: break-word !important; min-width: 200px; line-height: 1.4; cursor: pointer; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.9); }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen overflow-hidden font-sans text-sm">
@@ -22,11 +23,11 @@
 
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-80 bg-gray-900 border-r border-gray-800 sidebar-closed flex flex-col shadow-2xl z-[100]">
         <div class="p-6 flex justify-between items-center border-b border-gray-800">
-            <h2 class="text-blue-500 font-bold uppercase text-xs italic">VDC COMMANDER v24.2</h2>
+            <h2 class="text-blue-500 font-bold uppercase text-xs italic">VDC COMMANDER v24.4</h2>
             <button onclick="toggleSidebar()" class="text-gray-500"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
-        <div class="flex-1 p-4 space-y-6 overflow-y-auto">
-            <div class="space-y-4">
+        <div class="flex-1 p-4 space-y-6 overflow-y-auto" id="configPanel">
+             <div class="space-y-4">
                 <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Ngành nghề</label>
                 <select id="target_job" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-white">
                     <option value="Tất cả các ngành">-- TẤT CẢ --</option>
@@ -36,9 +37,7 @@
                 </select>
 
                 <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest block mt-4">Khu vực</label>
-                <select id="target_loc" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-white" id="provinceSelect">
-                    <option value="Toàn quốc">-- TOÀN QUỐC --</option>
-                </select>
+                <select id="target_loc" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-white"></select>
 
                 <label class="text-[10px] text-gray-500 font-black uppercase tracking-widest block mt-4">Chế độ</label>
                 <div class="grid grid-cols-2 gap-2 mt-2">
@@ -56,14 +55,14 @@
             <div class="flex items-center gap-4">
                 <button onclick="toggleSidebar()" class="w-10 h-10 bg-gray-800 rounded-lg text-blue-500"><i class="fa-solid fa-bars"></i></button>
                 <div>
-                    <h1 class="font-bold text-gray-100 uppercase text-sm">VDC CRM</h1>
-                    <span class="text-[8px] text-blue-600 font-black tracking-widest italic uppercase">Sync 5-point Report v24.2</span>
+                    <h1 class="font-bold text-gray-100 uppercase text-sm leading-none">VDC CRM</h1>
+                    <span class="text-[8px] text-blue-600 font-black tracking-widest italic uppercase">V24.4 - EDIT & CONTACT</span>
                 </div>
             </div>
             <button id="powerBtn" onclick="handlePowerToggle()" class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-xl transition-all"></button>
         </nav>
 
-        <div class="flex-1 overflow-hidden">
+        <div class="flex-1 overflow-hidden relative">
             <div id="page-stats" class="page-content active p-4 space-y-4 overflow-y-auto">
                 <div class="grid grid-cols-2 gap-3 text-center">
                     <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 font-bold"><div class="text-4xl text-blue-400" id="queueCount">0</div><div class="text-[9px] text-gray-500 mt-2 uppercase">Hàng đợi</div></div>
@@ -75,7 +74,7 @@
             <div id="page-leads" class="page-content">
                 <div class="flex-1 overflow-auto bg-gray-950">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-900 sticky top-0 border-b border-gray-800">
+                        <thead class="bg-gray-900 sticky top-0 border-b border-gray-800 z-10">
                             <tr class="text-[9px] text-gray-500 uppercase font-bold">
                                 <th class="p-4">Doanh nghiệp</th>
                                 <th class="p-4 text-center">Nhân sự</th>
@@ -88,40 +87,91 @@
                 </div>
             </div>
         </div>
-        
-        <footer class="h-14 bg-gray-900 border-t border-gray-800 flex items-center justify-around">
-            <button onclick="switchPage('stats')" class="text-blue-500"><i class="fa-solid fa-chart-line text-xl"></i></button>
-            <button onclick="switchPage('leads')" class="text-gray-500"><i class="fa-solid fa-database text-xl"></i></button>
-        </footer>
     </main>
+
+    <div id="editModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/50">
+                <h3 class="text-xs font-bold uppercase text-blue-400">Hồ sơ khách hàng chi tiết</h3>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div><label class="text-[10px] text-gray-500 uppercase font-bold">Tên công ty</label><input type="text" id="edit-company" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs mt-1" readonly></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] text-gray-500 uppercase font-bold">Mã số thuế</label><input type="text" id="edit-tax" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs mt-1 text-emerald-400"></div>
+                    <div><label class="text-[10px] text-gray-500 uppercase font-bold">Trạng thái</label><select id="edit-status" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs mt-1"><option value="Đang hoạt động">Đang hoạt động</option><option value="Ngừng hoạt động">Ngừng hoạt động</option></select></div>
+                </div>
+                <div><label class="text-[10px] text-gray-500 uppercase font-bold">Người liên hệ (Đặc biệt)</label><input type="text" id="edit-contact" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs mt-1 text-blue-400 placeholder-gray-600" placeholder="Ví dụ: Anh Đẹp - Giám đốc (090...)"></div>
+                <div><label class="text-[10px] text-gray-500 uppercase font-bold">Email</label><input type="text" id="edit-email" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs mt-1"></div>
+                <div><label class="text-[10px] text-gray-500 uppercase font-bold">Số điện thoại</label><input type="text" id="edit-phone" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs mt-1"></div>
+                <div><label class="text-[10px] text-gray-500 uppercase font-bold">Quy mô nhân sự</label><input type="text" id="edit-labor" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs mt-1"></div>
+            </div>
+            <div class="p-4 bg-gray-800/30 flex gap-2">
+                <button onclick="saveEdit()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all uppercase text-xs">Lưu thay đổi</button>
+                <button onclick="closeEditModal()" class="px-6 bg-gray-700 text-gray-300 py-3 rounded-xl text-xs font-bold">Hủy</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
         
-        let currentMode = 'SCOUT', currentStatus = 'PAUSED', rawLeadsData = {};
+        let currentMode = 'SCOUT', currentStatus = 'PAUSED', rawLeadsData = {}, currentEditId = null;
 
         const provinces = ["An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "TP. Hồ Chí Minh", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"];
-        const select = document.getElementById('target_loc');
-        provinces.forEach(p => { const opt = document.createElement('option'); opt.value = p; opt.innerText = p; select.appendChild(opt); });
+        const selectLoc = document.getElementById('target_loc');
+        provinces.forEach(p => { const opt = document.createElement('option'); opt.value = p; opt.innerText = p; selectLoc.appendChild(opt); });
 
         window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); };
         window.switchPage = (p) => { document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active')); document.getElementById('page-'+p).classList.add('active'); toggleSidebar(); };
         window.setMode = (m) => { currentMode = m; updateModeUI(); };
-        window.saveTargetConfig = () => { set(ref(db, 'config_target'), { job: document.getElementById('target_job').value, location: document.getElementById('target_loc').value, mode: currentMode }); alert("Đã lưu!"); };
+        window.saveTargetConfig = () => { set(ref(db, 'config_target'), { job: document.getElementById('target_job').value, location: document.getElementById('target_loc').value, mode: currentMode }); alert("Đã lưu mục tiêu!"); };
         window.handlePowerToggle = () => set(ref(db, 'config_system/status'), currentStatus === 'RUNNING' ? 'PAUSED' : 'RUNNING');
 
-        function updateModeUI() { ['SCOUT', 'REFRESH'].forEach(m => { const btn = document.getElementById('mode-' + m); btn.className = (currentMode === m) ? "py-2 rounded font-bold text-[10px] bg-blue-600 text-white" : "py-2 rounded font-bold text-[10px] bg-gray-800 text-gray-400"; }); }
+        // Logic Modal
+        window.openEditModal = (id) => {
+            currentEditId = id;
+            const data = rawLeadsData[id];
+            document.getElementById('edit-company').value = data.company || data.name || '';
+            document.getElementById('edit-tax').value = data.tax_id || '';
+            document.getElementById('edit-email').value = data.email || '';
+            document.getElementById('edit-phone').value = data.phone || '';
+            document.getElementById('edit-labor').value = data.labor_size || '';
+            document.getElementById('edit-status').value = data.status_code || 'Đang hoạt động';
+            document.getElementById('edit-contact').value = data.contact_person || '';
+            document.getElementById('editModal').classList.remove('hidden');
+        };
+        window.closeEditModal = () => document.getElementById('editModal').classList.add('hidden');
+        window.saveEdit = () => {
+            if(!currentEditId) return;
+            const updates = {
+                tax_id: document.getElementById('edit-tax').value,
+                email: document.getElementById('edit-email').value,
+                phone: document.getElementById('edit-phone').value,
+                labor_size: document.getElementById('edit-labor').value,
+                status_code: document.getElementById('edit-status').value,
+                contact_person: document.getElementById('edit-contact').value,
+                timestamp: Date.now()
+            };
+            update(ref(db, `hr_leads/${currentEditId}`), updates).then(() => {
+                alert("Đã cập nhật hồ sơ!");
+                closeEditModal();
+            });
+        };
+
+        function updateModeUI() { ['SCOUT', 'REFRESH'].forEach(m => { const btn = document.getElementById('mode-' + m); if(btn) btn.className = (currentMode === m) ? "py-2 rounded font-bold text-[10px] bg-blue-600 text-white" : "py-2 rounded font-bold text-[10px] bg-gray-800 text-gray-400"; }); }
 
         onValue(ref(db, 'hr_status/bot_VDC_CORE'), s => { if(s.val()) document.getElementById('botStatusText').innerHTML = s.val().message.replace(/\n/g, '<br>'); });
         onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; document.getElementById('leadCountStat').innerText = Object.keys(rawLeadsData).length; renderLeads(); });
         onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = Object.keys(s.val()||{}).length; });
-        onValue(ref(db, 'config_system/status'), s => { currentStatus = s.val() || 'PAUSED'; 
+        onValue(ref(db, 'config_system/status'), s => { 
+            currentStatus = s.val() || 'PAUSED'; 
             const b = document.getElementById('powerBtn');
-            b.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white pulse-active" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
+            b.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-lg" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
             b.innerHTML = '<i class="fa-solid fa-power-off text-xl"></i>';
         });
 
@@ -130,13 +180,13 @@
             Object.entries(rawLeadsData).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
                 const phone = v.phone?.split(' - ')[0].replace(/[^0-9]/g, '') || '';
                 const row = document.createElement('tr');
-                row.className = "border-b border-gray-900 hover:bg-gray-900/50";
+                row.className = "border-b border-gray-900 hover:bg-gray-900/50 transition";
                 row.innerHTML = `
-                    <td class="p-4 company-name-cell">
-                        <div class="font-bold text-gray-100 text-xs uppercase">${v.company || v.name}</div>
-                        <div class="flex gap-2 mt-1">
+                    <td class="p-4 company-name-cell" onclick="openEditModal('${k}')">
+                        <div class="font-bold text-gray-200 text-xs uppercase">${v.company || v.name}</div>
+                        <div class="flex flex-wrap gap-2 mt-1">
                             <span class="text-[8px] px-1.5 py-0.5 rounded ${v.status_code === 'Đang hoạt động' ? 'bg-emerald-900/30 text-emerald-500' : 'bg-red-900/30 text-red-500'} font-bold uppercase">${v.status_code || 'N/A'}</span>
-                            <span class="text-[9px] text-gray-500 font-mono">MST: ${v.tax_id || '---'}</span>
+                            <span class="text-[9px] text-blue-500 italic font-medium">${v.contact_person ? '👤 ' + v.contact_person : ''}</span>
                         </div>
                     </td>
                     <td class="p-4 text-center text-[10px] text-yellow-500 font-bold">${v.labor_size || '---'}</td>
@@ -147,7 +197,7 @@
                             ${v.email && v.email !== 'Chưa có' ? `<a href="mailto:${v.email}" class="text-purple-400"><i class="fa-solid fa-envelope"></i></a>` : ''}
                         </div>
                     </td>
-                    <td class="p-4 text-center"><button onclick="remove(ref(db,'hr_leads/${k}'))" class="text-gray-800 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>
+                    <td class="p-4 text-center"><button onclick="if(confirm('Xóa lead?')) remove(ref(db,'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(row);
             });

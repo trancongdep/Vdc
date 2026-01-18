@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v19.9</title>
+    <title>VDC CRM PRO v19.10</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,18 +11,19 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
         .table-fixed-header thead { position: sticky; top: 0; z-index: 10; background-color: #1f2937; }
-        .modal { transition: opacity 0.2s; }
-        body.modal-active { overflow: hidden; }
-        .blink-red { animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; color: red; } }
+        /* CSS Modal Fix v19.10 */
+        .modal { transition: all 0.3s; z-index: 9999; display: none; }
+        .modal.active { display: flex; opacity: 1; pointer-events: auto; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 10000; }
+        .modal-container { position: relative; z-index: 10001; background: #111827; border: 1px solid #374151; width: 90%; max-width: 500px; border-radius: 1rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen p-1 font-sans text-sm">
     <div class="max-w-[1900px] mx-auto">
         <header class="flex flex-col gap-2 mb-3 border-b border-gray-800 pb-3">
             <div class="flex justify-between items-center px-2">
-                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC CRM v19.9</h1>
-                <div id="systemStatusText" class="text-[9px] font-bold uppercase py-1 px-2 rounded bg-gray-900 border border-gray-700">...</div>
+                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC CRM v19.10</h1>
+                <div id="systemStatusText" class="text-[9px] font-bold uppercase py-1 px-2 rounded bg-gray-900 border border-gray-700">OFFLINE</div>
             </div>
 
             <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-6 gap-2">
@@ -35,8 +36,8 @@
                     <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none"></select>
                 </div>
                 <div class="flex gap-2 col-span-2 md:col-span-2">
-                    <button onclick="saveGlobalConfig('SCOUT')" id="btnScout" class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold shadow-lg uppercase shadow-blue-900/20">Web</button>
-                    <button onclick="saveGlobalConfig('MAPS')" id="btnMaps" class="flex-1 bg-red-700 text-white py-3 rounded-lg text-xs font-bold shadow-lg uppercase shadow-red-900/20">Maps</button>
+                    <button onclick="saveGlobalConfig('SCOUT')" id="btnScout" class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold uppercase shadow-lg shadow-blue-900/20">Web</button>
+                    <button onclick="saveGlobalConfig('MAPS')" id="btnMaps" class="flex-1 bg-red-700 text-white py-3 rounded-lg text-xs font-bold uppercase shadow-lg shadow-red-900/20">Maps</button>
                 </div>
                 <div class="flex gap-2 col-span-2 md:col-span-2">
                     <button onclick="setSystemStatus('RUNNING')" class="flex-1 bg-emerald-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Chạy</button>
@@ -46,31 +47,45 @@
         </header>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3 px-2">
-            <div class="bg-blue-900/10 border border-blue-500/30 rounded-lg p-2 text-center"><div class="text-xl font-bold text-blue-400" id="queueCount">0</div><div class="text-[8px] uppercase text-gray-500">Kho chờ</div></div>
-            <div class="bg-emerald-900/10 border border-emerald-500/30 rounded-lg p-2 text-center"><div class="text-xl font-bold text-emerald-400" id="leadCount">0</div><div class="text-[8px] uppercase text-gray-500">Kết quả</div></div>
-            <div class="col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-2"><div id="botGrid" class="grid grid-cols-1 gap-2 h-[40px] overflow-hidden"></div></div>
+            <div class="bg-blue-900/10 border border-blue-500/30 rounded-lg p-2 text-center">
+                <div class="text-xl font-bold text-blue-400" id="queueCount">0</div>
+                <div class="text-[8px] uppercase text-gray-500">Kho chờ</div>
+            </div>
+            <div class="bg-emerald-900/10 border border-emerald-500/30 rounded-lg p-2 text-center">
+                <div class="text-xl font-bold text-emerald-400" id="leadCount">0</div>
+                <div class="text-[8px] uppercase text-gray-500">Kết quả</div>
+            </div>
+            <div class="col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-2 flex items-center justify-center">
+                <div id="botGrid" class="font-bold text-[10px] text-gray-500 italic">Bot Status: Waiting...</div>
+            </div>
         </div>
 
         <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-280px)]">
             <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center px-4">
-                <h3 class="font-bold text-emerald-400 uppercase text-xs">Dữ liệu doanh nghiệp (Leads)</h3>
-                <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-3 py-1 rounded font-bold">XUẤT EXCEL</button>
+                <h3 class="font-bold text-emerald-400 uppercase text-xs">Doanh nghiệp mục tiêu</h3>
+                <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-3 py-1 rounded font-bold uppercase">Xuất Excel</button>
             </div>
             <div class="overflow-auto flex-1 bg-gray-950">
                 <table class="w-full text-left table-fixed-header text-xs">
-                    <thead><tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800"><th class="p-2">Doanh nghiệp</th><th class="p-2 w-28 text-center">Kết nối nhanh</th><th class="p-2 w-8">X</th></tr></thead>
+                    <thead><tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800"><th class="p-2">Tên & MST</th><th class="p-2 w-28 text-center">Kết nối</th><th class="p-2 w-8">X</th></tr></thead>
                     <tbody id="leadTableBody" class="divide-y divide-gray-900 text-gray-300"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div id="unifiedModal" class="modal opacity-0 pointer-events-none fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div class="modal-overlay absolute inset-0 bg-black/80" onclick="closeModal()"></div>
-        <div class="modal-container bg-gray-900 w-full max-w-md rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
-            <div class="p-4 border-b border-gray-800 flex justify-between"><h3 id="modalHeader" class="font-bold text-blue-400">Chi tiết</h3><button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
-            <div id="modalBody" class="p-4 space-y-3 text-[11px]"></div>
-            <div class="p-4 bg-gray-800 text-right"><button onclick="closeModal()" class="bg-blue-600 px-4 py-2 rounded font-bold">OK</button></div>
+    <div id="unifiedModal" class="modal fixed inset-0 items-center justify-center">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-container">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800">
+                <h3 id="modalHeader" class="font-bold text-blue-400 truncate pr-4 uppercase text-[11px]">Thông tin chi tiết</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="modalBody" class="p-5 space-y-4 text-xs leading-relaxed max-h-[60vh] overflow-y-auto">
+                </div>
+            <div class="p-4 bg-gray-900 border-t border-gray-800 text-right">
+                <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold uppercase transition">Xác nhận</button>
+            </div>
         </div>
     </div>
 
@@ -96,12 +111,11 @@
                 const cfg = cfgSnap.val();
                 document.getElementById('targetIndustry').value = cfg.industry || "ALL";
                 document.getElementById('targetProvince').value = cfg.province || "ALL";
-                document.getElementById('scoutQuota').value = cfg.quota || 200;
             }
         }
 
         window.saveGlobalConfig = (mode) => {
-            const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, quota: parseInt(document.getElementById('scoutQuota').value), updated_at: Date.now() };
+            const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, quota: 200, updated_at: Date.now() };
             set(ref(db, 'config_target'), cfg).then(() => alert(`Phát lệnh: ${mode}`));
         };
 
@@ -110,21 +124,20 @@
             Object.entries(rawLeadsData).sort((a,b) => b[1].last_updated?.localeCompare(a[1].last_updated)).forEach(([k,v]) => {
                 const phoneStr = v.phone && v.phone !== "Chưa có" ? v.phone.split(' - ')[0].replace(/[^0-9]/g, '') : '';
                 const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800 transition";
+                row.className = "hover:bg-gray-800/50 transition border-b border-gray-900 cursor-pointer";
                 row.innerHTML = `
                     <td class="p-2 leading-tight" onclick="showDetail('${k}')">
-                        <div class="font-bold text-gray-200">${v.company}</div>
-                        <div class="text-[9px] text-gray-500 truncate w-40">${v.address || v.province}</div>
-                        <div class="text-[10px] text-emerald-500 font-mono mt-0.5">${v.tax_id || ''}</div>
+                        <div class="font-bold text-gray-200 text-[11px]">${v.company}</div>
+                        <div class="text-[10px] text-emerald-500 font-mono mt-1">${v.tax_id || 'Chưa rõ MST'}</div>
                     </td>
                     <td class="p-2">
                         <div class="flex justify-center gap-4">
-                            ${phoneStr ? `<a href="tel:${phoneStr}" class="text-emerald-400 text-xl"><i class="fa-solid fa-phone-volume"></i></a>` : ''}
+                            ${phoneStr ? `<a href="tel:${phoneStr}" class="text-emerald-400 text-xl"><i class="fa-solid fa-phone-volume"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800 text-lg"></i>'}
                             ${phoneStr ? `<a href="https://zalo.me/${phoneStr}" target="_blank" class="text-blue-400 text-xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
                         </div>
                     </td>
                     <td class="p-2 text-center">
-                        <button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700"><i class="fa-solid fa-xmark"></i></button>
+                        <button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -135,25 +148,51 @@
             const v = rawLeadsData[key];
             document.getElementById('modalHeader').innerText = v.company;
             document.getElementById('modalBody').innerHTML = `
-                <p><b>MST:</b> ${v.tax_id || '---'}</p>
-                <p><b>Địa chỉ:</b> ${v.address || '---'}</p>
-                <p><b>Phone:</b> ${v.phone || '---'}</p>
-                <p><b>Phụ trách:</b> ${v.contact_desc || '---'}</p>
-                <p><b>Ngành:</b> ${v.industry || '---'}</p>
+                <div class="space-y-3">
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Mã số thuế</label>
+                        <div class="text-emerald-400 font-mono text-sm">${v.tax_id || 'Chưa cập nhật'}</div>
+                    </div>
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Địa chỉ trụ sở</label>
+                        <div class="text-gray-300 text-xs">${v.address || v.province || 'Chưa rõ địa chỉ'}</div>
+                    </div>
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Điện thoại liên hệ</label>
+                        <div class="text-blue-300 font-bold">${v.phone || 'Chưa có số'}</div>
+                    </div>
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Người phụ trách / Chức danh</label>
+                        <div class="text-yellow-400 font-bold">${v.contact_desc || 'Đang cập nhật...'}</div>
+                    </div>
+                    <div class="bg-gray-900 p-3 rounded-lg border border-gray-800">
+                        <label class="text-[9px] text-gray-500 uppercase font-bold">Nguồn dữ liệu & Ngành</label>
+                        <div class="text-gray-400 italic text-[10px]">${v.source} | ${v.industry}</div>
+                    </div>
+                </div>
             `;
-            document.getElementById('unifiedModal').classList.remove('opacity-0', 'pointer-events-none');
+            const modal = document.getElementById('unifiedModal');
+            modal.classList.add('active');
+            document.body.classList.add('modal-active');
         };
 
-        window.closeModal = () => document.getElementById('unifiedModal').classList.add('opacity-0', 'pointer-events-none');
+        window.closeModal = () => {
+            const modal = document.getElementById('unifiedModal');
+            modal.classList.remove('active');
+            document.body.classList.remove('modal-active');
+        };
+
         window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
-        onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeads(); document.getElementById('leadCount').innerText = s.size; });
+        onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeadsTable(); document.getElementById('leadCount').innerText = s.size; });
         onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = s.size; });
         onValue(ref(db, 'config_system/status'), s => { document.getElementById('systemStatusText').innerText = s.val(); });
-        onValue(ref(db, 'hr_status/' + BOT_NAME), s => { 
-            const b = s.val(); if(!b) return;
+        
+        onValue(ref(db, 'hr_status'), s => {
             const grid = document.getElementById('botGrid');
-            const color = b.is_error ? 'text-red-500 blink-red' : 'text-emerald-500';
-            grid.innerHTML = `<div class="font-bold text-[10px] ${color}">${b.message}</div>`;
+            const data = s.val(); if(!data) return;
+            const lastBot = Object.values(data).sort((a,b) => b.timestamp - a.timestamp)[0];
+            const color = lastBot.is_error ? 'text-red-500' : 'text-blue-400';
+            grid.innerHTML = `<div class="font-bold ${color} uppercase tracking-tighter animate-pulse">${lastBot.name}: ${lastBot.message}</div>`;
         });
 
         initSync();

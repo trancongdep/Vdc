@@ -2,183 +2,160 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM PRO v19.7 - Enterprise Filter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VDC CRM PRO v19.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
         .table-fixed-header thead { position: sticky; top: 0; z-index: 10; background-color: #1f2937; }
-        .modal { transition: opacity 0.2s ease-in-out; }
+        .modal { transition: opacity 0.2s; }
         body.modal-active { overflow: hidden; }
-        .btn-social:hover { transform: scale(1.25); filter: brightness(1.2); }
+        .blink-red { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; color: red; } }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-200 min-h-screen p-2 font-sans antialiased text-sm">
+<body class="bg-gray-950 text-gray-200 min-h-screen p-1 font-sans text-sm">
     <div class="max-w-[1900px] mx-auto">
-        <header class="flex flex-col xl:flex-row justify-between items-center mb-3 border-b border-gray-800 pb-3 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-blue-500 tracking-tighter flex items-center gap-2">
-                    <i class="fa-solid fa-building-shield"></i> VDC COMMAND v19.7
-                </h1>
-                <p class="text-[10px] text-emerald-500 uppercase font-bold tracking-[0.2em]">Chế độ lọc: Chỉ doanh nghiệp chính quy</p>
+        <header class="flex flex-col gap-2 mb-3 border-b border-gray-800 pb-3">
+            <div class="flex justify-between items-center px-2">
+                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC CRM v19.9</h1>
+                <div id="systemStatusText" class="text-[9px] font-bold uppercase py-1 px-2 rounded bg-gray-900 border border-gray-700">...</div>
             </div>
 
-            <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-6 gap-3 shadow-2xl w-full xl:w-auto">
+            <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-6 gap-2">
                 <div class="flex flex-col gap-1">
-                    <label class="text-[9px] text-blue-400 font-bold uppercase flex justify-between">Ngành <i class="fa-solid fa-pen-nib cursor-pointer ml-1" onclick="openParamModal('industry')"></i></label>
-                    <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-[11px] text-white outline-none"></select>
+                    <label class="text-[9px] text-blue-400 font-bold uppercase">Ngành <i class="fa-solid fa-pen-nib ml-1" onclick="openParamModal('industry')"></i></label>
+                    <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none"></select>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <label class="text-[9px] text-emerald-400 font-bold uppercase flex justify-between">Tỉnh <i class="fa-solid fa-pen-nib cursor-pointer ml-1" onclick="openParamModal('province')"></i></label>
-                    <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-[11px] text-white h-[26px] outline-none"></select>
+                    <label class="text-[9px] text-emerald-400 font-bold uppercase">Tỉnh <i class="fa-solid fa-pen-nib ml-1" onclick="openParamModal('province')"></i></label>
+                    <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none"></select>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-[9px] text-orange-400 font-bold uppercase">Nguồn</label>
-                    <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-[11px] text-white outline-none"></select>
+                <div class="flex gap-2 col-span-2 md:col-span-2">
+                    <button onclick="saveGlobalConfig('SCOUT')" id="btnScout" class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold shadow-lg uppercase shadow-blue-900/20">Web</button>
+                    <button onclick="saveGlobalConfig('MAPS')" id="btnMaps" class="flex-1 bg-red-700 text-white py-3 rounded-lg text-xs font-bold shadow-lg uppercase shadow-red-900/20">Maps</button>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-[9px] text-purple-400 font-bold uppercase">Quota</label>
-                    <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-[11px] text-center text-white" value="200">
-                </div>
-                <div class="flex items-end gap-2 md:col-span-2">
-                    <button onclick="saveGlobalConfig('SCOUT')" id="btnScout" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded text-[10px] font-bold shadow-lg transition uppercase">Quét Web</button>
-                    <button onclick="saveGlobalConfig('MAPS')" id="btnMaps" class="flex-1 bg-red-700 hover:bg-red-600 text-white py-1.5 rounded text-[10px] font-bold shadow-lg transition uppercase border border-red-500/50">Quét Maps</button>
+                <div class="flex gap-2 col-span-2 md:col-span-2">
+                    <button onclick="setSystemStatus('RUNNING')" class="flex-1 bg-emerald-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Chạy</button>
+                    <button onclick="setSystemStatus('PAUSED')" class="flex-1 bg-gray-700 text-white py-3 rounded-lg text-xs font-bold uppercase">Dừng</button>
                 </div>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-3">
-            <div class="lg:col-span-1 grid grid-cols-2 gap-2 text-center">
-                <div class="bg-blue-900/10 border border-blue-500/30 rounded-lg p-2"><div class="text-xl font-bold text-blue-400" id="queueCount">0</div><div class="text-[9px] text-gray-500 uppercase font-bold">Kho chờ</div></div>
-                <div class="bg-emerald-900/10 border border-emerald-500/30 rounded-lg p-2"><div class="text-xl font-bold text-emerald-400" id="leadCount">0</div><div class="text-[9px] text-gray-500 uppercase font-bold">Kết quả</div></div>
-            </div>
-            <div class="lg:col-span-1 bg-gray-900 border border-gray-700 rounded-lg p-2 flex flex-col justify-center items-center">
-                <div class="flex gap-3 w-full"><button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold text-[11px]">CHẠY</button><button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-red-600 text-white py-2 rounded font-bold text-[11px]">DỪNG</button></div>
-                <div id="systemStatusText" class="mt-1 text-[9px] font-bold uppercase tracking-widest uppercase">...</div>
-            </div>
-            <div class="lg:col-span-2 bg-gray-900/40 border border-gray-800 rounded-lg p-2"><div id="botGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2 h-[75px] overflow-y-auto"></div></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3 px-2">
+            <div class="bg-blue-900/10 border border-blue-500/30 rounded-lg p-2 text-center"><div class="text-xl font-bold text-blue-400" id="queueCount">0</div><div class="text-[8px] uppercase text-gray-500">Kho chờ</div></div>
+            <div class="bg-emerald-900/10 border border-emerald-500/30 rounded-lg p-2 text-center"><div class="text-xl font-bold text-emerald-400" id="leadCount">0</div><div class="text-[8px] uppercase text-gray-500">Kết quả</div></div>
+            <div class="col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-2"><div id="botGrid" class="grid grid-cols-1 gap-2 h-[40px] overflow-hidden"></div></div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-260px)]">
-            <div class="lg:col-span-3 bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden text-xs">
-                <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center text-blue-400 font-bold uppercase"><span>Queue (Đang chờ)</span><button onclick="clearAllQueue()" class="text-[9px] bg-red-900/30 text-red-400 px-2 py-0.5 rounded">XÓA</button></div>
-                <div class="overflow-auto flex-1 bg-gray-950"><table class="w-full text-left table-fixed-header"><tbody id="queueTableBody" class="divide-y divide-gray-900 text-gray-400"></tbody></table></div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-280px)]">
+            <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center px-4">
+                <h3 class="font-bold text-emerald-400 uppercase text-xs">Dữ liệu doanh nghiệp (Leads)</h3>
+                <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-3 py-1 rounded font-bold">XUẤT EXCEL</button>
             </div>
-
-            <div class="lg:col-span-9 bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden text-xs">
-                <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-emerald-400 uppercase">Danh sách Doanh nghiệp chính thức</h3>
-                    <div class="flex gap-2">
-                        <button onclick="downloadTemplate()" class="bg-gray-700 text-white text-[9px] px-2 py-1 rounded font-bold">MẪU NHẬP</button>
-                        <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-3 py-1 rounded font-bold">XUẤT EXCEL</button>
-                    </div>
-                </div>
-                <div class="overflow-auto flex-1 bg-gray-950">
-                    <table class="w-full text-left table-fixed-header text-gray-300">
-                        <thead><tr class="text-[10px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800"><th class="p-2">Tên & Địa chỉ</th><th class="p-2 w-28 text-blue-400 text-center">MST</th><th class="p-2 w-32 text-center text-emerald-500">Phone</th><th class="p-2 w-24 text-center">Social</th><th class="p-2 w-32 text-yellow-500">Phụ trách</th><th class="p-2 w-8 text-center">X</th></tr></thead>
-                        <tbody id="leadTableBody" class="divide-y divide-gray-900"></tbody>
-                    </table>
-                </div>
+            <div class="overflow-auto flex-1 bg-gray-950">
+                <table class="w-full text-left table-fixed-header text-xs">
+                    <thead><tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800"><th class="p-2">Doanh nghiệp</th><th class="p-2 w-28 text-center">Kết nối nhanh</th><th class="p-2 w-8">X</th></tr></thead>
+                    <tbody id="leadTableBody" class="divide-y divide-gray-900 text-gray-300"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <div id="unifiedModal" class="modal opacity-0 pointer-events-none fixed inset-0 flex items-center justify-center z-50 text-gray-300">
+    <div id="unifiedModal" class="modal opacity-0 pointer-events-none fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="modal-overlay absolute inset-0 bg-black/80" onclick="closeModal()"></div>
-        <div class="modal-container bg-gray-900 w-11/12 md:max-w-xl mx-auto rounded-xl shadow-2xl border border-gray-700">
-            <div class="flex justify-between items-center px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-xl"><h3 class="font-bold text-blue-400" id="modalHeader">Chi tiết</h3><button onclick="closeModal()"><i class="fa-solid fa-xmark text-xl"></i></button></div>
-            <form id="editForm" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-                <input type="hidden" id="editPath"><input type="hidden" id="editKey">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold">
-                    <div class="md:col-span-2"><label class="text-gray-500 uppercase block mb-1">Tên Công Ty</label><input type="text" id="editName" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-blue-300"></div>
-                    <div><label class="text-gray-500 uppercase block mb-1">Mã số thuế</label><input type="text" id="editTax" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-emerald-400 font-mono"></div>
-                    <div><label class="text-gray-500 uppercase block mb-1">Tỉnh thành</label><input type="text" id="editProv" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2"></div>
-                    <div class="md:col-span-2"><label class="text-gray-500 uppercase block mb-1">Địa chỉ</label><input type="text" id="editAddress" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2"></div>
-                    <div><label class="text-gray-500 uppercase block mb-1">Số điện thoại</label><input type="text" id="editPhone" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-emerald-400 font-mono"></div>
-                    <div><label class="text-gray-500 uppercase block mb-1">Người liên hệ</label><input type="text" id="editContact" class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-2 text-yellow-400"></div>
-                </div>
-            </form>
-            <div class="flex justify-end gap-3 px-5 py-4 bg-gray-800 border-t border-gray-700 rounded-b-xl"><button onclick="closeModal()" class="text-xs font-bold text-gray-400 uppercase">Đóng</button><button onclick="saveEdit()" class="px-6 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg uppercase">Cập nhật</button></div>
-        </div>
-    </div>
-
-    <div id="paramModal" class="modal opacity-0 pointer-events-none fixed inset-0 flex items-center justify-center z-[60]">
-        <div class="modal-overlay absolute inset-0 bg-black/90" onclick="closeParamModal()"></div>
-        <div class="modal-container bg-gray-900 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl border border-gray-700 p-5 text-center">
-            <h3 class="font-bold text-orange-400 uppercase text-xs mb-3">Sửa danh sách tham số</h3>
-            <textarea id="paramInput" class="w-full h-40 bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-blue-300 font-mono outline-none"></textarea>
-            <button onclick="saveParams()" class="w-full bg-orange-600 text-white py-2 rounded-lg mt-4 font-bold uppercase shadow-lg">Lưu hệ thống</button>
+        <div class="modal-container bg-gray-900 w-full max-w-md rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+            <div class="p-4 border-b border-gray-800 flex justify-between"><h3 id="modalHeader" class="font-bold text-blue-400">Chi tiết</h3><button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
+            <div id="modalBody" class="p-4 space-y-3 text-[11px]"></div>
+            <div class="p-4 bg-gray-800 text-right"><button onclick="closeModal()" class="bg-blue-600 px-4 py-2 rounded font-bold">OK</button></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-        let rawQueueData = {}; let rawLeadsData = {}; let currentFilter = 'ALL'; let currentEditingParam = '';
+        let rawLeadsData = {};
 
         async function initSync() {
-            onValue(ref(db, 'config_params'), async snap => {
-                const data = snap.val() || { industry: "Xây lắp điện, Dệt may, Da giày", province: "Bình Dương, Long An, HCM", site: "site:hosocongty.vn" };
-                ['industry', 'province', 'site'].forEach(type => {
+            onValue(ref(db, 'config_params'), snap => {
+                const data = snap.val(); if(!data) return;
+                ['industry', 'province'].forEach(type => {
                     const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
-                    const list = data[type].split(',').map(i => i.trim());
-                    select.innerHTML = (type !== 'site' ? `<option value="ALL">Xoay vòng (Tất cả)</option>` : '') + list.map(item => `<option value="${item}">${item}</option>`).join('');
+                    const list = data[type].split(',').map(i => i.strip());
+                    select.innerHTML = `<option value="ALL">Xoay vòng (Tất cả)</option>` + list.map(item => `<option value="${item}">${item}</option>`).join('');
                 });
-                const cfgSnap = await get(ref(db, 'config_target'));
-                if(cfgSnap.exists()){ const cfg = cfgSnap.val(); document.getElementById('targetIndustry').value = cfg.industry; document.getElementById('targetProvince').value = cfg.province; document.getElementById('targetSite').value = cfg.target_site; document.getElementById('scoutQuota').value = cfg.quota; updateUIColors(cfg.mode); }
             });
+            const cfgSnap = await get(ref(db, 'config_target'));
+            if(cfgSnap.exists()){ 
+                const cfg = cfgSnap.val();
+                document.getElementById('targetIndustry').value = cfg.industry || "ALL";
+                document.getElementById('targetProvince').value = cfg.province || "ALL";
+                document.getElementById('scoutQuota').value = cfg.quota || 200;
+            }
         }
 
         window.saveGlobalConfig = (mode) => {
-            const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, target_site: document.getElementById('targetSite').value, quota: parseInt(document.getElementById('scoutQuota').value), updated_at: Date.now() };
-            set(ref(db, 'config_target'), cfg).then(() => { alert(`Hệ thống phát lệnh: ${mode}`); updateUIColors(mode); });
+            const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, quota: parseInt(document.getElementById('scoutQuota').value), updated_at: Date.now() };
+            set(ref(db, 'config_target'), cfg).then(() => alert(`Phát lệnh: ${mode}`));
         };
 
-        function updateUIColors(mode) {
-            const bS = document.getElementById('btnScout'); const bM = document.getElementById('btnMaps');
-            if(mode === 'MAPS') { bM.className="flex-1 bg-red-700 text-white py-1.5 rounded text-[10px] font-bold border border-red-400 shadow-inner uppercase"; bS.className="flex-1 bg-gray-800 text-gray-500 py-1.5 rounded text-[10px] border border-gray-700 uppercase"; }
-            else { bS.className="flex-1 bg-blue-600 text-white py-1.5 rounded text-[10px] font-bold border border-blue-400 shadow-inner uppercase"; bM.className="flex-1 bg-gray-800 text-gray-500 py-1.5 rounded text-[10px] border border-gray-700 uppercase"; }
-        }
-
-        window.openSocial = (phone, type) => { if(!phone || phone === "Chưa có") return; const p = phone.split(' - ')[0].replace(/[^0-9]/g, ''); let url = ""; if(type === 'zalo') url = `https://zalo.me/${p}`; if(type === 'fb') url = `https://www.facebook.com/search/top/?q=${p}`; if(type === 'google') url = `https://www.google.com/search?q="${p}"`; window.open(url, '_blank'); };
-        window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
-        window.deleteNode = (p, n) => { if(confirm(`Xóa doanh nghiệp: ${n}?`)) remove(ref(db, p)); };
-        window.clearAllQueue = () => { if(confirm("Xóa sạch danh sách chờ?")) remove(ref(db, 'hr_queue')); };
-        window.downloadTemplate = () => { const ws = XLSX.utils.aoa_to_sheet([['Name', 'Address', 'Province', 'Industry', 'Phone'], ['Cty Mẫu', 'Đ/C', 'Hồ Chí Minh', 'Điện', '090']]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "VDC"); XLSX.writeFile(wb, "VDC_Template.xlsx"); };
-        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData).map(v => ({ "Doanh nghiệp": v.company, "MST": v.tax_id, "SĐT": v.phone, "Liên hệ": v.contact_desc, "Địa chỉ": v.address }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads"); XLSX.writeFile(wb, `VDC_Leads_${new Date().toISOString().slice(0,10)}.xlsx`); };
-
-        onValue(ref(db, 'hr_queue'), s => { rawQueueData = s.val() || {}; document.getElementById('queueCount').innerText = s.size; const tbody = document.getElementById('queueTableBody'); tbody.innerHTML = ''; Object.entries(rawQueueData).sort((a,b) => parseDateTime(b[1].created_at) - parseDateTime(a[1].created_at)).forEach(([k,v], i) => { const row = document.createElement('tr'); row.className = "hover:bg-gray-800/50 cursor-pointer border-b border-gray-900/50"; row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_queue', k); }; row.innerHTML = `<td class="p-2 text-gray-700 w-8">${i+1}</td><td class="p-2 font-bold text-blue-300 truncate max-w-[200px]">${v.name}</td><td class="p-2 text-center text-gray-600">${v.province || ''}</td>`; tbody.appendChild(row); }); });
-        onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; document.getElementById('leadCount').innerText = s.size; renderLeadsTable(); });
-
-        function renderLeadsTable() {
+        function renderLeads() {
             const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
-            let arr = Object.entries(rawLeadsData); if(currentFilter==='PHONE_ONLY') arr = arr.filter(([k,v]) => v.phone && v.phone!=="Chưa có");
-            arr.sort((a,b) => parseDateTime(b[1].last_updated) - parseDateTime(a[1].last_updated)).forEach(([k,v]) => {
-                const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer group";
-                const hasP = v.phone && v.phone !== "Chưa có";
-                const socialBtns = hasP ? `<div class="flex justify-center gap-2"><button onclick="openSocial('${v.phone}','zalo')" class="btn-social text-blue-400"><i class="fa-solid fa-comment-dots text-lg"></i></button><button onclick="openSocial('${v.phone}','fb')" class="btn-social text-blue-600"><i class="fa-brands fa-facebook text-lg"></i></button><button onclick="openSocial('${v.phone}','google')" class="btn-social text-orange-500"><i class="fa-brands fa-google text-lg"></i></button></div>` : ``;
-                row.innerHTML = `<td class="p-2 leading-tight" onclick="openDetail('hr_leads', '${k}')"><div class="font-bold text-gray-300 text-[11px] group-hover:text-blue-400">${v.company}</div><div class="text-[9px] text-gray-600 truncate w-72 uppercase">${v.address || (v.province || '---')}</div></td><td class="p-2 font-mono text-emerald-600 font-bold text-[11px] text-center">${v.tax_id || '---'}</td><td class="p-2 text-center"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded font-mono text-[11px]':'text-gray-600 text-[10px]'}">${v.phone||'---'}</span></td><td class="p-2 text-center">${socialBtns}</td><td class="p-2 text-yellow-400 font-bold text-[10px]">${v.contact_desc || ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500 px-1"><i class="fa-solid fa-xmark text-lg"></i></button></td>`;
+            Object.entries(rawLeadsData).sort((a,b) => b[1].last_updated?.localeCompare(a[1].last_updated)).forEach(([k,v]) => {
+                const phoneStr = v.phone && v.phone !== "Chưa có" ? v.phone.split(' - ')[0].replace(/[^0-9]/g, '') : '';
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800 transition";
+                row.innerHTML = `
+                    <td class="p-2 leading-tight" onclick="showDetail('${k}')">
+                        <div class="font-bold text-gray-200">${v.company}</div>
+                        <div class="text-[9px] text-gray-500 truncate w-40">${v.address || v.province}</div>
+                        <div class="text-[10px] text-emerald-500 font-mono mt-0.5">${v.tax_id || ''}</div>
+                    </td>
+                    <td class="p-2">
+                        <div class="flex justify-center gap-4">
+                            ${phoneStr ? `<a href="tel:${phoneStr}" class="text-emerald-400 text-xl"><i class="fa-solid fa-phone-volume"></i></a>` : ''}
+                            ${phoneStr ? `<a href="https://zalo.me/${phoneStr}" target="_blank" class="text-blue-400 text-xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700"><i class="fa-solid fa-xmark"></i></button>
+                    </td>
+                `;
                 tbody.appendChild(row);
             });
         }
 
-        onValue(ref(db, 'config_system/status'), s => { const v = s.val(); const txt = document.getElementById('systemStatusText'); if(v==='RUNNING'){ txt.innerText="Bot đang chạy"; txt.className="mt-1 text-[9px] font-bold text-emerald-500 animate-pulse"; } else { txt.innerText="Tạm dừng"; txt.className="mt-1 text-[9px] font-bold text-red-500"; }});
-        onValue(ref(db, 'hr_status'), s => { const grid = document.getElementById('botGrid'); grid.innerHTML = ''; const now = Math.floor(Date.now()/1000); Object.values(s.val()||{}).forEach(b => { if((now-(b.timestamp||0))>120) return; let borderColor = b.type === "SCOUT" ? "border-purple-500" : "border-blue-500"; grid.innerHTML+=`<div class="bg-gray-900 ${borderColor} border rounded-lg p-2 flex items-center gap-2 h-9 shadow-inner"><i class="fa-solid fa-robot text-xs ${b.type==='SCOUT'?'text-purple-400':'text-blue-400'}"></i><div class="overflow-hidden leading-none"><div class="font-bold text-[9px] truncate w-20">${b.name}</div><div class="text-[8px] opacity-60 truncate w-32 mt-1">${b.message}</div></div></div>`; }); });
-        
-        window.openDetail = (table, key) => { const data = (table === 'hr_queue') ? rawQueueData[key] : rawLeadsData[key]; if(!data) return; document.getElementById('editPath').value = table; document.getElementById('editKey').value = key; document.getElementById('editName').value = data.company_name || data.company || ""; document.getElementById('editTax').value = data.tax_id || ""; document.getElementById('editProv').value = data.province || ""; document.getElementById('editAddress').value = data.address || ""; document.getElementById('editPhone').value = data.phone || ""; document.getElementById('editContact').value = data.contact_desc || ""; document.getElementById('unifiedModal').classList.remove('opacity-0', 'pointer-events-none'); document.body.classList.add('modal-active'); };
-        window.closeModal = () => { document.getElementById('unifiedModal').classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); };
-        window.saveEdit = async function() { const table = document.getElementById('editPath').value; const key = document.getElementById('editKey').value; const newData = { province: document.getElementById('editProv').value, address: document.getElementById('editAddress').value, phone: document.getElementById('editPhone').value, contact_desc: document.getElementById('editContact').value, tax_id: document.getElementById('editTax').value, last_updated: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " " + new Date().toLocaleDateString('en-GB') }; if(table === 'hr_queue') { newData.name = document.getElementById('editName').value; newData.company_name = newData.name; } else { newData.company = document.getElementById('editName').value; } await update(ref(db, `${table}/${key}`), newData); closeModal(); };
-        window.openParamModal = async (type) => { currentEditingParam = type; const snap = await get(ref(db, 'config_params/' + type)); document.getElementById('paramInput').value = snap.val() || ""; document.getElementById('paramModal').classList.remove('opacity-0', 'pointer-events-none'); document.body.classList.add('modal-active'); };
-        window.closeParamModal = () => { document.getElementById('paramModal').classList.add('opacity-0', 'pointer-events-none'); document.body.classList.remove('modal-active'); };
-        window.saveParams = async () => { await set(ref(db, 'config_params/' + currentEditingParam), document.getElementById('paramInput').value); alert("Lưu thành công!"); closeParamModal(); };
-        function parseDateTime(s) { if (!s) return 0; if (s.includes('T')) return new Date(s).getTime(); try { const p = s.split(' '); const d = p[1].split('/'); const t = p[0].split(':'); return new Date(d[2], d[1]-1, d[0], t[0], t[1]).getTime(); } catch(e) { return 0; } }
-        window.applyFilter = (v) => { currentFilter = v; renderLeadsTable(); };
+        window.showDetail = (key) => {
+            const v = rawLeadsData[key];
+            document.getElementById('modalHeader').innerText = v.company;
+            document.getElementById('modalBody').innerHTML = `
+                <p><b>MST:</b> ${v.tax_id || '---'}</p>
+                <p><b>Địa chỉ:</b> ${v.address || '---'}</p>
+                <p><b>Phone:</b> ${v.phone || '---'}</p>
+                <p><b>Phụ trách:</b> ${v.contact_desc || '---'}</p>
+                <p><b>Ngành:</b> ${v.industry || '---'}</p>
+            `;
+            document.getElementById('unifiedModal').classList.remove('opacity-0', 'pointer-events-none');
+        };
+
+        window.closeModal = () => document.getElementById('unifiedModal').classList.add('opacity-0', 'pointer-events-none');
+        window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
+        onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeads(); document.getElementById('leadCount').innerText = s.size; });
+        onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = s.size; });
+        onValue(ref(db, 'config_system/status'), s => { document.getElementById('systemStatusText').innerText = s.val(); });
+        onValue(ref(db, 'hr_status/' + BOT_NAME), s => { 
+            const b = s.val(); if(!b) return;
+            const grid = document.getElementById('botGrid');
+            const color = b.is_error ? 'text-red-500 blink-red' : 'text-emerald-500';
+            grid.innerHTML = `<div class="font-bold text-[10px] ${color}">${b.message}</div>`;
+        });
+
         initSync();
     </script>
 </body>

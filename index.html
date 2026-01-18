@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v19.14 - Minimalist Icons</title>
+    <title>VDC CRM PRO v19.15 - Full Recovery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -15,7 +15,7 @@
         .modal.active { display: flex; opacity: 1; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 10000; }
         .modal-container { position: relative; z-index: 10001; background: #111827; border: 1px solid #4b5563; width: 95%; max-width: 500px; border-radius: 1rem; overflow: hidden; }
-        .call-icon { transition: transform 0.1s; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
+        .call-icon { transition: transform 0.1s; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; }
         .call-icon:active { transform: scale(1.2); background: rgba(255,255,255,0.1); }
     </style>
 </head>
@@ -23,7 +23,7 @@
     <div class="max-w-[1900px] mx-auto">
         <header class="flex flex-col gap-2 mb-3 border-b border-gray-800 pb-3">
             <div class="flex justify-between items-center px-2">
-                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC COMMAND v19.14</h1>
+                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC COMMAND v19.15</h1>
                 <div id="systemStatusText" class="text-[9px] font-bold uppercase py-1 px-2 rounded bg-gray-900 border border-gray-700">Connecting...</div>
             </div>
 
@@ -47,18 +47,39 @@
             </div>
         </header>
 
-        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-210px)]">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3 px-2">
+            <div class="bg-blue-900/10 border border-blue-500/30 rounded-lg p-2 text-center">
+                <div class="text-xl font-bold text-blue-400" id="queueCount">0</div>
+                <div class="text-[8px] uppercase text-gray-500 font-bold">Kho chờ xử lý</div>
+            </div>
+            <div class="bg-emerald-900/10 border border-emerald-500/30 rounded-lg p-2 text-center">
+                <div class="text-xl font-bold text-emerald-400" id="leadCount">0</div>
+                <div class="text-[8px] uppercase text-gray-500 font-bold">Tổng doanh nghiệp</div>
+            </div>
+            <div class="bg-purple-900/10 border border-purple-500/30 rounded-lg p-2 text-center col-span-2">
+                <div class="text-xl font-bold text-purple-400"><span id="phoneCount">0</span> / <span id="conversionRate">0%</span></div>
+                <div class="text-[8px] uppercase text-gray-500 font-bold">Đã có SĐT / Tỷ lệ chất lượng</div>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-280px)]">
             <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center px-4">
-                <h3 class="font-bold text-emerald-400 uppercase text-xs">Dữ liệu doanh nghiệp</h3>
-                <button onclick="exportToExcel()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-file-excel"></i></button>
+                <h3 class="font-bold text-emerald-400 uppercase text-xs">Danh sách khách hàng</h3>
+                <div class="flex gap-2">
+                    <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-950 text-[10px] border border-gray-700 rounded px-1 py-1 text-white">
+                        <option value="ALL">Tất cả</option>
+                        <option value="PHONE_ONLY">Chỉ có SĐT</option>
+                    </select>
+                    <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-2 py-1 rounded font-bold uppercase"><i class="fa-solid fa-file-excel"></i></button>
+                </div>
             </div>
             <div class="overflow-auto flex-1 bg-gray-950">
                 <table class="w-full text-left table-fixed-header text-xs">
                     <thead>
                         <tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800">
                             <th class="p-3">Doanh nghiệp</th>
-                            <th class="p-3 w-24 text-center">Gọi nhanh</th>
-                            <th class="p-3 w-20 text-center">Zalo</th>
+                            <th class="p-3 w-20 text-center">Gọi</th>
+                            <th class="p-3 w-16 text-center">Zalo</th>
                             <th class="p-3 w-8 text-center">X</th>
                         </tr>
                     </thead>
@@ -71,15 +92,15 @@
     <div id="unifiedModal" class="modal fixed inset-0 items-center justify-center">
         <div class="modal-overlay" onclick="closeModal()"></div>
         <div class="modal-container">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800 shadow-md">
-                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px] truncate pr-4">Chi tiết hồ sơ</h3>
-                <button onclick="closeModal()" class="text-white bg-red-600 px-2 py-1 rounded-md"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800"><h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px] truncate pr-4">Hồ sơ</h3><button onclick="closeModal()" class="text-white bg-red-600 px-2 py-1 rounded-md"><i class="fa-solid fa-xmark"></i></button></div>
             <div id="modalBody" class="p-5 space-y-4 text-xs bg-gray-950"></div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800 text-right">
-                 <button onclick="closeModal()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold uppercase shadow-lg">Đóng</button>
-            </div>
+            <div class="p-4 bg-gray-900 border-t border-gray-800 text-right"><button onclick="closeModal()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold uppercase shadow-lg">Xác nhận</button></div>
         </div>
+    </div>
+
+    <div id="paramModal" class="modal fixed inset-0 items-center justify-center">
+        <div class="modal-overlay" onclick="closeParamModal()"></div>
+        <div class="modal-container p-5"><h3 id="paramModalHeader" class="font-bold text-orange-400 uppercase text-xs mb-3 text-center">Tham số</h3><textarea id="paramInput" class="w-full h-40 bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-blue-300 font-mono outline-none"></textarea><button onclick="saveParams()" class="w-full bg-orange-600 text-white py-2 rounded-lg mt-4 font-bold uppercase">Cập nhật hệ thống</button></div>
     </div>
 
     <script type="module">
@@ -88,16 +109,38 @@
 
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-        let rawLeadsData = {};
+        let rawLeadsData = {}; let currentFilter = 'ALL'; let currentEditingParam = '';
+
+        async function initSync() {
+            onValue(ref(db, 'config_params'), snap => {
+                const data = snap.val(); if(!data) return;
+                ['industry', 'province'].forEach(type => {
+                    const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
+                    const list = data[type].split(',').map(i => i.strip());
+                    select.innerHTML = `<option value="ALL">Xoay vòng (Tất cả)</option>` + list.map(item => `<option value="${item}">${item}</option>`).join('');
+                });
+            });
+            const cfgSnap = await get(ref(db, 'config_target'));
+            if(cfgSnap.exists()){ const cfg = cfgSnap.val(); document.getElementById('targetIndustry').value = cfg.industry || "ALL"; document.getElementById('targetProvince').value = cfg.province || "ALL"; }
+        }
 
         function renderLeads() {
             const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
-            Object.entries(rawLeadsData).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
+            let items = Object.entries(rawLeadsData);
+            
+            // Tính toán số liệu thống kê
+            const total = items.length;
+            const hasPhoneCount = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có").length;
+            document.getElementById('leadCount').innerText = total;
+            document.getElementById('phoneCount').innerText = hasPhoneCount;
+            document.getElementById('conversionRate').innerText = total > 0 ? Math.round((hasPhoneCount/total)*100) + '%' : '0%';
+
+            if(currentFilter === 'PHONE_ONLY') items = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có");
+
+            items.sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
                 const phoneArr = v.phone && v.phone !== "Chưa có" ? v.phone.split(' - ') : [];
                 const mainPhone = phoneArr[0] || '';
                 const cleanPhone = mainPhone.replace(/[^0-9]/g, '');
-                
-                // Quyết định Icon: Mobile hay Landline
                 const isLandline = mainPhone.startsWith('02');
                 const iconClass = isLandline ? "fa-solid fa-phone-office text-orange-400" : "fa-solid fa-mobile-screen-button text-emerald-400";
 
@@ -109,22 +152,12 @@
                         <div class="text-[9px] text-emerald-600 font-mono mt-0.5">${v.tax_id || ''}</div>
                     </td>
                     <td class="p-3 text-center">
-                        ${cleanPhone ? `
-                            <a href="tel:${cleanPhone}" class="call-icon text-2xl">
-                                <i class="${iconClass}"></i>
-                            </a>
-                        ` : '<i class="fa-solid fa-phone-slash text-gray-800 text-lg"></i>'}
+                        ${cleanPhone ? `<a href="tel:${cleanPhone}" class="call-icon text-2xl"><i class="${iconClass}"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800 text-lg"></i>'}
                     </td>
                     <td class="p-3 text-center">
-                        ${(!isLandline && cleanPhone) ? `
-                            <a href="https://zalo.me/${cleanPhone}" target="_blank" class="text-blue-400 text-2xl">
-                                <i class="fa-solid fa-comment-dots"></i>
-                            </a>
-                        ` : ''}
+                        ${(!isLandline && cleanPhone) ? `<a href="https://zalo.me/${cleanPhone}" target="_blank" class="call-icon text-blue-400 text-2xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
                     </td>
-                    <td class="p-3 text-center">
-                        <button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-800 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
-                    </td>
+                    <td class="p-3 text-center"><button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -136,41 +169,32 @@
             document.getElementById('modalBody').innerHTML = `
                 <div class="space-y-4">
                     <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-gray-500 text-[9px] uppercase font-bold mb-1">Mã số thuế & Địa chỉ</p>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Mã số thuế & Địa chỉ</p>
                         <p class="text-emerald-400 font-mono font-bold text-sm mb-2">${v.tax_id || 'Chưa cập nhật'}</p>
                         <p class="text-gray-300 font-medium">${v.address || v.province || '---'}</p>
                     </div>
                     <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-gray-500 text-[9px] uppercase font-bold mb-1">Liên hệ</p>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Liên hệ chi tiết</p>
                         <p class="text-white font-bold text-lg tracking-widest select-all">${v.phone || '---'}</p>
-                        <p class="text-yellow-400 font-bold mt-2"><i class="fa-solid fa-user-check mr-2"></i>${v.contact_desc || 'Chưa rõ thông tin nhân sự'}</p>
+                        <p class="text-yellow-400 font-bold mt-2"><i class="fa-solid fa-user-tie mr-2"></i>${v.contact_desc || 'Chưa có thông tin nhân sự'}</p>
                     </div>
-                    <div class="flex justify-around py-2">
-                        <a href="https://www.google.com/search?q=%22${v.company}%22" target="_blank" class="text-gray-500 text-[10px] uppercase font-bold bg-gray-900 px-4 py-2 rounded-lg border border-gray-800">Tra cứu Google</a>
-                    </div>
+                    <p class="text-[9px] text-gray-700 text-center uppercase">Nguồn: ${v.source} | Ngành: ${v.industry}</p>
                 </div>
             `;
             document.getElementById('unifiedModal').classList.add('active');
         };
 
-        // CORE SYNC
-        async function initSync() {
-            onValue(ref(db, 'config_params'), snap => {
-                const data = snap.val(); if(!data) return;
-                ['industry', 'province'].forEach(type => {
-                    const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
-                    const list = data[type].split(',').map(i => i.strip());
-                    select.innerHTML = `<option value="ALL">Tất cả (Xoay vòng)</option>` + list.map(item => `<option value="${item}">${item}</option>`).join('');
-                });
-            });
-            const cfgSnap = await get(ref(db, 'config_target'));
-            if(cfgSnap.exists()){ const cfg = cfgSnap.val(); document.getElementById('targetIndustry').value = cfg.industry || "ALL"; document.getElementById('targetProvince').value = cfg.province || "ALL"; }
-        }
-
+        window.openParamModal = async (type) => { currentEditingParam = type; const snap = await get(ref(db, 'config_params/' + type)); document.getElementById('paramInput').value = snap.val() || ""; document.getElementById('paramModal').classList.add('active'); };
+        window.closeParamModal = () => document.getElementById('paramModal').classList.remove('active');
+        window.saveParams = async () => { await set(ref(db, 'config_params/' + currentEditingParam), document.getElementById('paramInput').value); alert("Đã lưu!"); closeParamModal(); };
         window.closeModal = () => document.getElementById('unifiedModal').classList.remove('active');
-        window.saveGlobalConfig = (mode) => { const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, quota: 200, updated_at: Date.now() }; set(ref(db, 'config_target'), cfg).then(() => alert("Đã phát lệnh!")); };
+        window.saveGlobalConfig = (mode) => { const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, updated_at: Date.now() }; set(ref(db, 'config_target'), cfg).then(() => alert("Đã phát lệnh!")); };
         window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
+        window.applyFilter = (v) => { currentFilter = v; renderLeads(); };
+        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "MST": v.tax_id, "Phone": v.phone, "Địa chỉ": v.address }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads"); XLSX.writeFile(wb, "VDC_Leads.xlsx"); };
+
         onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeads(); });
+        onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = s.size; });
         onValue(ref(db, 'config_system/status'), s => { document.getElementById('systemStatusText').innerText = s.val(); });
         initSync();
     </script>

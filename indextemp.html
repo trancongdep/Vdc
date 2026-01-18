@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC CRM COMMAND v17.0</title>
+    <title>VDC CRM COMMAND v17.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -26,9 +26,9 @@
         <header class="flex flex-col xl:flex-row justify-between items-center mb-4 border-b border-gray-800 pb-4 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-blue-500 tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-tower-observation"></i> VDC COMMAND v17.0
+                    <i class="fa-solid fa-layer-group"></i> VDC COMMAND v17.3
                 </h1>
-                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Hệ thống điều phối mục tiêu đa tầng</p>
+                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest text-emerald-500">Hệ thống hợp nhất dữ liệu bảo toàn</p>
             </div>
 
             <div class="bg-gray-900 border border-blue-500/30 rounded-lg p-3 grid grid-cols-2 md:grid-cols-5 gap-3 shadow-2xl w-full xl:w-auto">
@@ -39,10 +39,6 @@
                         <option value="Xây dựng điện">Xây dựng điện</option>
                         <option value="Kỹ thuật điện">Kỹ thuật điện</option>
                         <option value="Điện mặt trời">Điện mặt trời</option>
-                        <option value="Cơ điện M&E">Cơ điện M&E</option>
-                        <option value="Dệt may">Dệt may</option>
-                        <option value="Gỗ">Gỗ</option>
-                        <option value="Cơ khí">Cơ khí</option>
                         <option value="ALL">Tất cả ngành</option>
                     </select>
                 </div>
@@ -52,8 +48,6 @@
                         <option value="Bình Dương">Bình Dương</option>
                         <option value="Đồng Nai">Đồng Nai</option>
                         <option value="TP Hồ Chí Minh">TP Hồ Chí Minh</option>
-                        <option value="Long An">Long An</option>
-                        <option value="Bắc Ninh">Bắc Ninh</option>
                         <option value="RANDOM">Ngẫu nhiên</option>
                     </select>
                 </div>
@@ -62,8 +56,6 @@
                     <select id="targetSite" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs outline-none focus:border-orange-500 text-white">
                         <option value="site:hosocongty.vn">hosocongty.vn</option>
                         <option value="site:masothue.com">masothue.com</option>
-                        <option value="site:thongtincongty.com">thongtincongty.com</option>
-                        <option value="site:trangvangvietnam.com">trangvangvietnam.com</option>
                     </select>
                 </div>
                 <div class="flex flex-col gap-1">
@@ -71,7 +63,7 @@
                     <input type="number" id="scoutQuota" class="bg-gray-950 border border-gray-700 rounded px-2 py-1 text-xs w-full text-center focus:border-purple-500 outline-none text-white" value="50">
                 </div>
                 <div class="flex items-end">
-                    <button onclick="saveConfig()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-1 rounded text-xs font-bold transition shadow-lg active:scale-95 border border-blue-400/50">LƯU LỆNH TỔNG</button>
+                    <button onclick="saveConfig()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-1 rounded text-xs font-bold transition shadow-lg active:scale-95 border border-blue-400/50">LƯU LỆNH</button>
                 </div>
             </div>
         </header>
@@ -89,8 +81,8 @@
             </div>
             <div class="lg:col-span-1 bg-gray-900 border border-gray-700 rounded p-3 flex flex-col justify-center items-center">
                 <div class="flex gap-4 w-full">
-                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold shadow-lg transition active:scale-95">CHẠY</button>
-                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-red-600 text-white py-2 rounded font-bold shadow-lg transition active:scale-95">DỪNG</button>
+                    <button onclick="setSystemStatus('RUNNING')" id="btnStart" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold shadow-lg transition">CHẠY</button>
+                    <button onclick="setSystemStatus('PAUSED')" id="btnStop" class="flex-1 bg-red-600 text-white py-2 rounded font-bold shadow-lg transition">DỪNG</button>
                 </div>
                 <div id="systemStatusText" class="mt-2 text-[10px] font-bold tracking-widest uppercase">...</div>
             </div>
@@ -102,7 +94,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-280px)]">
             <div class="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-blue-400 text-xs uppercase pl-1"><i class="fa-solid fa-database mr-1"></i> Kho chờ</h3>
+                    <h3 class="font-bold text-blue-400 text-xs uppercase pl-1">Kho chờ (Queue)</h3>
                     <div class="flex gap-2">
                         <button onclick="downloadTemplate()" class="bg-gray-700 text-[9px] px-2 py-1 rounded">Mẫu</button>
                         <label class="bg-blue-700 text-[9px] px-2 py-1 rounded cursor-pointer">Nhập Excel<input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileUpload(this)"></label>
@@ -125,7 +117,7 @@
 
             <div class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg flex flex-col overflow-hidden">
                 <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <h3 class="font-bold text-emerald-400 text-xs uppercase pl-1"><i class="fa-solid fa-check-double mr-1"></i> Kết quả (Sale)</h3>
+                    <h3 class="font-bold text-emerald-400 text-xs uppercase pl-1">Kết quả (Leads)</h3>
                     <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-900 text-[10px] border border-gray-700 rounded px-2 py-1 outline-none">
                         <option value="ALL">Tất cả</option>
                         <option value="PHONE_ONLY">Chỉ có SĐT</option>
@@ -135,7 +127,7 @@
                     <table class="w-full text-left table-fixed-header">
                         <thead>
                             <tr class="text-[10px] uppercase text-gray-500 bg-gray-800 border-b border-gray-700">
-                                <th class="p-2">Tên Công ty (Click sửa)</th>
+                                <th class="p-2">Tên & Địa chỉ (Sửa)</th>
                                 <th class="p-2 w-44 text-yellow-500 font-bold">Người liên hệ</th>
                                 <th class="p-2 w-32">Phone</th>
                                 <th class="p-2 w-24 text-center">Cập nhật</th>
@@ -190,7 +182,7 @@
                     </div>
                 </div>
             </form>
-            <div class="flex justify-end gap-3 px-6 py-4 bg-gray-800 rounded-b-lg border-t border-gray-700">
+            <div class="flex justify-end gap-3 px-6 py-4 bg-gray-800 border-t border-gray-700 rounded-b-lg">
                 <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white transition">HỦY</button>
                 <button onclick="saveEdit()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded shadow-lg active:scale-95">LƯU THAY ĐỔI</button>
             </div>
@@ -229,7 +221,7 @@
             const province = document.getElementById('targetProvince').value;
             const site = document.getElementById('targetSite').value;
             const quota = document.getElementById('scoutQuota').value;
-            set(ref(db, 'config_target'), { industry, province, target_site: site, quota: parseInt(quota), updated_at: Date.now() }).then(() => alert("🎯 LỆNH ĐÃ PHÁT!"));
+            set(ref(db, 'config_target'), { industry, province, target_site: site, quota: parseInt(quota), updated_at: Date.now() }).then(() => alert("🎯 ĐÃ LƯU!"));
         };
 
         window.openDetail = (table, key) => {
@@ -255,7 +247,8 @@
                 province: document.getElementById('editProv').value,
                 address: document.getElementById('editAddress').value,
                 phone: document.getElementById('editPhone').value,
-                contact_desc: document.getElementById('editContact').value
+                contact_desc: document.getElementById('editContact').value,
+                tax_id: document.getElementById('editTax').value
             };
             if(table === 'hr_queue') { newData.name = document.getElementById('editName').value; newData.company_name = newData.name; }
             else { newData.company = document.getElementById('editName').value; }
@@ -276,7 +269,7 @@
                 json.forEach(r => {
                     if (r[0]) {
                         const key = "tax_manual_" + Date.now() + Math.floor(Math.random()*1000);
-                        updates['hr_queue/' + key] = { name: r[0], address: r[1]||"", province: r[2]||"", industry: r[3]||"", created_at: new Date().toISOString() };
+                        updates['hr_queue/' + key] = { name: r[0], company_name: r[0], address: r[1]||"", province: r[2]||"", industry: r[3]||"", created_at: new Date().toISOString() };
                         added++;
                     }
                 });
@@ -287,7 +280,7 @@
         onValue(ref(db, 'config_system/status'), s => {
             const v = s.val(); const txt = document.getElementById('systemStatusText');
             if(v==='RUNNING'){ txt.innerText="Hệ thống đang chạy"; txt.className="mt-2 text-[10px] font-bold text-emerald-500 animate-pulse"; }
-            else { txt.innerText="Hệ thống tạm dừng"; txt.className="mt-2 text-[10px] font-bold text-red-500"; }
+            else { txt.innerText="Hệ thống tạm dừng"; txt.className="mt-2 text-[10px] font-bold text-red-400"; }
         });
 
         onValue(ref(db, 'hr_queue'), s => {
@@ -296,7 +289,7 @@
             Object.entries(rawQueueData).sort((a,b) => parseDateTime(b[1].created_at) - parseDateTime(a[1].created_at)).forEach(([k,v], i) => {
                 const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer";
                 row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_queue', k); };
-                row.innerHTML = `<td class="p-2 text-gray-600">${i+1}</td><td class="p-2"><div class="font-bold text-blue-300">${v.name}</div><div class="text-[9px] text-gray-600 truncate w-40">${v.address||''}</div></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.created_at ? v.created_at.split(' ')[0] : '---'}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_queue/${k}', '${v.name}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></td>`;
+                row.innerHTML = `<td class="p-2 text-gray-600">${i+1}</td><td class="p-2"><div class="font-bold text-blue-300">${v.name}</div><div class="text-[9px] text-gray-600 truncate w-40">${v.address||''}</div></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.created_at ? v.created_at.split('T')[0] : '---'}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_queue/${k}', '${v.name}')" class="text-gray-700 hover:text-red-500 transition"><i class="fa-solid fa-trash-can"></i></button></td>`;
                 tbody.appendChild(row);
             });
         });
@@ -312,7 +305,7 @@
                 const row = document.createElement('tr'); row.className = "hover:bg-gray-800 transition cursor-pointer";
                 row.onclick = (e) => { if(!e.target.closest('button')) openDetail('hr_leads', k); };
                 const hasP = v.phone && v.phone !== "Chưa có";
-                row.innerHTML = `<td class="p-2"><div class="font-bold text-gray-300 group-hover:text-emerald-300 transition">${v.company}</div><div class="text-[9px] text-gray-600">${v.province || ''} | ${v.source || 'Bot'}</div></td><td class="p-2 text-yellow-400 font-bold text-xs">${v.contact_desc || '---'}</td><td class="p-2"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600'} font-mono">${v.phone||'---'}</span></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.last_updated ? v.last_updated.replace(' ', '<br>') : ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>`;
+                row.innerHTML = `<td class="p-2"><div class="font-bold text-gray-300 group-hover:text-emerald-300 transition">${v.company}</div><div class="text-[9px] text-gray-600 truncate w-64">${v.address || (v.province || '---')}</div></td><td class="p-2 text-yellow-400 font-bold text-xs">${v.contact_desc || '---'}</td><td class="p-2"><span class="${hasP?'text-emerald-400 font-bold bg-emerald-900/20 px-1 rounded':'text-gray-600'} font-mono">${v.phone||'---'}</span></td><td class="p-2 text-center text-[9px] text-gray-500 font-mono">${v.last_updated ? v.last_updated.replace(' ', '<br>') : ''}</td><td class="p-2 text-center"><button onclick="deleteNode('hr_leads/${k}', '${v.company}')" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>`;
                 tbody.appendChild(row);
             });
         }

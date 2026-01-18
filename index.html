@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v19.22</title>
+    <title>VDC CRM PRO v19.23 - Email Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -28,129 +28,77 @@
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/90 z-[90]"></div>
 
     <aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-gray-900 border-r border-gray-800 sidebar-closed flex flex-col shadow-2xl">
-        <div class="p-6 flex justify-between items-center border-b border-gray-800 bg-gray-900">
+        <div class="p-6 flex justify-between items-center border-b border-gray-800">
             <h2 class="text-blue-500 font-bold uppercase tracking-widest text-xs">VDC Control</h2>
             <button onclick="toggleSidebar()" class="text-gray-500"><i class="fa-solid fa-chevron-left text-xl"></i></button>
         </div>
         
         <div class="flex-1 overflow-y-auto p-4 space-y-8">
             <nav class="space-y-2">
-                <label class="text-[9px] text-gray-600 font-bold uppercase px-2 tracking-widest">Chế độ hiển thị</label>
-                <button onclick="switchPage('stats')" id="nav-stats" class="w-full flex items-center gap-4 p-4 rounded-xl transition menu-item-active">
-                    <i class="fa-solid fa-chart-line text-lg"></i> Giám sát & Stats
-                </button>
-                <button onclick="switchPage('leads')" id="nav-leads" class="w-full flex items-center gap-4 p-4 rounded-xl transition text-gray-400 hover:bg-gray-800">
-                    <i class="fa-solid fa-table-list text-lg"></i> Data Khách hàng
-                </button>
+                <button onclick="switchPage('stats')" id="nav-stats" class="w-full flex items-center gap-4 p-4 rounded-xl transition menu-item-active"><i class="fa-solid fa-chart-line text-lg"></i> Giám sát</button>
+                <button onclick="switchPage('leads')" id="nav-leads" class="w-full flex items-center gap-4 p-4 rounded-xl transition text-gray-400 hover:bg-gray-800"><i class="fa-solid fa-envelope-open-text text-lg"></i> Data & Email</button>
             </nav>
 
-            <hr class="border-gray-800">
-
-            <div class="space-y-4">
-                <label class="text-[9px] text-gray-600 font-bold uppercase px-2 tracking-widest">Cấu hình Bot</label>
-                <div class="px-2 space-y-4">
-                    <div>
-                        <span class="text-[10px] text-gray-500 block mb-2">Nguồn dữ liệu:</span>
-                        <button id="modeToggleBtn" onclick="handleModeToggle()" class="w-full py-3 rounded-lg text-[10px] font-bold uppercase border transition-all"></button>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-gray-500 block mb-2">Ngành mục tiêu:</span>
-                        <select id="targetIndustry" onchange="updateConfigOnServer()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-white outline-none focus:border-blue-500"></select>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-gray-500 block mb-2">Tỉnh khu vực:</span>
-                        <select id="targetProvince" onchange="updateConfigOnServer()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-white outline-none focus:border-emerald-500"></select>
-                    </div>
-                </div>
+            <div class="space-y-4 px-2">
+                <label class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Cấu hình Bot</label>
+                <button id="modeToggleBtn" onclick="handleModeToggle()" class="w-full py-3 rounded-lg text-[10px] font-bold uppercase border transition-all"></button>
+                <select id="targetIndustry" onchange="updateConfigOnServer()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-white outline-none"></select>
+                <select id="targetProvince" onchange="updateConfigOnServer()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-white outline-none"></select>
             </div>
         </div>
-        <div class="p-4 text-[9px] text-gray-700 text-center uppercase tracking-tighter border-t border-gray-800">VDC Dashboard v19.22</div>
+        <div class="p-4 text-[9px] text-gray-700 text-center uppercase border-t border-gray-800">VDC Dashboard v19.23</div>
     </aside>
 
     <main class="h-screen flex flex-col">
         <nav class="bg-gray-900 border-b border-gray-800 p-3 flex justify-between items-center z-10">
             <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-lg text-blue-500 active:scale-95 transition shadow-inner">
-                    <i class="fa-solid fa-bars-staggered"></i>
-                </button>
-                <h1 id="pageTitle" class="font-bold text-gray-200 tracking-tighter uppercase text-sm">Giám sát</h1>
+                <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-lg text-blue-500 active:scale-95 transition shadow-inner"><i class="fa-solid fa-bars-staggered"></i></button>
+                <h1 id="pageTitle" class="font-bold text-gray-100 tracking-tighter uppercase text-sm">Giám sát</h1>
             </div>
-            
-            <button id="powerBtn" onclick="handlePowerToggle()" class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-xl active:scale-90 transition-all">
-                <i class="fa-solid fa-power-off text-xl"></i>
-            </button>
+            <button id="powerBtn" onclick="handlePowerToggle()" class="w-12 h-12 flex items-center justify-center rounded-full border-4 shadow-xl active:scale-90 transition-all"><i class="fa-solid fa-power-off text-xl"></i></button>
         </nav>
 
         <div class="flex-1 overflow-hidden relative">
-            
             <div id="page-stats" class="page-content active p-4 space-y-4 overflow-y-auto">
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 text-center shadow-lg">
-                        <div class="text-4xl font-bold text-blue-400" id="queueCount">0</div>
-                        <div class="text-[10px] uppercase text-gray-500 font-bold mt-2">Kho chờ xử lý</div>
-                    </div>
-                    <div class="bg-emerald-900/10 border border-emerald-500/20 rounded-2xl p-6 text-center shadow-lg">
-                        <div class="text-4xl font-bold text-emerald-400" id="leadCountStat">0</div>
-                        <div class="text-[10px] uppercase text-gray-500 font-bold mt-2">Tổng doanh nghiệp</div>
-                    </div>
-                    <div class="bg-purple-900/10 border border-purple-500/20 rounded-2xl p-6 text-center col-span-2 shadow-lg">
-                        <div class="text-4xl font-bold text-purple-400" id="statDisplay">0 - 0%</div>
-                        <div class="text-[10px] uppercase text-gray-500 font-bold mt-2">Số có SĐT - Hiệu suất nguồn</div>
-                    </div>
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 shadow-lg"><div class="text-4xl font-bold text-blue-400" id="queueCount">0</div><div class="text-[10px] text-gray-500 font-bold mt-2 uppercase">Kho xử lý</div></div>
+                    <div class="bg-emerald-900/10 border border-emerald-500/20 rounded-2xl p-6 shadow-lg"><div class="text-4xl font-bold text-emerald-400" id="leadCountStat">0</div><div class="text-[10px] text-gray-500 font-bold mt-2 uppercase">Tổng Data</div></div>
+                    <div class="bg-purple-900/10 border border-purple-500/20 rounded-2xl p-6 shadow-lg col-span-2"><div class="text-4xl font-bold text-purple-400" id="statDisplay">0 - 0%</div><div class="text-[10px] text-gray-500 font-bold mt-2 uppercase">Chỉ số chuyển đổi</div></div>
                 </div>
-                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center">
-                    <label class="text-[10px] text-gray-600 uppercase font-bold block mb-3 tracking-widest">Hoạt động của Bot</label>
-                    <div id="botStatusText" class="text-blue-400 font-bold text-xl tracking-tight leading-relaxed">Bot Offline</div>
-                </div>
-                <div class="bg-orange-900/5 border border-orange-500/10 rounded-2xl p-4 flex items-center justify-between">
-                    <span class="text-xs text-orange-200/50">Yêu cầu can thiệp Captcha:</span>
-                    <span class="bg-gray-800 text-orange-500 px-3 py-1 rounded-full text-[10px] font-bold">Không có</span>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center shadow-inner">
+                    <label class="text-[10px] text-gray-600 uppercase font-bold block mb-2">Bot đang làm gì?</label>
+                    <div id="botStatusText" class="text-blue-400 font-bold text-lg italic">Bot Offline</div>
                 </div>
             </div>
 
             <div id="page-leads" class="page-content">
                 <div class="bg-gray-900 border-b border-gray-800 p-2 flex justify-between items-center px-4">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Real-time Data</span>
-                    </div>
-                    <div class="flex gap-3">
-                        <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-800 text-[10px] border border-gray-700 rounded-lg px-3 py-1.5 text-white">
-                            <option value="ALL">Tất cả</option>
-                            <option value="PHONE_ONLY">Chỉ có SĐT</option>
-                        </select>
-                        <button onclick="exportToExcel()" class="bg-emerald-600/20 text-emerald-500 w-8 h-8 rounded-lg border border-emerald-500/20"><i class="fa-solid fa-download"></i></button>
-                    </div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase">Data Intelligence</span>
+                    <button onclick="exportToExcel()" class="bg-emerald-600/20 text-emerald-500 px-3 py-1 rounded border border-emerald-500/30 text-xs font-bold uppercase">Xuất Excel</button>
                 </div>
                 <div class="flex-1 overflow-auto bg-gray-950">
                     <table class="w-full text-left table-fixed-header">
                         <thead>
-                            <tr class="text-[9px] text-gray-600 uppercase bg-gray-900 border-b border-gray-800">
-                                <th class="p-4">Hồ sơ công ty</th>
-                                <th class="p-4 w-20 text-center">Gọi</th>
-                                <th class="p-4 w-20 text-center">Zalo</th>
-                                <th class="p-4 w-10"></th>
+                            <tr class="text-[9px] text-gray-600 uppercase bg-gray-900 border-b border-gray-800 font-bold">
+                                <th class="p-4">Doanh nghiệp</th><th class="p-4 w-12 text-center">Gọi</th><th class="p-4 w-12 text-center">Zalo</th><th class="p-4 w-12 text-center">Mail</th><th class="p-4 w-8"></th>
                             </tr>
                         </thead>
                         <tbody id="leadTableBody" class="divide-y divide-gray-800/50"></tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </main>
 
     <div id="unifiedModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
         <div class="fixed inset-0 bg-black/95" onclick="closeModal()"></div>
         <div class="relative bg-gray-900 border border-gray-700 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
-            <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-gray-800/50">
-                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-xs truncate">Chi tiết</h3>
-                <button onclick="closeModal()" class="text-white bg-red-600/20 text-red-500 w-8 h-8 rounded-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800">
+                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px]">Hồ sơ chi tiết</h3>
+                <button onclick="closeModal()" class="text-white bg-red-600 px-2 py-1 rounded-md"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="modalBody" class="p-6 space-y-5 text-xs bg-gray-950"></div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800">
-                 <button onclick="closeModal()" class="bg-blue-600 text-white py-4 rounded-xl font-bold uppercase w-full shadow-lg shadow-blue-900/20">Xác nhận đã xem</button>
-            </div>
+            <div id="modalBody" class="p-6 space-y-4 text-xs bg-gray-950 overflow-y-auto max-h-[60vh]"></div>
+            <div class="p-4 bg-gray-900"><button onclick="closeModal()" class="bg-blue-600 text-white py-3 rounded-xl font-bold uppercase w-full">Đóng</button></div>
         </div>
     </div>
 
@@ -161,28 +109,17 @@
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
         
-        let currentMode = 'SCOUT', currentStatus = 'PAUSED', rawLeadsData = {}, currentFilter = 'ALL';
+        let currentMode = 'SCOUT', currentStatus = 'PAUSED', rawLeadsData = {};
 
-        // --- NAVIGATION LOGIC ---
-        window.toggleSidebar = () => {
-            document.getElementById('sidebar').classList.toggle('sidebar-closed');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
-        };
-
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('sidebar-closed'); document.getElementById('sidebarOverlay').classList.toggle('active'); };
         window.switchPage = (pageId) => {
-            // Hiệu ứng ẩn/hiện trang
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
-            
-            // Cập nhật trạng thái menu
             document.getElementById('nav-stats').classList.remove('menu-item-active');
             document.getElementById('nav-leads').classList.remove('menu-item-active');
             document.getElementById('nav-' + pageId).classList.add('menu-item-active');
-            
-            // Cập nhật tiêu đề Top Bar
-            document.getElementById('pageTitle').innerText = pageId === 'stats' ? 'Giám sát hệ thống' : 'Data Khách hàng';
-            
-            toggleSidebar(); // Đóng sidebar sau khi chọn
+            document.getElementById('pageTitle').innerText = pageId === 'stats' ? 'Giám sát hệ thống' : 'Data & Email Marketing';
+            toggleSidebar();
         };
 
         const LISTS = {
@@ -190,24 +127,15 @@
             province: "Bình Dương, Đồng Nai, TP.HCM, Long An, Bà Rịa - Vũng Tàu, Tây Ninh, Bình Phước, Cần Thơ, Tiền Giang"
         };
 
-        // --- SYNC ENGINE ---
         async function init() {
             onValue(ref(db, 'config_params'), snap => {
                 const data = snap.val() || LISTS;
                 ['industry', 'province'].forEach(type => {
                     const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
-                    select.innerHTML = `<option value="ALL">Tất cả (Xoay vòng)</option>` + data[type].split(',').map(i => `<option value="${i.trim()}">${i.trim()}</option>`).join('');
+                    select.innerHTML = `<option value="ALL">Tất cả</option>` + data[type].split(',').map(i => `<option value="${i.trim()}">${i.trim()}</option>`).join('');
                 });
             });
-
-            onValue(ref(db, 'config_target'), snap => {
-                const val = snap.val() || {};
-                currentMode = val.mode || 'SCOUT';
-                document.getElementById('targetIndustry').value = val.industry || 'ALL';
-                document.getElementById('targetProvince').value = val.province || 'ALL';
-                updateModeUI();
-            });
-
+            onValue(ref(db, 'config_target'), snap => { currentMode = snap.val()?.mode || 'SCOUT'; updateModeUI(); });
             onValue(ref(db, 'config_system/status'), snap => { currentStatus = snap.val() || 'PAUSED'; updatePowerUI(); });
             onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeads(); });
             onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = s.size; });
@@ -234,11 +162,7 @@
 
         function updatePowerUI() {
             const btn = document.getElementById('powerBtn');
-            if(currentStatus === 'RUNNING') {
-                btn.className = "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] pulse-active";
-            } else {
-                btn.className = "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white shadow-none";
-            }
+            btn.className = currentStatus === 'RUNNING' ? "w-12 h-12 flex items-center justify-center rounded-full border-4 border-emerald-500 bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] pulse-active" : "w-12 h-12 flex items-center justify-center rounded-full border-4 border-red-500 bg-red-600 text-white";
         }
 
         function renderLeads() {
@@ -249,23 +173,25 @@
             document.getElementById('leadCountStat').innerText = total;
             document.getElementById('statDisplay').innerText = `${hasPhone} - ${total>0?Math.round((hasPhone/total)*100):0}%`;
 
-            if(currentFilter === 'PHONE_ONLY') items = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có");
-
             items.sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
                 const phone = v.phone && v.phone !== "Chưa có" ? v.phone.split(' - ')[0].replace(/[^0-9]/g, '') : '';
+                const email = v.email || '';
                 const isMobile = !v.phone?.startsWith('02');
                 const row = document.createElement('tr');
-                row.className = "hover:bg-gray-900 border-b border-gray-800/50 active:bg-gray-800";
+                row.className = "hover:bg-gray-900 border-b border-gray-800/50";
                 row.innerHTML = `
                     <td class="p-4 leading-tight" onclick="showDetail('${k}')">
-                        <div class="font-bold text-gray-200 text-xs">${v.company || v.name}</div>
-                        <div class="text-[10px] text-emerald-500 font-mono mt-1">${v.tax_id || ''}</div>
+                        <div class="font-bold text-gray-200 text-xs truncate max-w-[180px]">${v.company || v.name}</div>
+                        <div class="text-[9px] text-emerald-500 font-mono mt-0.5">${v.tax_id || ''}</div>
                     </td>
                     <td class="p-4 text-center">
-                        ${phone ? `<a href="tel:${phone}" class="text-3xl ${isMobile?'text-emerald-400':'text-orange-400'}"><i class="fa-solid ${isMobile?'fa-mobile-screen':'fa-phone-office'}"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800 text-xl"></i>'}
+                        ${phone ? `<a href="tel:${phone}" class="text-2xl ${isMobile?'text-emerald-400':'text-orange-400'}"><i class="fa-solid ${isMobile?'fa-mobile-screen':'fa-phone-office'}"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800 text-lg"></i>'}
                     </td>
                     <td class="p-4 text-center">
-                        ${(isMobile && phone) ? `<a href="https://zalo.me/${phone}" target="_blank" class="text-blue-400 text-3xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
+                        ${(isMobile && phone) ? `<a href="https://zalo.me/${phone}" target="_blank" class="text-blue-400 text-2xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
+                    </td>
+                    <td class="p-4 text-center">
+                        ${email ? `<a href="mailto:${email}" class="text-purple-400 text-2xl active:scale-125 transition inline-block"><i class="fa-solid fa-envelope"></i></a>` : '<i class="fa-solid fa-envelope-circle-check text-gray-800 text-lg opacity-20"></i>'}
                     </td>
                     <td class="p-4 text-center"><button onclick="if(confirm('Xóa?')) remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>
                 `;
@@ -278,30 +204,17 @@
             document.getElementById('modalHeader').innerText = v.company || v.name;
             document.getElementById('modalBody').innerHTML = `
                 <div class="space-y-4">
-                    <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-2">Định danh doanh nghiệp</p>
-                        <p class="text-emerald-400 font-mono font-bold text-sm">MST: ${v.tax_id || '---'}</p>
-                        <p class="text-blue-300 mt-2 font-bold leading-relaxed">${v.address || v.province || '---'}</p>
-                        <p class="text-gray-500 italic mt-2">Ngành: ${v.industry || '---'}</p>
-                    </div>
-                    <div class="bg-gray-900 p-5 rounded-2xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-2">Thông tin liên lạc</p>
-                        <p class="text-white font-bold text-xl select-all tracking-wider">${v.phone || '---'}</p>
-                        <p class="text-yellow-400 font-bold mt-3"><i class="fa-solid fa-user-shield mr-2"></i>${v.contact_desc || '---'}</p>
-                    </div>
+                    <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800"><p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Định danh</p><p class="text-emerald-400 font-mono font-bold text-sm">MST: ${v.tax_id || '---'}</p><p class="text-gray-300 mt-2">${v.address || v.province || '---'}</p></div>
+                    <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800"><p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Điện thoại</p><p class="text-white font-bold text-lg select-all tracking-wider">${v.phone || '---'}</p></div>
+                    <div class="bg-gray-900 p-4 rounded-2xl border border-purple-500/30 shadow-lg shadow-purple-900/10"><p class="text-[9px] text-purple-400 uppercase font-bold mb-1">Email Doanh Nghiệp</p><p class="text-purple-300 font-bold text-sm select-all">${v.email || 'Bot đang tìm kiếm thêm...'}</p><p class="text-gray-500 italic mt-2 text-[10px]">Đầu mối: ${v.contact_desc || 'Chưa rõ'}</p></div>
                 </div>
             `;
             document.getElementById('unifiedModal').classList.remove('hidden');
             document.getElementById('unifiedModal').classList.add('active');
         };
 
-        window.closeModal = () => {
-            document.getElementById('unifiedModal').classList.add('hidden');
-            document.getElementById('unifiedModal').classList.remove('active');
-        };
-
-        window.applyFilter = (v) => { currentFilter = v; renderLeads(); };
-        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "MST": v.tax_id, "Phone": v.phone, "Địa chỉ": v.address }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads"); XLSX.writeFile(wb, "VDC_CRM_Export.xlsx"); };
+        window.closeModal = () => { document.getElementById('unifiedModal').classList.add('hidden'); document.getElementById('unifiedModal').classList.remove('active'); };
+        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "MST": v.tax_id, "Phone": v.phone, "Email": v.email, "Địa chỉ": v.address, "Ngành": v.industry }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads"); XLSX.writeFile(wb, "VDC_Export_Pro.xlsx"); };
         
         init();
     </script>

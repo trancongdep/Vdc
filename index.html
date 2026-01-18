@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC CRM PRO v19.17</title>
+    <title>VDC CRM PRO v19.18 - Smart Toggle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -15,61 +15,41 @@
         .modal.active { display: flex; opacity: 1; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 10000; }
         .modal-container { position: relative; z-index: 10001; background: #111827; border: 1px solid #4b5563; width: 95%; max-width: 500px; border-radius: 1rem; overflow: hidden; }
-        .call-icon { transition: transform 0.1s; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; }
-        .call-icon:active { transform: scale(1.2); background: rgba(255,255,255,0.1); }
+        /* Hiệu ứng cho nút đang chạy */
+        .pulse-active { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200 min-h-screen p-1 font-sans text-sm">
     <div class="max-w-[1900px] mx-auto">
-        <header class="flex flex-col gap-2 mb-3 border-b border-gray-800 pb-3">
-            <div class="flex justify-between items-center px-2">
-                <h1 class="text-xl font-bold text-blue-500 tracking-tighter">VDC COMMAND v19.17</h1>
-                <div id="systemStatusText" class="text-[9px] font-bold uppercase py-1 px-2 rounded bg-gray-900 border border-gray-700">Connecting...</div>
-            </div>
+        <header class="flex flex-col gap-2 mb-3 border-b border-gray-800 pb-3 text-center md:text-left">
+            <h1 class="text-xl font-bold text-blue-500 tracking-tighter px-2">VDC COMMAND v19.18</h1>
 
-            <div id="commandBox" class="bg-gray-900 border border-gray-700 rounded-xl p-3 grid grid-cols-2 md:grid-cols-6 gap-2 shadow-xl">
+            <div id="commandBox" class="bg-gray-900 border border-gray-800 rounded-xl p-3 grid grid-cols-2 md:grid-cols-4 gap-3 shadow-xl">
                 <div class="flex flex-col gap-1">
-                    <label class="text-[9px] text-blue-400 font-bold uppercase">Ngành nghề <i class="fa-solid fa-pen-nib ml-1" onclick="openParamModal('industry')"></i></label>
-                    <select id="targetIndustry" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none">
-                        <option value="ALL">Tất cả (Xoay vòng)</option>
-                        <option value="Điện">Điện (Trọng tâm)</option>
-                        <option value="Xây dựng">Xây dựng</option>
-                        <option value="May mặc">May mặc</option>
-                        <option value="Cơ khí">Cơ khí</option>
-                        <option value="Gỗ">Sản xuất Gỗ</option>
-                        <option value="Thực phẩm">Thực phẩm</option>
-                        <option value="Logistics">Logistics / Kho bãi</option>
-                        <option value="Giày da">Giày da</option>
-                        <option value="Nhựa">Nhựa / Bao bì</option>
-                    </select>
+                    <label class="text-[9px] text-blue-400 font-bold uppercase">Ngành nghề</label>
+                    <select id="targetIndustry" class="bg-gray-950 border border-gray-800 rounded p-2.5 text-xs text-white outline-none"></select>
                 </div>
-                <div class="flex flex-col gap-1 text-emerald-400">
-                    <label class="text-[9px] font-bold uppercase">Khu vực <i class="fa-solid fa-pen-nib ml-1 text-emerald-400" onclick="openParamModal('province')"></i></label>
-                    <select id="targetProvince" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white outline-none">
-                        <option value="ALL">Tất cả (Xoay vòng)</option>
-                        <option value="Bình Dương">Bình Dương</option>
-                        <option value="Đồng Nai">Đồng Nai</option>
-                        <option value="TP.HCM">TP. Hồ Chí Minh</option>
-                        <option value="Long An">Long An</option>
-                        <option value="Bà Rịa - Vũng Tàu">Vũng Tàu</option>
-                        <option value="Tây Ninh">Tây Ninh</option>
-                        <option value="Bình Phước">Bình Phước</option>
-                        <option value="Cần Thơ">Cần Thơ</option>
-                        <option value="Tiền Giang">Tiền Giang</option>
-                    </select>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[9px] text-emerald-400 font-bold uppercase">Khu vực</label>
+                    <select id="targetProvince" class="bg-gray-950 border border-gray-800 rounded p-2.5 text-xs text-white outline-none"></select>
                 </div>
-                <div class="flex gap-2 col-span-2 md:col-span-2">
-                    <button onclick="saveGlobalConfig('SCOUT')" class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Chế độ Web</button>
-                    <button onclick="saveGlobalConfig('MAPS')" class="flex-1 bg-red-700 text-white py-3 rounded-lg text-xs font-bold uppercase">Chế độ Maps</button>
+                
+                <div class="flex flex-col justify-end">
+                    <button id="toggleModeBtn" onclick="handleModeToggle()" class="w-full py-3 rounded-lg text-xs font-bold uppercase transition-all duration-300 shadow-lg border">
+                        Loading...
+                    </button>
                 </div>
-                <div class="flex gap-2 col-span-2 md:col-span-2">
-                    <button onclick="setSystemStatus('RUNNING')" class="flex-1 bg-emerald-600 text-white py-3 rounded-lg text-xs font-bold uppercase">Bắt đầu</button>
-                    <button onclick="setSystemStatus('PAUSED')" class="flex-1 bg-gray-700 text-white py-3 rounded-lg text-xs font-bold uppercase">Dừng lại</button>
+
+                <div class="flex flex-col justify-end">
+                    <button id="togglePowerBtn" onclick="handlePowerToggle()" class="w-full py-3 rounded-lg text-xs font-bold uppercase transition-all duration-300 shadow-lg border">
+                        Loading...
+                    </button>
                 </div>
             </div>
         </header>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3 px-2">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-3 px-2">
             <div class="bg-blue-900/10 border border-blue-500/30 rounded-lg p-2 text-center">
                 <div class="text-xl font-bold text-blue-400" id="queueCount">0</div>
                 <div class="text-[8px] uppercase text-gray-500 font-bold">Kho chờ</div>
@@ -78,31 +58,28 @@
                 <div class="text-xl font-bold text-emerald-400" id="leadCount">0</div>
                 <div class="text-[8px] uppercase text-gray-500 font-bold">Tổng doanh nghiệp</div>
             </div>
-            <div class="bg-purple-900/10 border border-purple-500/30 rounded-lg p-2 text-center col-span-2">
+            <div class="bg-purple-900/10 border border-purple-500/30 rounded-lg p-2 text-center col-span-2 lg:col-span-1">
                 <div class="text-xl font-bold text-purple-400" id="statDisplay">0 - 0%</div>
-                <div class="text-[8px] uppercase text-gray-500 font-bold">Số có SĐT - Hiệu suất quét</div>
+                <div class="text-[8px] uppercase text-gray-500 font-bold">Có SĐT - Hiệu quả</div>
             </div>
         </div>
 
-        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl h-[calc(100vh-280px)]">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl flex flex-col overflow-hidden h-[calc(100vh-230px)]">
             <div class="p-2 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center px-4">
-                <h3 class="font-bold text-emerald-400 uppercase text-xs">Cơ sở dữ liệu VDC</h3>
+                <h3 class="font-bold text-emerald-400 uppercase text-xs">Dữ liệu doanh nghiệp</h3>
                 <div class="flex gap-2">
-                    <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-950 text-[10px] border border-gray-700 rounded px-1 py-1 text-white">
+                    <select id="filterSelect" onchange="applyFilter(this.value)" class="bg-gray-950 text-[10px] border border-gray-700 rounded px-1 text-white">
                         <option value="ALL">Tất cả</option>
-                        <option value="PHONE_ONLY">Chỉ công ty có SĐT</option>
+                        <option value="PHONE_ONLY">Chỉ có số</option>
                     </select>
-                    <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-2 py-1 rounded font-bold uppercase"><i class="fa-solid fa-file-excel mr-1"></i> Xuất Excel</button>
+                    <button onclick="exportToExcel()" class="bg-emerald-700 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Excel</button>
                 </div>
             </div>
             <div class="overflow-auto flex-1 bg-gray-950">
                 <table class="w-full text-left table-fixed-header text-xs">
                     <thead>
                         <tr class="text-[9px] text-gray-500 uppercase bg-gray-900 border-b border-gray-800">
-                            <th class="p-3">Thông tin doanh nghiệp</th>
-                            <th class="p-3 w-20 text-center">Gọi</th>
-                            <th class="p-3 w-16 text-center">Zalo</th>
-                            <th class="p-3 w-8 text-center">X</th>
+                            <th class="p-3">Doanh nghiệp</th><th class="p-3 w-16 text-center">Gọi</th><th class="p-3 w-16 text-center">Zalo</th><th class="p-3 w-8 text-center">X</th>
                         </tr>
                     </thead>
                     <tbody id="leadTableBody" class="divide-y divide-gray-900 text-gray-300"></tbody>
@@ -113,16 +90,7 @@
 
     <div id="unifiedModal" class="modal fixed inset-0 items-center justify-center">
         <div class="modal-overlay" onclick="closeModal()"></div>
-        <div class="modal-container p-0">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800">
-                <h3 id="modalHeader" class="font-bold text-blue-400 uppercase text-[11px] truncate pr-4">Chi tiết</h3>
-                <button onclick="closeModal()" class="text-white bg-red-600 px-2 py-1 rounded-md"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="modalBody" class="p-5 space-y-4 text-xs bg-gray-950"></div>
-            <div class="p-4 bg-gray-900 border-t border-gray-800 text-right">
-                 <button onclick="closeModal()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold uppercase">Đã xem</button>
-            </div>
-        </div>
+        <div class="modal-container"><div id="modalBody" class="p-5"></div></div>
     </div>
 
     <script type="module">
@@ -131,39 +99,101 @@
 
         const firebaseConfig = { apiKey: "AIzaSyCCF9A0dKF5Rwp0v5RoSVDxjdWJawUxVFU", authDomain: "vdc-crm-southern.firebaseapp.com", databaseURL: "https://vdc-crm-southern-default-rtdb.firebaseio.com", projectId: "vdc-crm-southern", storageBucket: "vdc-crm-southern.firebasestorage.app", messagingSenderId: "793485969742", appId: "1:793485969742:web:40bd247e271eca62df361f" };
         const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+        
+        let currentMode = 'SCOUT';
+        let currentStatus = 'PAUSED';
         let rawLeadsData = {}; let currentFilter = 'ALL';
 
+        // --- KHÔI PHỤC LIST ĐẦY ĐỦ NHƯ V19.17 ---
+        const FULL_PROVINCES = "Bình Dương, Đồng Nai, TP.HCM, Long An, Bà Rịa - Vũng Tàu, Tây Ninh, Bình Phước, Cần Thơ, Tiền Giang";
+        const FULL_INDUSTRIES = "Điện, Xây dựng, May mặc, Cơ khí, Gỗ, Thực phẩm, Logistics, Giày da, Nhựa";
+
+        async function initSync() {
+            onValue(ref(db, 'config_params'), snap => {
+                const data = snap.val() || { industry: FULL_INDUSTRIES, province: FULL_PROVINCES };
+                ['industry', 'province'].forEach(type => {
+                    const select = document.getElementById('target' + type.charAt(0).toUpperCase() + type.slice(1));
+                    const list = data[type].split(',').map(i => i.trim());
+                    select.innerHTML = `<option value="ALL">Xoay vòng (Tất cả)</option>` + list.map(item => `<option value="${item}">${item}</option>`).join('');
+                });
+            });
+
+            // Lắng nghe thay đổi Mode
+            onValue(ref(db, 'config_target'), snap => {
+                const cfg = snap.val() || {};
+                currentMode = cfg.mode || 'SCOUT';
+                updateModeUI();
+            });
+
+            // Lắng nghe thay đổi Power
+            onValue(ref(db, 'config_system/status'), snap => {
+                currentStatus = snap.val() || 'PAUSED';
+                updatePowerUI();
+            });
+        }
+
+        // --- LOGIC XỬ LÝ NÚT BẤM (TOGGLE) ---
+        window.handleModeToggle = () => {
+            const newMode = currentMode === 'SCOUT' ? 'MAPS' : 'SCOUT';
+            set(ref(db, 'config_target/mode'), newMode);
+            set(ref(db, 'config_target/industry'), document.getElementById('targetIndustry').value);
+            set(ref(db, 'config_target/province'), document.getElementById('targetProvince').value);
+            set(ref(db, 'config_target/updated_at'), Date.now());
+        };
+
+        window.handlePowerToggle = () => {
+            const newStatus = currentStatus === 'RUNNING' ? 'PAUSED' : 'RUNNING';
+            set(ref(db, 'config_system/status'), newStatus);
+        };
+
+        function updateModeUI() {
+            const btn = document.getElementById('toggleModeBtn');
+            if(currentMode === 'SCOUT') {
+                btn.innerHTML = '<i class="fa-solid fa-globe mr-2"></i> WEB MODE';
+                btn.className = "w-full py-3 rounded-lg text-xs font-bold uppercase bg-blue-900/40 text-blue-400 border-blue-500/50 shadow-blue-900/20";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-map-location-dot mr-2"></i> MAPS MODE';
+                btn.className = "w-full py-3 rounded-lg text-xs font-bold uppercase bg-red-900/40 text-red-400 border-red-500/50 shadow-red-900/20";
+            }
+        }
+
+        function updatePowerUI() {
+            const btn = document.getElementById('togglePowerBtn');
+            if(currentStatus === 'RUNNING') {
+                btn.innerHTML = '<i class="fa-solid fa-bolt-lightning mr-2"></i> ĐANG CHẠY';
+                btn.className = "w-full py-3 rounded-lg text-xs font-bold uppercase bg-emerald-600 text-white border-emerald-400 pulse-active shadow-emerald-900/40";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-pause mr-2"></i> HỆ THỐNG DỪNG';
+                btn.className = "w-full py-3 rounded-lg text-xs font-bold uppercase bg-gray-800 text-gray-400 border-gray-700 shadow-none";
+            }
+        }
+
+        // --- RENDER DỮ LIỆU ---
         function renderLeads() {
             const tbody = document.getElementById('leadTableBody'); tbody.innerHTML = '';
             let items = Object.entries(rawLeadsData);
-            
             const total = items.length;
-            const hasPhoneCount = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có").length;
-            const percentage = total > 0 ? Math.round((hasPhoneCount/total)*100) : 0;
+            const hasPhone = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có").length;
             document.getElementById('leadCount').innerText = total;
-            document.getElementById('statDisplay').innerText = `${hasPhoneCount} - ${percentage}%`;
+            document.getElementById('statDisplay').innerText = `${hasPhone} - ${total>0?Math.round((hasPhone/total)*100):0}%`;
 
             if(currentFilter === 'PHONE_ONLY') items = items.filter(([k,v]) => v.phone && v.phone !== "Chưa có");
 
             items.sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0)).forEach(([k,v]) => {
-                const phoneArr = v.phone && v.phone !== "Chưa có" ? v.phone.split(' - ') : [];
-                const mainPhone = phoneArr[0] || '';
-                const cleanPhone = mainPhone.replace(/[^0-9]/g, '');
-                const isLandline = mainPhone.startsWith('02');
-                const iconClass = isLandline ? "fa-solid fa-phone-office text-orange-400" : "fa-solid fa-mobile-screen-button text-emerald-400";
-
+                const phone = v.phone ? v.phone.split(' - ')[0].replace(/[^0-9]/g, '') : '';
+                const isMobile = !v.phone?.startsWith('02');
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800 transition border-b border-gray-900";
                 row.innerHTML = `
                     <td class="p-3 leading-tight" onclick="showDetail('${k}')">
                         <div class="font-bold text-gray-200 text-[11px]">${v.company || v.name}</div>
-                        <div class="text-[10px] text-emerald-600 font-mono mt-0.5">${v.tax_id || ''}</div>
+                        <div class="text-[10px] text-emerald-500 font-mono">${v.tax_id || ''}</div>
                     </td>
                     <td class="p-3 text-center">
-                        ${cleanPhone ? `<a href="tel:${cleanPhone}" class="call-icon text-2xl"><i class="${iconClass}"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800 text-lg"></i>'}
+                        ${phone ? `<a href="tel:${phone}" class="text-2xl ${isMobile?'text-emerald-400':'text-orange-400'}"><i class="fa-solid ${isMobile?'fa-mobile-screen':'fa-phone-office'}"></i></a>` : '<i class="fa-solid fa-phone-slash text-gray-800 text-lg"></i>'}
                     </td>
                     <td class="p-3 text-center">
-                        ${(!isLandline && cleanPhone) ? `<a href="https://zalo.me/${cleanPhone}" target="_blank" class="call-icon text-blue-400 text-2xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
+                        ${(isMobile && phone) ? `<a href="https://zalo.me/${phone}" target="_blank" class="text-blue-400 text-2xl"><i class="fa-solid fa-comment-dots"></i></a>` : ''}
                     </td>
                     <td class="p-3 text-center"><button onclick="remove(ref(db, 'hr_leads/${k}'))" class="text-gray-700 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button></td>
                 `;
@@ -173,33 +203,23 @@
 
         window.showDetail = (key) => {
             const v = rawLeadsData[key];
-            document.getElementById('modalHeader').innerText = v.company || v.name;
             document.getElementById('modalBody').innerHTML = `
+                <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-blue-400 uppercase">${v.company}</h3><button onclick="closeModal()" class="text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button></div>
                 <div class="space-y-4">
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Mã số thuế & Địa chỉ</p>
-                        <p class="text-emerald-400 font-mono font-bold text-sm mb-2">${v.tax_id || 'Chưa cập nhật'}</p>
-                        <p class="text-gray-300 font-medium">${v.address || v.province || '---'}</p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Liên hệ</p>
-                        <p class="text-white font-bold text-lg tracking-widest select-all">${v.phone || '---'}</p>
-                        <p class="text-yellow-400 font-bold mt-2"><i class="fa-solid fa-user-tie mr-2"></i>${v.contact_desc || 'Chưa rõ nhân sự'}</p>
-                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800"><p class="text-[9px] text-gray-500 uppercase mb-1">MST & Địa chỉ</p><p class="text-emerald-400 font-mono font-bold text-sm mb-2">${v.tax_id || '---'}</p><p class="text-gray-300">${v.address || v.province || '---'}</p></div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800"><p class="text-[9px] text-gray-500 uppercase mb-1">Liên hệ</p><p class="text-white font-bold text-lg select-all">${v.phone || '---'}</p><p class="text-yellow-400 font-bold mt-2"><i class="fa-solid fa-user-tie mr-2"></i>${v.contact_desc || '---'}</p></div>
+                    <p class="text-[9px] text-gray-700 text-center uppercase">Nguồn: ${v.source} | Ngành: ${v.industry}</p>
                 </div>
             `;
             document.getElementById('unifiedModal').classList.add('active');
         };
 
         window.closeModal = () => document.getElementById('unifiedModal').classList.remove('active');
-        window.saveGlobalConfig = (mode) => { const cfg = { mode, industry: document.getElementById('targetIndustry').value, province: document.getElementById('targetProvince').value, updated_at: Date.now() }; set(ref(db, 'config_target'), cfg).then(() => alert("Phát lệnh thành công!")); };
-        window.setSystemStatus = (s) => set(ref(db, 'config_system/status'), s);
         window.applyFilter = (v) => { currentFilter = v; renderLeads(); };
-        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "MST": v.tax_id, "Phone": v.phone, "Địa chỉ": v.address }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Leads"); XLSX.writeFile(wb, "VDC_CRM_Leads.xlsx"); };
-
+        window.exportToExcel = () => { const ws = XLSX.utils.json_to_sheet(Object.values(rawLeadsData).map(v => ({ "Công ty": v.company, "MST": v.tax_id, "Phone": v.phone, "Địa chỉ": v.address }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "VDC"); XLSX.writeFile(wb, "VDC_CRM.xlsx"); };
         onValue(ref(db, 'hr_leads'), s => { rawLeadsData = s.val() || {}; renderLeads(); });
         onValue(ref(db, 'hr_queue'), s => { document.getElementById('queueCount').innerText = s.size; });
-        onValue(ref(db, 'config_system/status'), s => { document.getElementById('systemStatusText').innerText = s.val(); });
+        initSync();
     </script>
 </body>
 </html>

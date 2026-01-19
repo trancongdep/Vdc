@@ -3,117 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC - Thực hành CPR (WebAR)</title>
-    
+    <title>VDC - Thực hành CPR (Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     
     <style>
-        /* Màn hình đen để làm nổi bật Model */
         body { margin: 0; background-color: #1a1a1a; font-family: sans-serif; }
-        
-        model-viewer { 
-            width: 100vw; 
-            height: 100vh; 
-        }
-        
-        /* Nút bấm trong suốt phủ lên ngực nạn nhân */
-        .hotspot-chest {
-            width: 80px; height: 80px;
-            background: rgba(220, 38, 38, 0.3); /* Màu đỏ nhạt */
-            border: 3px solid #ef4444; /* Viền đỏ đậm */
-            border-radius: 50%;
-            cursor: pointer;
-            transform: translateY(-50%);
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
-            animation: pulse-ring 2s infinite;
-        }
-        .hotspot-chest:active { 
-            background: rgba(220, 38, 38, 0.7); 
-            transform: translateY(-50%) scale(0.9);
-        }
+        model-viewer { width: 100vw; height: 100vh; }
 
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* Giao diện HUD (Head-up Display) nổi trên Camera */
+        /* Giao diện HUD (Bảng thông số) */
         #ar-hud {
-            position: fixed; bottom: 40px; left: 0; right: 0;
-            text-align: center; pointer-events: none;
-            z-index: 10;
+            position: fixed; bottom: 30px; left: 0; right: 0;
+            text-align: center; pointer-events: none; z-index: 10;
         }
-        
-        /* Hộp thông tin */
         .hud-box {
             display: inline-block;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             color: white;
-            padding: 16px 24px;
+            padding: 15px 25px;
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Nút AR (Góc phải trên) */
-        .ar-button {
-            position: absolute; top: 16px; right: 16px;
-            background: #2563eb; color: white;
-            padding: 8px 16px; border-radius: 8px;
-            font-weight: bold; font-size: 14px;
-            text-decoration: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        /* --- STYLE CHO NÚT BẤM CỦA BẠN (Class .Hotspot) --- */
+        .Hotspot {
+            background: rgba(255, 0, 0, 0.3);
+            border-radius: 50%;
+            border: 3px solid #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+            width: 60px; height: 60px;
+            cursor: pointer;
+            transition: all 0.1s;
+            /* Hiệu ứng nhịp đập để thu hút sự chú ý */
+            animation: pulse-red 2s infinite; 
         }
+
+        /* Hiệu ứng khi bấm vào */
+        .Hotspot:active {
+            background: rgba(255, 0, 0, 0.8);
+            transform: scale(0.9);
+            border-color: white;
+        }
+
+        /* Ẩn các chú thích mặc định của Google nếu có */
+        .Hotspot > * { pointer-events: none; }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Thanh Progress Bar tải model */
+        .progress-bar { display: none; }
     </style>
 </head>
 <body>
 
     <model-viewer 
         id="cpr-model"
-        src="models/cpr.glb" 
-        ar 
-        ar-modes="webxr scene-viewer quick-look" 
-        ar-placement="floor"
+        src="cpr.glb" 
+        ar ar-modes="webxr scene-viewer quick-look" 
         camera-controls 
-        shadow-intensity="1"
-        disable-tap
-        auto-rotate> 
+        tone-mapping="neutral" 
+        poster="poster.webp" 
+        shadow-intensity="1">
 
-        <button class="hotspot-chest" slot="hotspot-chest" 
-                data-position="0 0.2 0.3" 
-                data-normal="0 1 0"
+        <button class="Hotspot" 
+                slot="hotspot-3" 
+                data-surface="6 0 930 931 926 0.225 0.592 0.183" 
+                data-visibility-attribute="visible"
                 onclick="performCompression()">
         </button>
-        
-        <button slot="ar-button" class="ar-button">
-            📺 Xem trong không gian thật (AR)
-        </button>
 
+        <button slot="ar-button" style="background-color: white; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; padding: 10px 20px;">
+            👋 Xem AR
+        </button>
     </model-viewer>
 
     <div id="ar-hud">
         <div class="hud-box">
-            <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Tốc độ ép tim (BPM)</div>
+            <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Tốc độ ép tim</div>
             
             <div class="flex items-end justify-center gap-3">
                 <span id="bpm-val" class="text-6xl font-black text-white leading-none">0</span>
                 <div class="flex flex-col items-start pb-1">
-                    <span id="feedback" class="text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200">Sẵn sàng</span>
-                    <span class="text-[10px] text-gray-400 mt-1">Mục tiêu: 100-120</span>
+                    <span class="text-sm font-bold text-gray-400">BPM</span>
+                    <span id="feedback" class="text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200 mt-1">Sẵn sàng</span>
                 </div>
             </div>
 
             <div class="w-64 h-3 bg-gray-700 rounded-full mt-4 overflow-hidden relative">
-                <div class="absolute top-0 bottom-0 left-[66%] right-[20%] bg-green-900/50 z-0"></div>
-                <div id="bpm-bar" class="h-full bg-blue-500 w-0 transition-all duration-200 relative z-10"></div>
+                <div class="absolute top-0 bottom-0 left-[66%] right-[20%] bg-green-900/50"></div>
+                <div id="bpm-bar" class="h-full bg-blue-500 w-0 transition-all duration-200"></div>
             </div>
             
-            <p class="text-[11px] mt-3 text-gray-400 italic animate-pulse">
-                👇 Ấn liên tục vào vòng tròn đỏ trên ngực nạn nhân
+            <p class="text-[11px] mt-3 text-gray-400 italic">
+                Ấn vào vòng tròn đỏ để bắt đầu
             </p>
         </div>
     </div>
@@ -128,77 +116,59 @@
         let pressTimeout;
 
         // TÊN ANIMATION (QUAN TRỌNG)
-        // File Mixamo thường có tên animation là 'mixamo.com'
-        // Nếu file của bạn tên khác, hãy sửa dòng dưới đây.
+        // Nếu model không nhún, hãy đổi tên này thành 'mixamo.com' hoặc 'KeyAction'
         const ANIMATION_NAME = 'mixamo.com'; 
 
         function performCompression() {
             const now = Date.now();
             
             // 1. Chạy Animation ép tim
-            // Kiểm tra xem model có animation đó không
             if (modelViewer.availableAnimations.includes(ANIMATION_NAME)) {
                 modelViewer.animationName = ANIMATION_NAME; 
                 modelViewer.play();
-                
-                // Dừng animation sau 0.4s (để tạo cảm giác nhún xuống rồi nảy lên)
-                setTimeout(() => modelViewer.pause(), 400); 
-            } else {
-                console.warn(`Không tìm thấy animation tên: ${ANIMATION_NAME}. Hãy kiểm tra lại file 3D.`);
-                // Vẫn chạy logic tính điểm dù không có animation
+                setTimeout(() => modelViewer.pause(), 400); // Dừng sau 0.4s
             }
 
             // 2. Tính toán nhịp tim (BPM)
             if (lastPress !== 0) {
                 const diff = now - lastPress;
-                // Công thức: 60000ms / khoảng cách giữa 2 lần ấn
                 const bpm = Math.round(60000 / diff);
 
                 // Cập nhật số hiển thị
                 bpmDisplay.innerText = bpm;
                 
-                // Cập nhật thanh Bar (Max 150bpm là 100%)
+                // Cập nhật thanh Bar
                 let percent = (bpm / 150) * 100;
                 bpmBar.style.width = Math.min(percent, 100) + "%";
 
-                // Đánh giá kết quả (Chuẩn: 100 - 120)
-                updateFeedback(bpm);
+                // Đánh giá kết quả
+                if (bpm < 100) {
+                    feedbackBadge.innerText = "NHANH HƠN! ⚡";
+                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-500 text-black mt-1";
+                    bpmBar.className = "h-full w-0 transition-all duration-200 bg-yellow-500";
+                } else if (bpm > 120) {
+                    feedbackBadge.innerText = "CHẬM LẠI! 🐢";
+                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500 text-white mt-1";
+                    bpmBar.className = "h-full w-0 transition-all duration-200 bg-red-500";
+                } else {
+                    feedbackBadge.innerText = "TUYỆT VỜI! ✅";
+                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-green-500 text-white mt-1";
+                    bpmBar.className = "h-full w-0 transition-all duration-200 bg-green-500 shadow-[0_0_10px_#22c55e]";
+                }
             }
 
             lastPress = now;
 
-            // Reset về 0 nếu ngừng ấn quá 2 giây
+            // Reset về 0 nếu nghỉ quá 2 giây
             clearTimeout(pressTimeout);
             pressTimeout = setTimeout(() => {
                 bpmDisplay.innerText = "0";
                 bpmBar.style.width = "0%";
-                updateFeedback(0);
+                feedbackBadge.innerText = "Sẵn sàng";
+                feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200 mt-1";
+                bpmBar.className = "h-full w-0 transition-all duration-200 bg-blue-500";
                 lastPress = 0;
             }, 2000);
-        }
-
-        function updateFeedback(bpm) {
-            if (bpm === 0) {
-                feedbackBadge.innerText = "Sẵn sàng";
-                feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200";
-                bpmBar.classList.remove("bg-red-500", "bg-yellow-500", "bg-green-500");
-                bpmBar.classList.add("bg-blue-500");
-                return;
-            }
-
-            if (bpm < 100) {
-                feedbackBadge.innerText = "NHANH HƠN! ⚡";
-                feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-500 text-black";
-                bpmBar.className = "h-full w-0 transition-all duration-200 bg-yellow-500";
-            } else if (bpm > 120) {
-                feedbackBadge.innerText = "CHẬM LẠI! 🐢";
-                feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500 text-white";
-                bpmBar.className = "h-full w-0 transition-all duration-200 bg-red-500";
-            } else {
-                feedbackBadge.innerText = "TUYỆT VỜI! ✅";
-                feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-green-500 text-white";
-                bpmBar.className = "h-full w-0 transition-all duration-200 bg-green-500 shadow-[0_0_10px_#22c55e]";
-            }
         }
     </script>
 </body>

@@ -3,162 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC - Kiểm tra PPE</title>
+    <title>VDC - WebAR PPE Check</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     <style>
-        body { background-color: #f0fdf4; user-select: none; }
-        
-        /* Khung chứa nhân vật */
-        .character-container {
-            position: relative;
-            width: 300px;
-            height: 500px;
-            margin: 0 auto;
-            background-image: url('https://img.freepik.com/free-vector/builder-character-uniform_1308-36171.jpg?w=360'); /* Ảnh nền cơ thể (Body) */
-            background-size: cover;
-            background-position: center;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
+        model-viewer { width: 100vw; height: 100vh; background-color: #333; }
 
-        /* Các điểm nóng (Hotspots) - Vùng bấm */
-        .hazard-spot {
-            position: absolute;
+        /* Hotspot cảnh báo lỗi */
+        .hotspot-warning {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px; border-radius: 30px;
+            border: 2px solid #ef4444;
+            font-weight: bold; color: #b91c1c; font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px dashed rgba(220, 38, 38, 0.5); /* Viền đỏ nhạt gợi ý */
-            background-color: rgba(255, 255, 255, 0.1);
+            animation: bounce 2s infinite;
         }
-        .hazard-spot:hover {
-            background-color: rgba(220, 38, 38, 0.1);
-            border-color: red;
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
-        /* Trạng thái ĐÚNG (Sau khi sửa) */
-        .hazard-spot.fixed {
-            border: 2px solid #16a34a; /* Viền xanh */
-            background-color: rgba(22, 163, 74, 0.2);
-            pointer-events: none; /* Không cho bấm nữa */
+        /* Hotspot khi đã sửa xong */
+        .hotspot-success {
+            background: #22c55e; color: white; border-color: white;
+            animation: none;
         }
-
-        /* Nhãn hiển thị lỗi/sửa lỗi */
-        .status-badge {
-            position: absolute;
-            right: -140px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-size: 12px;
-            font-weight: bold;
-            width: 130px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .hazard-spot:hover .status-badge { opacity: 1; }
-        .hazard-spot.fixed .status-badge { opacity: 1; }
-
-        /* Icon trạng thái */
-        .icon-state { font-size: 20px; margin-right: 5px; }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-center font-sans">
+<body>
+    
+    <model-viewer 
+        id="ppe-model"
+        src="https://modelviewer.dev/shared-assets/models/MaterialsVariantsShoe.glb" 
+        ar ar-modes="webxr scene-viewer quick-look" 
+        camera-controls shadow-intensity="1">
 
-    <div class="fixed top-0 w-full bg-blue-900 text-white p-4 z-20 shadow-lg">
-        <div class="flex justify-between items-center max-w-md mx-auto">
-            <div>
-                <h1 class="font-bold">BÀI TẬP PPE</h1>
-                <p class="text-xs text-blue-200">Tìm 3 lỗi sai trang phục</p>
-            </div>
-            <div class="bg-yellow-500 text-blue-900 px-4 py-1 rounded-full font-bold">
-                Điểm: <span id="score">0</span>/30
-            </div>
-        </div>
-    </div>
+        <button class="hotspot-warning" slot="hotspot-issue" 
+                data-position="-0.1 0.2 0.1" 
+                data-normal="-0.7 0.5 0.5"
+                onclick="fixPPE(this)">
+            <span id="icon">⚠️</span>
+            <span id="text">Lỗi: Dây chưa buộc</span>
+        </button>
 
-    <div class="character-container mt-10">
-        
-        <div id="spot-head" class="hazard-spot" style="top: 2%; left: 35%; width: 30%; height: 15%;" onclick="fixHazard('head')">
-            <img id="img-head" src="https://cdn-icons-png.flaticon.com/512/10360/10360947.png" class="hidden w-full h-full object-contain">
-            
-            <div class="status-badge text-red-600 border-l-4 border-red-500" id="badge-head">
-                <span class="icon-state">❌</span> Không quai mũ
-            </div>
-        </div>
-
-        <div id="spot-hand" class="hazard-spot" style="top: 40%; left: 5%; width: 20%; height: 20%;" onclick="fixHazard('hand')">
-            <img id="img-hand" src="https://cdn-icons-png.flaticon.com/512/8636/8636082.png" class="hidden w-full h-full object-contain">
-            <div class="status-badge text-red-600 border-l-4 border-red-500" id="badge-hand">
-                <span class="icon-state">❌</span> Thiếu găng tay
+        <div class="fixed top-6 left-0 right-0 text-center pointer-events-none">
+            <div class="bg-blue-900/80 text-white inline-block px-4 py-2 rounded-lg backdrop-blur">
+                <h2 class="font-bold">BÀI TẬP PPE AR</h2>
+                <p class="text-xs">Tìm và chạm vào các lỗi an toàn</p>
             </div>
         </div>
 
-        <div id="spot-foot" class="hazard-spot" style="bottom: 2%; left: 30%; width: 40%; height: 15%;" onclick="fixHazard('foot')">
-            <img id="img-foot" src="https://cdn-icons-png.flaticon.com/512/2669/2669528.png" class="hidden w-full h-full object-contain">
-            <div class="status-badge text-red-600 border-l-4 border-red-500" id="badge-foot">
-                <span class="icon-state">❌</span> Đi giày vải
-            </div>
-        </div>
-
-    </div>
-
-    <div id="completion-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center">
-        <div class="bg-white p-6 rounded-xl text-center max-w-xs animate__animated animate__zoomIn">
-            <div class="text-5xl mb-2">🎉</div>
-            <h2 class="text-xl font-bold text-green-700">XUẤT SẮC!</h2>
-            <p class="text-gray-600 text-sm mb-4">Bạn đã nhận diện đúng tất cả các mối nguy.</p>
-            <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700">Làm lại</button>
-        </div>
-    </div>
+    </model-viewer>
 
     <script>
-        let currentScore = 0;
-        const maxItems = 3;
-        let foundItems = 0;
+        const modelViewer = document.querySelector("#ppe-model");
 
-        // Dữ liệu nội dung (Text)
-        const feedbackData = {
-            'head': { wrong: 'Không quai mũ', right: 'Đã cài quai an toàn' },
-            'hand': { wrong: 'Thiếu găng tay', right: 'Đã đeo găng tay' },
-            'foot': { wrong: 'Đi giày vải', right: 'Giày bảo hộ chuẩn' }
-        };
+        async function fixPPE(btnElement) {
+            // 1. Đổi biến thể model (Ví dụ: Từ giày cũ sang giày mới, hoặc từ không mũ sang có mũ)
+            // 'midnight' là tên biến thể có sẵn trong file mẫu này
+            const names = modelViewer.availableVariants;
+            modelViewer.variantName = 'midnight'; 
 
-        function fixHazard(partId) {
-            const spot = document.getElementById(`spot-${partId}`);
-            const badge = document.getElementById(`badge-${partId}`);
-            const img = document.getElementById(`img-${partId}`);
-            const scoreEl = document.getElementById('score');
-
-            // 1. Thay đổi giao diện sang "ĐÚNG"
-            spot.classList.add('fixed');
+            // 2. Hiệu ứng giao diện (UI)
+            btnElement.classList.replace("hotspot-warning", "hotspot-success");
+            btnElement.querySelector("#icon").innerText = "✅";
+            btnElement.querySelector("#text").innerText = "Đã khắc phục!";
             
-            // 2. Hiện ảnh đồ bảo hộ đúng (Overlay)
-            img.classList.remove('hidden');
-            img.classList.add('animate__animated', 'animate__bounceIn'); // Hiệu ứng nảy
-
-            // 3. Cập nhật Text Badge
-            badge.className = "status-badge text-green-700 border-l-4 border-green-500";
-            badge.innerHTML = `<span class="icon-state">✅</span> ${feedbackData[partId].right}`;
-
-            // 4. Cộng điểm
-            currentScore += 10;
-            scoreEl.innerText = currentScore;
-            
-            // Hiệu ứng cộng điểm
-            scoreEl.classList.add('animate__animated', 'animate__heartBeat');
-            setTimeout(() => scoreEl.classList.remove('animate__animated', 'animate__heartBeat'), 500);
-
-            // 5. Kiểm tra chiến thắng
-            foundItems++;
-            if (foundItems === maxItems) {
-                setTimeout(() => {
-                    document.getElementById('completion-modal').classList.remove('hidden');
-                    // Phát âm thanh chiến thắng (nếu có)
-                }, 1000);
-            }
+            // 3. Thông báo hoàn thành
+            setTimeout(() => {
+                alert("Xuất sắc! Bạn đã phát hiện và xử lý lỗi PPE.");
+            }, 500);
         }
     </script>
 </body>

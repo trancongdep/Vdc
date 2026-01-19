@@ -2,53 +2,102 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC - CPR Gyro AR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VDC - CPR Landscape AR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
+        /* CAMERA NỀN */
         #camera-stream {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: 0;
         }
 
+        /* MODEL VIEWER */
         model-viewer { 
             width: 100vw; height: 100vh; 
             position: relative; z-index: 10;
             background-color: transparent;
+            --poster-color: transparent;
         }
 
-        /* Nút Hotspot */
+        /* MÀN HÌNH CẢNH BÁO XOAY NGANG */
+        #orientation-warning {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #0f172a;
+            display: none; /* Mặc định ẩn, JS sẽ check */
+            flex-direction: column; align-items: center; justify-content: center;
+            color: white; text-align: center;
+        }
+        
+        /* Hiệu ứng xoay điện thoại animation */
+        .rotate-phone {
+            width: 60px; height: 100px;
+            border: 4px solid white; border-radius: 10px;
+            animation: rotate-anim 2s infinite ease-in-out;
+            margin-bottom: 20px;
+        }
+        @keyframes rotate-anim {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+            100% { transform: rotate(90deg); }
+        }
+
+        /* Nút Hotspot Tim */
         .Hotspot {
             background: rgba(255, 0, 0, 0.2);
             border-radius: 50%;
             border: 3px solid #ef4444;
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.9);
-            width: 70px; height: 70px;
+            width: 80px; height: 80px; /* To hơn chút vì màn hình ngang */
             cursor: pointer;
-            transition: transform 0.1s;
             animation: pulse-red 1.5s infinite; 
         }
-        .Hotspot:active { background: rgba(255, 0, 0, 0.8); transform: scale(0.85); }
+        .Hotspot:active { background: rgba(255, 0, 0, 0.8); transform: scale(0.9); border-color: white; }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 30px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        #ar-hud { position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 20; }
-        .hud-box {
-            display: inline-block; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
-            color: white; padding: 15px 25px; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.2);
+        /* GIAO DIỆN SETUP (Bước Calibration) */
+        #setup-ui {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 50;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 20px; pointer-events: none; /* Để touch xuyên qua vào model */
+        }
+        .setup-instruction {
+            background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px;
+            text-align: center; margin: 0 auto; pointer-events: auto;
+        }
+        #btn-lock {
+            background: #2563eb; color: white; font-weight: bold; font-size: 18px;
+            padding: 15px 40px; border-radius: 50px; border: none;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
+            pointer-events: auto; margin: 0 auto 20px auto;
+            animation: bounce 2s infinite;
         }
 
+        /* GIAO DIỆN CHƠI (HUD) - Mặc định ẩn */
+        #game-ui {
+            position: fixed; top: 20px; right: 20px; z-index: 40;
+            display: none; /* Hiện sau khi lock */
+        }
+        .hud-box {
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            color: white; padding: 15px; border-radius: 15px; width: 200px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Màn hình Bắt đầu */
         #start-screen {
-            position: fixed; inset: 0; z-index: 50;
-            background: linear-gradient(to bottom, #1e3a8a, #000);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+            position: fixed; inset: 0; z-index: 100;
+            background: linear-gradient(to right, #000000, #1e3a8a);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white;
         }
     </style>
 </head>
@@ -60,12 +109,12 @@
         id="cpr-model"
         src="models/cpr.glb" 
         camera-controls 
-        disable-zoom
-        disable-pan
+        disable-zoom 
+        disable-tap
         shadow-intensity="1"
-        camera-orbit="0deg 75deg 2m" 
-        field-of-view="45deg"
-        interpolation-decay="100">
+        interaction-prompt="none"
+        camera-orbit="0deg 60deg 2m"
+        field-of-view="45deg">
 
         <button class="Hotspot" 
                 slot="hotspot-3" 
@@ -75,30 +124,43 @@
 
     </model-viewer>
 
-    <div id="ar-hud">
+    <div id="orientation-warning">
+        <div class="rotate-phone"></div>
+        <h2 class="text-xl font-bold uppercase">Vui lòng xoay ngang thiết bị</h2>
+        <p class="text-gray-400 mt-2">Bài tập yêu cầu màn hình rộng</p>
+    </div>
+
+    <div id="setup-ui" style="display: none;">
+        <div class="setup-instruction mt-4">
+            <h3 class="font-bold text-yellow-400">BƯỚC 1: ĐỊNH VỊ</h3>
+            <p class="text-sm">Di chuyển, xoay người nộm vào vị trí thuận lợi trên sàn nhà.</p>
+        </div>
+        <button id="btn-lock" onclick="lockPosition()">
+            🔒 CHỐT VỊ TRÍ & BẮT ĐẦU
+        </button>
+    </div>
+
+    <div id="game-ui">
         <div class="hud-box">
-            <div class="flex items-end justify-center gap-3">
-                <span id="bpm-val" class="text-6xl font-black text-white leading-none">0</span>
-                <div class="flex flex-col items-start pb-1">
-                    <span class="text-xs font-bold text-gray-400">BPM</span>
-                    <span id="feedback" class="text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200 mt-1">Sẵn sàng</span>
-                </div>
+            <div class="text-xs text-gray-400 mb-1">NHỊP TIM (BPM)</div>
+            <div class="flex items-center gap-3">
+                <span id="bpm-val" class="text-5xl font-bold text-white">0</span>
+                <span id="feedback" class="text-xs font-bold px-2 py-1 rounded bg-gray-600">Sẵn sàng</span>
             </div>
-            <div class="w-64 h-3 bg-gray-700 rounded-full mt-4 overflow-hidden relative">
-                <div class="absolute top-0 bottom-0 left-[66%] right-[20%] bg-green-500/30"></div>
+            <div class="w-full h-2 bg-gray-600 rounded-full mt-2 overflow-hidden relative">
+                <div class="absolute inset-y-0 left-[66%] right-[20%] bg-green-500/50"></div>
                 <div id="bpm-bar" class="h-full bg-blue-500 w-0 transition-all duration-100"></div>
             </div>
-            <p class="text-[10px] mt-2 text-gray-300">Đứng thẳng, giữ điện thoại nhìn xuống sàn</p>
         </div>
     </div>
 
     <div id="start-screen">
-        <h1 class="text-2xl font-bold mb-2">Chế độ Mô phỏng</h1>
-        <p class="text-sm text-gray-300 mb-8 max-w-xs text-center">
-            Yêu cầu quyền Camera và Cảm biến chuyển động để trải nghiệm.
+        <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">VDC CPR TRAINING</h1>
+        <p class="text-gray-300 mb-8 max-w-md text-center">
+            Hãy quỳ gối trên sàn, giữ điện thoại nằm ngang cách mặt đất khoảng 50cm.
         </p>
-        <button onclick="startExperience()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg">
-            Bắt đầu
+        <button onclick="startApp()" class="bg-white text-blue-900 font-bold py-3 px-10 rounded-full shadow-xl hover:scale-105 transition">
+            BẮT ĐẦU CAMERA
         </button>
     </div>
 
@@ -106,55 +168,56 @@
         const modelViewer = document.querySelector("#cpr-model");
         const videoElement = document.getElementById('camera-stream');
         const startScreen = document.getElementById('start-screen');
-        
-        // 1. KHỞI ĐỘNG CAMERA & CẢM BIẾN
-        async function startExperience() {
+        const setupUI = document.getElementById('setup-ui');
+        const gameUI = document.getElementById('game-ui');
+        const warningUI = document.getElementById('orientation-warning');
+
+        // 1. KIỂM TRA XOAY MÀN HÌNH
+        function checkOrientation() {
+            if (window.innerHeight > window.innerWidth) {
+                // Đang dọc
+                warningUI.style.display = 'flex';
+            } else {
+                // Đang ngang
+                warningUI.style.display = 'none';
+            }
+        }
+        window.addEventListener('resize', checkOrientation);
+        checkOrientation(); // Check ngay khi mở
+
+        // 2. KHỞI ĐỘNG
+        async function startApp() {
             try {
-                // Camera
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                // Yêu cầu Camera
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment', width: 1280, height: 720 } 
+                });
                 videoElement.srcObject = stream;
                 
-                // Cảm biến Gyroscope (Cho iOS 13+ cần xin quyền)
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    const response = await DeviceOrientationEvent.requestPermission();
-                    if (response === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation);
-                    } else {
-                        alert("Cần quyền cảm biến để xoay góc nhìn!");
-                    }
-                } else {
-                    // Android / iOS cũ
-                    window.addEventListener('deviceorientation', handleOrientation);
-                }
-
                 startScreen.style.display = 'none';
+                setupUI.style.display = 'flex'; // Hiện bước căn chỉnh
+                
             } catch (err) {
-                alert("Lỗi: " + err.message);
+                alert("Lỗi Camera: " + err.message);
             }
         }
 
-        // 2. XỬ LÝ GÓC NHÌN THEO ĐIỆN THOẠI (MAGIC WINDOW)
-        // Khi nghiêng điện thoại, camera 3D sẽ xoay theo
-        function handleOrientation(event) {
-            // Beta: Nghiêng trước/sau (-180 đến 180)
-            // Gamma: Nghiêng trái/phải (-90 đến 90)
+        // 3. CHỐT VỊ TRÍ (QUAN TRỌNG NHẤT)
+        function lockPosition() {
+            // Tắt khả năng xoay/di chuyển của người dùng
+            modelViewer.setAttribute('camera-controls', 'false'); // Tắt điều khiển camera
+            modelViewer.setAttribute('disable-pan', ''); 
+            modelViewer.setAttribute('disable-zoom', '');
             
-            const tiltX = event.beta;  
-            const tiltY = event.gamma; 
+            // Chuyển UI
+            setupUI.style.display = 'none';
+            gameUI.style.display = 'block';
 
-            // Giới hạn góc nghiêng để không bị lật ngược
-            // Chuyển đổi góc nghiêng điện thoại thành góc orbit của model
-            // Công thức này tinh chỉnh để tạo cảm giác "nhìn xuống đất"
-            
-            // Mặc định nhìn xuống 75 độ. Nghiêng điện thoại sẽ cộng trừ thêm vào đó.
-            let orbitTheta = 75 + (tiltX - 45) * 0.5; 
-            let orbitPhi = (tiltY) * 0.5;
-
-            // Cập nhật Camera Orbit
-            modelViewer.cameraOrbit = `${orbitPhi}deg ${orbitTheta}deg 2m`;
+            // Thông báo nhỏ
+            alert("Vị trí đã khóa! Hãy bắt đầu ép tim.");
         }
 
-        // 3. LOGIC CPR (GIỮ NGUYÊN)
+        // 4. LOGIC CPR (GIỮ NGUYÊN)
         const bpmDisplay = document.getElementById("bpm-val");
         const feedbackBadge = document.getElementById("feedback");
         const bpmBar = document.getElementById("bpm-bar");
@@ -164,29 +227,33 @@
 
         function performCompression() {
             const now = Date.now();
+            
             if (modelViewer.availableAnimations.includes(ANIMATION_NAME)) {
                 modelViewer.animationName = ANIMATION_NAME; 
                 modelViewer.play();
                 setTimeout(() => modelViewer.pause(), 400); 
             }
+
             if (lastPress !== 0) {
                 const diff = now - lastPress;
                 const bpm = Math.round(60000 / diff);
+
                 bpmDisplay.innerText = bpm;
                 let percent = (bpm / 150) * 100;
                 bpmBar.style.width = Math.min(percent, 100) + "%";
+
                 if (bpm < 100) {
                     feedbackBadge.innerText = "NHANH HƠN!";
-                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-500 text-black mt-1";
-                    bpmBar.className = "h-full w-0 transition-all duration-100 bg-yellow-500";
+                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-500 text-black";
+                    bpmBar.className = "h-full bg-yellow-500";
                 } else if (bpm > 120) {
                     feedbackBadge.innerText = "CHẬM LẠI!";
-                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500 text-white mt-1";
-                    bpmBar.className = "h-full w-0 transition-all duration-100 bg-red-500";
+                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500 text-white";
+                    bpmBar.className = "h-full bg-red-500";
                 } else {
                     feedbackBadge.innerText = "TỐT! ✅";
-                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-green-500 text-white mt-1";
-                    bpmBar.className = "h-full w-0 transition-all duration-100 bg-green-500 shadow-[0_0_10px_#22c55e]";
+                    feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-green-500 text-white";
+                    bpmBar.className = "h-full bg-green-500";
                 }
             }
             lastPress = now;

@@ -3,72 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC - Trợ lý ảo 3D</title>
+    <title>VDC - Trợ lý ảo Intro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-    
-    <style>
-        model-viewer { width: 100%; height: 500px; background-color: #f0f0f0; }
-        .ar-btn {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #2563eb; color: white; padding: 12px 24px; border-radius: 30px;
-            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            display: flex; align-items: center; gap: 8px;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 p-4">
 
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden relative">
-        <div class="p-4 border-b">
-            <h2 class="font-bold text-blue-900 text-lg">Trợ lý ảo VDC</h2>
-            <p class="text-sm text-gray-500">Bấm nút bên dưới để nghe hướng dẫn</p>
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden text-center">
+        <div class="p-4 bg-blue-900 text-white">
+            <h2 class="font-bold text-lg">TRUNG TÂM HUẤN LUYỆN VDC</h2>
+            <p class="text-xs text-blue-200">Trợ lý ảo hỗ trợ học viên</p>
         </div>
 
-        <model-viewer 
-            id="avatar-3d"
-            src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb" 
-            ar ar-modes="webxr scene-viewer quick-look" 
-            camera-controls 
-            shadow-intensity="1"
-            animation-name="Idle"> </model-viewer>
+        <div class="relative">
+            <model-viewer 
+                id="avatar-3d"
+                src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb" 
+                ar ar-modes="webxr scene-viewer quick-look" 
+                camera-controls 
+                shadow-intensity="1"
+                animation-name="Idle" 
+                class="w-full h-96 bg-gray-50">
+            </model-viewer>
 
-        <audio id="guide-voice" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+            <audio id="guide-voice" src="audio/gioi-thieu-vdc.mp3"></audio>
 
-        <button onclick="startPresentation()" class="ar-btn bg-blue-600 hover:bg-blue-700 transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Bắt đầu Hướng dẫn
-        </button>
+            <div class="absolute bottom-4 left-0 right-0 flex justify-center">
+                <button onclick="toggleGuide()" id="btn-action" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition transform active:scale-95">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    Nghe Giới Thiệu
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
         const model = document.querySelector("#avatar-3d");
         const audio = document.querySelector("#guide-voice");
+        const btn = document.querySelector("#btn-action");
         let isPlaying = false;
 
-        function startPresentation() {
+        function toggleGuide() {
             if (!isPlaying) {
-                // 1. Chuyển động tác: Ví dụ chuyển sang 'Wave' (Vẫy tay) hoặc 'Talk'
-                // Lưu ý: Tên animation phải có sẵn trong file 3D
-                model.animationName = 'Dance'; 
-                
-                // 2. Phát âm thanh
-                audio.play();
-                
-                // 3. Xử lý khi nói xong
-                audio.onended = function() {
-                    model.animationName = 'Idle'; // Quay về đứng yên
-                    isPlaying = false;
-                };
+                // 1. Chạy âm thanh
+                audio.play().catch(error => {
+                    alert("Lỗi: Không tìm thấy file audio/gioi-thieu-vdc.mp3. Vui lòng kiểm tra lại thư mục.");
+                });
 
+                // 2. Chuyển động tác Robot: Vẫy tay (Wave) cho thân thiện
+                // Nếu muốn nó nói liên tục, dùng 'Talk' (nếu file 3D có sẵn)
+                model.animationName = 'Wave'; 
+                
+                // 3. Đổi nút thành "Dừng lại"
+                btn.innerHTML = '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg> Dừng lại';
+                btn.classList.replace('bg-yellow-500', 'bg-red-500');
+                
                 isPlaying = true;
+
+                // 4. Khi nói xong tự động dừng
+                audio.onended = function() {
+                    resetState();
+                };
             } else {
-                // Bấm lần nữa để dừng
+                // Dừng chủ động
                 audio.pause();
                 audio.currentTime = 0;
-                model.animationName = 'Idle';
-                isPlaying = false;
+                resetState();
             }
+        }
+
+        function resetState() {
+            model.animationName = 'Idle'; // Quay về đứng yên
+            btn.innerHTML = '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg> Nghe Giới Thiệu';
+            btn.classList.replace('bg-red-500', 'bg-yellow-500');
+            isPlaying = false;
         }
     </script>
 </body>

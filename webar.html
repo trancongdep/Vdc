@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDC - Thực hành AR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    
+    <style>
+        model-viewer {
+            width: 100%;
+            height: 400px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+
+    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">Thực hành Nhận diện PPE</h1>
+        <p class="text-sm text-gray-600 mb-4">
+            Bấm nút bên dưới để đặt mô hình phi hành gia (tượng trưng cho công nhân mặc đồ bảo hộ) lên mặt bàn của bạn.
+        </p>
+
+        <model-viewer 
+            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+            ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+            alt="Mô hình 3D Công nhân VDC"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            auto-rotate
+            shadow-intensity="1">
+            
+            <button slot="ar-button" class="absolute bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center hover:bg-blue-700 transition">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+                Xem trong không gian thật (AR)
+            </button>
+            
+            <div id="progress" slot="progress-bar" class="w-full h-1 bg-gray-200 absolute top-0">
+                <div class="h-full bg-blue-600" style="width: 0%"></div>
+            </div>
+
+        </model-viewer>
+
+        <div class="mt-4 text-center">
+            <h3 class="font-bold text-gray-700">Hướng dẫn:</h3>
+            <ul class="text-sm text-left list-disc pl-8 mt-2 space-y-1 text-gray-600">
+                <li>Bấm nút <strong>"Xem trong không gian thật"</strong>.</li>
+                <li>Hướng Camera xuống sàn nhà hoặc mặt bàn.</li>
+                <li>Di chuyển nhẹ điện thoại để nhận diện mặt phẳng.</li>
+                <li>Mô hình sẽ xuất hiện. Dùng 2 ngón tay để phóng to/thu nhỏ.</li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>

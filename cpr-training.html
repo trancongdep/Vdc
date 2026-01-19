@@ -3,78 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC - Thực hành CPR (AR Fix)</title>
+    <title>VDC - Thực hành CPR (Realtime AR)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     
     <style>
-        body { margin: 0; background-color: #1a1a1a; font-family: sans-serif; }
-        model-viewer { width: 100vw; height: 100vh; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
+        
+        /* 1. CAMERA NỀN */
+        #camera-stream {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0;
+            transform: scaleX(1); /* Nếu camera bị ngược thì đổi thành -1 */
+        }
+
+        /* 2. MÔ HÌNH 3D (Nằm đè lên Camera) */
+        model-viewer { 
+            width: 100vw; height: 100vh; 
+            position: relative; z-index: 10;
+            background-color: transparent; /* Quan trọng: Nền trong suốt */
+        }
 
         /* Nút Hotspot đỏ trên ngực */
         .Hotspot {
-            background: rgba(255, 0, 0, 0.3);
+            background: rgba(255, 0, 0, 0.2);
             border-radius: 50%;
             border: 3px solid #ef4444;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
-            width: 60px; height: 60px;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.9);
+            width: 70px; height: 70px;
             cursor: pointer;
-            transition: all 0.1s;
-            animation: pulse-red 2s infinite; 
+            transition: transform 0.1s;
+            animation: pulse-red 1.5s infinite; 
         }
-        .Hotspot:active { background: rgba(255, 0, 0, 0.8); transform: scale(0.9); }
+        .Hotspot:active { background: rgba(255, 0, 0, 0.8); transform: scale(0.85); border-color: white; }
         .Hotspot > * { pointer-events: none; }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* NÚT AR MẶC ĐỊNH (Cần style lại để chắc chắn hiện ra) */
-        #ar-button {
-            position: absolute;
-            bottom: 20px; right: 20px; /* Đổi vị trí xuống góc dưới cho dễ bấm */
-            background-color: white;
-            border-radius: 20px;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 100; /* Quan trọng: Đẩy lên trên cùng */
-            display: flex; align-items: center; gap: 8px;
+        /* Giao diện HUD */
+        #ar-hud {
+            position: fixed; bottom: 30px; left: 0; right: 0;
+            text-align: center; pointer-events: none; z-index: 20;
+        }
+        .hud-box {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Giao diện HUD */
-        #ar-hud { position: fixed; top: 30px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 10; }
-        .hud-box {
-            display: inline-block; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
-            color: white; padding: 15px 25px; border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* Màn hình Chào mừng (Yêu cầu bật Cam) */
+        #start-screen {
+            position: fixed; inset: 0; z-index: 50;
+            background: linear-gradient(to bottom, #1e3a8a, #000);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; text-align: center; p-6;
         }
     </style>
 </head>
 <body>
 
+    <video id="camera-stream" autoplay playsinline muted></video>
+
     <model-viewer 
         id="cpr-model"
         src="models/cpr.glb" 
-        ar 
-        ar-modes="scene-viewer webxr quick-look" 
-        ar-scale="auto"
         camera-controls 
-        tone-mapping="neutral" 
-        shadow-intensity="1">
+        disable-zoom
+        shadow-intensity="1"
+        camera-orbit="0deg 75deg 2m" 
+        field-of-view="30deg">
 
         <button class="Hotspot" 
                 slot="hotspot-3" 
                 data-surface="6 0 930 931 926 0.225 0.592 0.183" 
-                data-visibility-attribute="visible"
                 onclick="performCompression()">
-        </button>
-
-        <button slot="ar-button" id="ar-button">
-            <svg w="24" h="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            Xem trong không gian thật
         </button>
 
     </model-viewer>
@@ -84,19 +94,51 @@
             <div class="flex items-end justify-center gap-3">
                 <span id="bpm-val" class="text-6xl font-black text-white leading-none">0</span>
                 <div class="flex flex-col items-start pb-1">
-                    <span class="text-sm font-bold text-gray-400">BPM</span>
+                    <span class="text-xs font-bold text-gray-400">BPM</span>
                     <span id="feedback" class="text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200 mt-1">Sẵn sàng</span>
                 </div>
             </div>
             <div class="w-64 h-3 bg-gray-700 rounded-full mt-4 overflow-hidden relative">
-                <div class="absolute top-0 bottom-0 left-[66%] right-[20%] bg-green-900/50"></div>
-                <div id="bpm-bar" class="h-full bg-blue-500 w-0 transition-all duration-200"></div>
+                <div class="absolute top-0 bottom-0 left-[66%] right-[20%] bg-green-500/30"></div>
+                <div id="bpm-bar" class="h-full bg-blue-500 w-0 transition-all duration-100"></div>
             </div>
+            <p class="text-[10px] mt-2 text-gray-300">Hướng camera xuống sàn nhà</p>
         </div>
+    </div>
+
+    <div id="start-screen">
+        <div class="bg-white/10 p-4 rounded-full mb-4">
+            <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-2">Chế độ Thực tế ảo</h1>
+        <p class="text-sm text-gray-300 mb-8 max-w-xs">Cho phép camera truy cập để hiển thị mô hình ngay trong phòng của bạn.</p>
+        <button onclick="startAR()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform active:scale-95">
+            Bắt đầu Camera
+        </button>
     </div>
 
     <script>
         const modelViewer = document.querySelector("#cpr-model");
+        const videoElement = document.getElementById('camera-stream');
+        const startScreen = document.getElementById('start-screen');
+        
+        // --- 1. LOGIC CAMERA (QUAN TRỌNG) ---
+        async function startAR() {
+            try {
+                // Yêu cầu quyền Camera sau (environment)
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                videoElement.srcObject = stream;
+                
+                // Ẩn màn hình chào mừng
+                startScreen.style.display = 'none';
+            } catch (err) {
+                alert("Lỗi Camera: " + err.message + "\nHãy đảm bảo bạn đang dùng https:// và cho phép quyền truy cập.");
+            }
+        }
+
+        // --- 2. LOGIC CPR (GIỮ NGUYÊN) ---
         const bpmDisplay = document.getElementById("bpm-val");
         const feedbackBadge = document.getElementById("feedback");
         const bpmBar = document.getElementById("bpm-bar");
@@ -106,29 +148,35 @@
 
         function performCompression() {
             const now = Date.now();
+            
+            // Animation
             if (modelViewer.availableAnimations.includes(ANIMATION_NAME)) {
                 modelViewer.animationName = ANIMATION_NAME; 
                 modelViewer.play();
                 setTimeout(() => modelViewer.pause(), 400); 
             }
+
+            // Tính toán BPM
             if (lastPress !== 0) {
                 const diff = now - lastPress;
                 const bpm = Math.round(60000 / diff);
+
                 bpmDisplay.innerText = bpm;
                 let percent = (bpm / 150) * 100;
                 bpmBar.style.width = Math.min(percent, 100) + "%";
+
                 if (bpm < 100) {
-                    feedbackBadge.innerText = "NHANH HƠN! ⚡";
+                    feedbackBadge.innerText = "NHANH HƠN!";
                     feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-500 text-black mt-1";
-                    bpmBar.className = "h-full w-0 transition-all duration-200 bg-yellow-500";
+                    bpmBar.className = "h-full w-0 transition-all duration-100 bg-yellow-500";
                 } else if (bpm > 120) {
-                    feedbackBadge.innerText = "CHẬM LẠI! 🐢";
+                    feedbackBadge.innerText = "CHẬM LẠI!";
                     feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500 text-white mt-1";
-                    bpmBar.className = "h-full w-0 transition-all duration-200 bg-red-500";
+                    bpmBar.className = "h-full w-0 transition-all duration-100 bg-red-500";
                 } else {
-                    feedbackBadge.innerText = "TUYỆT VỜI! ✅";
+                    feedbackBadge.innerText = "TỐT! ✅";
                     feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-green-500 text-white mt-1";
-                    bpmBar.className = "h-full w-0 transition-all duration-200 bg-green-500 shadow-[0_0_10px_#22c55e]";
+                    bpmBar.className = "h-full w-0 transition-all duration-100 bg-green-500 shadow-[0_0_10px_#22c55e]";
                 }
             }
             lastPress = now;
@@ -138,7 +186,7 @@
                 bpmBar.style.width = "0%";
                 feedbackBadge.innerText = "Sẵn sàng";
                 feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200 mt-1";
-                bpmBar.className = "h-full w-0 transition-all duration-200 bg-blue-500";
+                bpmBar.className = "h-full w-0 transition-all duration-100 bg-blue-500";
                 lastPress = 0;
             }, 2000);
         }

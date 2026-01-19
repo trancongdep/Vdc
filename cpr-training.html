@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC - Thực hành CPR (Realtime AR)</title>
+    <title>VDC - CPR Gyro AR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         
-        /* 1. CAMERA NỀN */
         #camera-stream {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: 0;
-            transform: scaleX(1); /* Nếu camera bị ngược thì đổi thành -1 */
         }
 
-        /* 2. MÔ HÌNH 3D (Nằm đè lên Camera) */
         model-viewer { 
             width: 100vw; height: 100vh; 
             position: relative; z-index: 10;
-            background-color: transparent; /* Quan trọng: Nền trong suốt */
+            background-color: transparent;
         }
 
-        /* Nút Hotspot đỏ trên ngực */
+        /* Nút Hotspot */
         .Hotspot {
             background: rgba(255, 0, 0, 0.2);
             border-radius: 50%;
@@ -35,36 +32,23 @@
             transition: transform 0.1s;
             animation: pulse-red 1.5s infinite; 
         }
-        .Hotspot:active { background: rgba(255, 0, 0, 0.8); transform: scale(0.85); border-color: white; }
-        .Hotspot > * { pointer-events: none; }
+        .Hotspot:active { background: rgba(255, 0, 0, 0.8); transform: scale(0.85); }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
             70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* Giao diện HUD */
-        #ar-hud {
-            position: fixed; bottom: 30px; left: 0; right: 0;
-            text-align: center; pointer-events: none; z-index: 20;
-        }
+        #ar-hud { position: fixed; bottom: 30px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 20; }
         .hud-box {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: inline-block; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
+            color: white; padding: 15px 25px; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Màn hình Chào mừng (Yêu cầu bật Cam) */
         #start-screen {
             position: fixed; inset: 0; z-index: 50;
             background: linear-gradient(to bottom, #1e3a8a, #000);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; text-align: center; p-6;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
     </style>
 </head>
@@ -77,9 +61,11 @@
         src="models/cpr.glb" 
         camera-controls 
         disable-zoom
+        disable-pan
         shadow-intensity="1"
         camera-orbit="0deg 75deg 2m" 
-        field-of-view="30deg">
+        field-of-view="45deg"
+        interpolation-decay="100">
 
         <button class="Hotspot" 
                 slot="hotspot-3" 
@@ -102,18 +88,17 @@
                 <div class="absolute top-0 bottom-0 left-[66%] right-[20%] bg-green-500/30"></div>
                 <div id="bpm-bar" class="h-full bg-blue-500 w-0 transition-all duration-100"></div>
             </div>
-            <p class="text-[10px] mt-2 text-gray-300">Hướng camera xuống sàn nhà</p>
+            <p class="text-[10px] mt-2 text-gray-300">Đứng thẳng, giữ điện thoại nhìn xuống sàn</p>
         </div>
     </div>
 
     <div id="start-screen">
-        <div class="bg-white/10 p-4 rounded-full mb-4">
-            <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        </div>
-        <h1 class="text-2xl font-bold mb-2">Chế độ Thực tế ảo</h1>
-        <p class="text-sm text-gray-300 mb-8 max-w-xs">Cho phép camera truy cập để hiển thị mô hình ngay trong phòng của bạn.</p>
-        <button onclick="startAR()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform active:scale-95">
-            Bắt đầu Camera
+        <h1 class="text-2xl font-bold mb-2">Chế độ Mô phỏng</h1>
+        <p class="text-sm text-gray-300 mb-8 max-w-xs text-center">
+            Yêu cầu quyền Camera và Cảm biến chuyển động để trải nghiệm.
+        </p>
+        <button onclick="startExperience()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg">
+            Bắt đầu
         </button>
     </div>
 
@@ -122,23 +107,54 @@
         const videoElement = document.getElementById('camera-stream');
         const startScreen = document.getElementById('start-screen');
         
-        // --- 1. LOGIC CAMERA (QUAN TRỌNG) ---
-        async function startAR() {
+        // 1. KHỞI ĐỘNG CAMERA & CẢM BIẾN
+        async function startExperience() {
             try {
-                // Yêu cầu quyền Camera sau (environment)
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
+                // Camera
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 videoElement.srcObject = stream;
                 
-                // Ẩn màn hình chào mừng
+                // Cảm biến Gyroscope (Cho iOS 13+ cần xin quyền)
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    const response = await DeviceOrientationEvent.requestPermission();
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                    } else {
+                        alert("Cần quyền cảm biến để xoay góc nhìn!");
+                    }
+                } else {
+                    // Android / iOS cũ
+                    window.addEventListener('deviceorientation', handleOrientation);
+                }
+
                 startScreen.style.display = 'none';
             } catch (err) {
-                alert("Lỗi Camera: " + err.message + "\nHãy đảm bảo bạn đang dùng https:// và cho phép quyền truy cập.");
+                alert("Lỗi: " + err.message);
             }
         }
 
-        // --- 2. LOGIC CPR (GIỮ NGUYÊN) ---
+        // 2. XỬ LÝ GÓC NHÌN THEO ĐIỆN THOẠI (MAGIC WINDOW)
+        // Khi nghiêng điện thoại, camera 3D sẽ xoay theo
+        function handleOrientation(event) {
+            // Beta: Nghiêng trước/sau (-180 đến 180)
+            // Gamma: Nghiêng trái/phải (-90 đến 90)
+            
+            const tiltX = event.beta;  
+            const tiltY = event.gamma; 
+
+            // Giới hạn góc nghiêng để không bị lật ngược
+            // Chuyển đổi góc nghiêng điện thoại thành góc orbit của model
+            // Công thức này tinh chỉnh để tạo cảm giác "nhìn xuống đất"
+            
+            // Mặc định nhìn xuống 75 độ. Nghiêng điện thoại sẽ cộng trừ thêm vào đó.
+            let orbitTheta = 75 + (tiltX - 45) * 0.5; 
+            let orbitPhi = (tiltY) * 0.5;
+
+            // Cập nhật Camera Orbit
+            modelViewer.cameraOrbit = `${orbitPhi}deg ${orbitTheta}deg 2m`;
+        }
+
+        // 3. LOGIC CPR (GIỮ NGUYÊN)
         const bpmDisplay = document.getElementById("bpm-val");
         const feedbackBadge = document.getElementById("feedback");
         const bpmBar = document.getElementById("bpm-bar");
@@ -148,23 +164,17 @@
 
         function performCompression() {
             const now = Date.now();
-            
-            // Animation
             if (modelViewer.availableAnimations.includes(ANIMATION_NAME)) {
                 modelViewer.animationName = ANIMATION_NAME; 
                 modelViewer.play();
                 setTimeout(() => modelViewer.pause(), 400); 
             }
-
-            // Tính toán BPM
             if (lastPress !== 0) {
                 const diff = now - lastPress;
                 const bpm = Math.round(60000 / diff);
-
                 bpmDisplay.innerText = bpm;
                 let percent = (bpm / 150) * 100;
                 bpmBar.style.width = Math.min(percent, 100) + "%";
-
                 if (bpm < 100) {
                     feedbackBadge.innerText = "NHANH HƠN!";
                     feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-yellow-500 text-black mt-1";
@@ -185,8 +195,6 @@
                 bpmDisplay.innerText = "0";
                 bpmBar.style.width = "0%";
                 feedbackBadge.innerText = "Sẵn sàng";
-                feedbackBadge.className = "text-xs font-bold px-2 py-1 rounded bg-gray-600 text-gray-200 mt-1";
-                bpmBar.className = "h-full w-0 transition-all duration-100 bg-blue-500";
                 lastPress = 0;
             }, 2000);
         }

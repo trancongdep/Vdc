@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDC - Thực hành CPR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body { background-color: #f3f4f6; user-select: none; }
+        
+        /* Mô phỏng lồng ngực đàn hồi */
+        #chest-zone {
+            transition: transform 0.1s;
+            cursor: pointer;
+            background-image: url('https://img.freepik.com/free-vector/human-anatomy-man-body-silhouette_1284-46322.jpg?w=360'); 
+            background-size: cover;
+            background-position: center top;
+        }
+        #chest-zone:active {
+            transform: scale(0.95); /* Hiệu ứng lún xuống khi ấn */
+        }
+
+        /* Tâm điểm ấn (Vị trí tim) */
+        .target-point {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 4px dashed rgba(255, 0, 0, 0.5);
+            animation: pulse-guide 1.5s infinite;
+        }
+
+        @keyframes pulse-guide {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        /* Thanh nhịp điệu */
+        .bpm-bar { transition: width 0.3s ease-out, background-color 0.3s; }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center font-sans">
+
+    <div class="absolute top-0 w-full bg-blue-900 text-white p-4 shadow-lg z-10">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="font-bold text-lg">BÀI TẬP CPR</h1>
+                <p class="text-xs text-blue-200">Ép tim ngoài lồng ngực</p>
+            </div>
+            <div class="text-right">
+                <div class="text-2xl font-bold" id="score-display">0</div>
+                <div class="text-xs">Lần ép đúng</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="relative w-full max-w-md h-full bg-gray-200 flex items-center justify-center overflow-hidden">
+        
+        <div id="chest-zone" class="w-64 h-96 bg-gray-300 rounded-3xl shadow-2xl relative flex items-center justify-center border-4 border-white" onclick="handleCompression()">
+            
+            <div class="target-point flex items-center justify-center bg-red-500/20 backdrop-blur-sm">
+                <span class="text-red-600 font-bold text-xs">ẤN VÀO ĐÂY</span>
+            </div>
+
+            <div id="feedback-text" class="absolute -top-16 left-1/2 transform -translate-x-1/2 font-bold text-xl whitespace-nowrap px-4 py-1 rounded shadow hidden">
+                Tốt!
+            </div>
+        </div>
+
+    </div>
+
+    <div class="absolute bottom-0 w-full bg-white rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] p-6 pb-8">
+        
+        <div class="mb-4">
+            <div class="flex justify-between text-sm font-bold text-gray-500 mb-1">
+                <span>0</span>
+                <span>100 (Chuẩn)</span>
+                <span>120+</span>
+            </div>
+            <div class="h-4 w-full bg-gray-200 rounded-full overflow-hidden relative">
+                <div class="absolute top-0 bottom-0 bg-green-100 opacity-50 left-[50%] right-[10%]"></div>
+                <div id="bpm-meter" class="h-full bg-gray-400 w-0"></div>
+            </div>
+            <div class="text-center mt-2">
+                <span id="bpm-value" class="text-3xl font-bold text-gray-800">0</span>
+                <span class="text-sm text-gray-500">nhịp/phút</span>
+            </div>
+        </div>
+
+        <div id="instruction" class="text-center text-gray-500 text-sm">
+            Hãy ấn liên tục vào lồng ngực để bắt đầu...
+        </div>
+    </div>
+
+    <script>
+        // CẤU HÌNH
+        const TARGET_MIN = 100;
+        const TARGET_MAX = 120;
+        
+        // BIẾN HỆ THỐNG
+        let lastPressTime = 0;
+        let score = 0;
+        let bpm = 0;
+        const bpmMeter = document.getElementById('bpm-meter');
+        const bpmValue = document.getElementById('bpm-value');
+        const feedback = document.getElementById('feedback-text');
+        const scoreDisplay = document.getElementById('score-display');
+        const instruction = document.getElementById('instruction');
+
+        function handleCompression() {
+            const currentTime = Date.now();
+            
+            // Nếu là lần ấn đầu tiên hoặc nghỉ quá lâu (> 2 giây)
+            if (lastPressTime === 0 || (currentTime - lastPressTime) > 2000) {
+                lastPressTime = currentTime;
+                bpm = 0;
+                updateUI("Sẵn sàng...", "gray");
+                return;
+            }
+
+            // Tính toán BPM
+            const timeDiff = currentTime - lastPressTime; // Mili giây giữa 2 lần ấn
+            const currentBPM = Math.round(60000 / timeDiff);
+            
+            // Làm mượt chỉ số (tránh nhảy số quá nhanh)
+            bpm = currentBPM; 
+            lastPressTime = currentTime;
+
+            // Đánh giá
+            evaluateCPR(bpm);
+        }
+
+        function evaluateCPR(currentBPM) {
+            bpmValue.innerText = currentBPM;
+            
+            // Tính % độ dài thanh hiển thị (Max hiển thị là 150bpm)
+            let widthPercent = (currentBPM / 180) * 100; 
+            if(widthPercent > 100) widthPercent = 100;
+            bpmMeter.style.width = widthPercent + "%";
+
+            // Logic Phản hồi
+            if (currentBPM < TARGET_MIN) {
+                // Quá chậm
+                updateUI("⚠️ QUÁ CHẬM! Tăng tốc độ", "bg-yellow-100 text-yellow-700", "bg-yellow-500");
+            } else if (currentBPM > TARGET_MAX) {
+                // Quá nhanh
+                updateUI("⚠️ QUÁ NHANH! Giảm tốc độ", "bg-red-100 text-red-700", "bg-red-500");
+            } else {
+                // CHUẨN (Trong khoảng 100-120)
+                score++;
+                scoreDisplay.innerText = score;
+                updateUI("✅ TỐT! Giữ nguyên nhịp", "bg-green-100 text-green-700", "bg-green-500");
+                
+                // Hiệu ứng Visual mạnh khi làm đúng
+                scoreDisplay.classList.add('animate__animated', 'animate__heartBeat');
+                setTimeout(() => scoreDisplay.classList.remove('animate__animated', 'animate__heartBeat'), 500);
+            }
+
+            instruction.innerText = "Đang thực hiện ép tim...";
+        }
+
+        function updateUI(text, classString, barColorClass) {
+            // Cập nhật thông báo nổi
+            feedback.innerText = text;
+            feedback.className = `absolute -top-16 left-1/2 transform -translate-x-1/2 font-bold text-sm whitespace-nowrap px-4 py-2 rounded-full shadow-lg border-2 animate__animated animate__fadeInUp ${classString}`;
+            feedback.style.display = 'block';
+
+            // Cập nhật màu thanh đo
+            bpmMeter.className = `h-full w-0 transition-all duration-200 ${barColorClass}`;
+
+            // Ẩn thông báo sau 1s nếu không ấn tiếp
+            clearTimeout(window.hideFeedbackTimeout);
+            window.hideFeedbackTimeout = setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

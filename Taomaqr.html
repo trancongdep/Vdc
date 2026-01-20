@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDC QR Service | Quản lý Tập trung</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --gold-color: #ffc107; /* Màu cho VIP */
+            --vdc-bg: #f8f9fa;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--vdc-bg);
+            color: #333;
+        }
+        
+        /* --- Styles Viewers (Landing Page) --- */
+        .vdc-header {
+            background: linear-gradient(135deg, #004e92, #000428);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            border-bottom-left-radius: 50% 20px;
+            border-bottom-right-radius: 50% 20px;
+        }
+        .document-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: -30px;
+            border-top: 5px solid var(--primary-color);
+            text-align: center;
+        }
+        .cta-btn {
+            background-color: #28a745;
+            color: white;
+            font-size: 1.2rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .cta-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+            color: white;
+        }
+        .cta-btn.disabled {
+            background-color: #6c757d;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        /* --- Styles Creator & Admin --- */
+        .creator-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .admin-container {
+            max-width: 1100px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .auth-card {
+            max-width: 400px;
+            margin: 80px auto;
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .google-btn {
+            background-color: #fff;
+            color: #757575;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #ddd;
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+        .google-btn:hover { background-color: #f1f1f1; }
+        .google-btn img { width: 18px; height: 18px; margin-right: 10px; }
+
+        .hidden { display: none !important; }
+        
+        .user-info-bar {
+            background: #e9ecef;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .limit-badge {
+            background: #e3f2fd;
+            color: #0d6efd;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .vip-badge {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .version-tag {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: #ccc;
+        }
+        
+        #qrcode img, #qrcode canvas {
+            max-width: 100%;
+            height: auto;
+            border: 5px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Loading redirect animation */
+        .redirect-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex justify-content-center align-items-center" style="z-index: 9999;">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
+    <div id="redirect-view" class="hidden redirect-loader">
+        <div class="spinner-border text-warning mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h4 class="text-secondary">Đang chuyển hướng tới tài liệu...</h4>
+        <p class="small text-muted">VDC Direct Link</p>
+    </div>
+
+    <div id="auth-view" class="hidden">
+        <div class="auth-card">
+            <h3 class="mb-4 text-primary fw-bold">VDC QR Service</h3>
+            <p class="text-muted mb-4">Đăng nhập để sử dụng dịch vụ.</p>
+            <button class="google-btn" id="btn-login-google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+                <span>Đăng nhập bằng Gmail</span>
+            </button>
+            <p class="mt-4 small text-muted">Hệ thống bảo mật bởi VDC & Firebase</p>
+        </div>
+    </div>
+
+    <div id="profile-view" class="container creator-container hidden">
+        <h4 class="text-center mb-4 text-primary">Cập nhật thông tin</h4>
+        <p class="text-center text-muted small">Vui lòng hoàn tất hồ sơ để tiếp tục.</p>
+        <form id="profile-form">
+            <div class="mb-3">
+                <label class="form-label">Họ và Tên</label>
+                <input type="text" class="form-control" id="profile-name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" id="profile-phone" placeholder="Nhập số điện thoại" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Lưu & Bắt đầu</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="locked-view" class="hidden text-center mt-5">
+        <i class="fas fa-lock fa-3x text-danger mb-3"></i>
+        <h3>Tài khoản bị khóa</h3>
+        <p>Vui lòng liên hệ Admin VDC để được hỗ trợ mở khóa.</p>
+        <button class="btn btn-secondary" onclick="location.reload()">Quay lại</button>
+    </div>
+
+    <div id="creator-view" class="container creator-container hidden">
+        <div class="user-info-bar">
+            <div>
+                <i class="fas fa-user-circle"></i> <span id="display-username">User</span>
+                <span id="vip-status-display"></span>
+                <span class="limit-badge ms-2">Đã tạo: <span id="usage-count">0</span> / <span id="usage-limit">10</span></span>
+            </div>
+            <div>
+                <button class="btn btn-sm btn-outline-dark hidden" id="btn-go-admin">Admin Page</button>
+                <button class="btn btn-sm btn-outline-danger" id="btn-logout">Đăng xuất</button>
+            </div>
+        </div>
+
+        <h2 class="text-center mb-4"><i class="fas fa-qrcode text-primary"></i> Tạo Mã QR</h2>
+        <p class="text-muted text-center mb-4" id="creator-subtitle">Nhập thông tin để tạo trang đích.</p>
+        
+        <div class="mb-3">
+            <label class="form-label">Tiêu đề tài liệu</label>
+            <input type="text" class="form-control" id="docTitle" placeholder="Ví dụ: Tài liệu hướng dẫn">
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Mô tả / Hướng dẫn</label>
+            <textarea class="form-control" id="docDesc" rows="3" placeholder="Nhập mô tả ngắn gọn..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Link gốc (Google Drive/PDF)</label>
+            <input type="url" class="form-control" id="targetLink" placeholder="https://...">
+        </div>
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-lg" id="btn-generate" onclick="generateVdcQR()">
+                <i class="fas fa-magic"></i> Tạo Mã QR
+            </button>
+        </div>
+
+        <div id="qr-result" class="hidden text-center mt-4">
+            <h5 class="mb-3">Mã QR của bạn:</h5>
+            <div id="qrcode" class="d-flex justify-content-center"></div>
+            <button class="btn btn-outline-secondary mt-3 btn-sm" onclick="downloadQR()">
+                <i class="fas fa-download"></i> Tải ảnh QR
+            </button>
+             <div class="mt-2 text-break small">
+                Link: <a href="#" id="preview-link" target="_blank">Xem thử</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-view" class="container admin-container hidden">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary"><i class="fas fa-users-cog"></i> Quản trị viên VDC</h3>
+            <button class="btn btn-secondary" onclick="showCreatorFromAdmin()">
+                <i class="fas fa-arrow-left"></i> Về trang Tạo QR
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>User (Email/Tên)</th>
+                        <th>SĐT</th>
+                        <th>Loại TK</th>
+                        <th>Đã dùng</th>
+                        <th>Giới hạn</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-list">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="viewer-view" class="hidden">
+        <header class="vdc-header">
+            <div class="container">
+                <div class="vdc-logo"><i class="fas fa-cloud"></i> VDC ONLINE</div>
+                <p class="lead">Cổng thông tin và tiện ích số hàng đầu</p>
+                <p class="mb-0"><small><i class="fas fa-shield-alt"></i> Safe Browsing Verification</small></p>
+            </div>
+        </header>
+
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="document-card">
+                        <div class="mb-4">
+                            <i class="fas fa-file-alt fa-4x text-primary"></i>
+                        </div>
+                        <h2 id="view-title" class="fw-bold mb-3">Đang tải thông tin...</h2>
+                        <p class="text-muted">Bạn được chuyển hướng từ hệ thống mã QR VDC.</p>
+                        <hr class="my-4">
+                        
+                        <div class="text-start bg-light p-3 rounded mb-4">
+                            <h5 class="text-dark"><i class="fas fa-info-circle"></i> Chi tiết tài liệu:</h5>
+                            <p id="view-desc" class="mb-0 text-secondary">...</p>
+                        </div>
+
+                        <div class="alert alert-warning small" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> Lưu ý: Liên kết sẽ mở trong tab mới.
+                        </div>
+
+                        <div id="view-qr-small" class="mb-3 opacity-50 d-flex justify-content-center" style="transform: scale(0.8);">
+                            </div>
+
+                        <a href="#" id="view-btn" class="cta-btn">
+                            <i class="fas fa-external-link-alt"></i> Truy Cập Tài Liệu Ngay
+                        </a>
+                        
+                        <p class="mt-4 small text-muted">
+                            Powered by VDC Services &copy; 2026
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center py-4 text-muted small">
+            <div class="container">
+                <p>Vietnam Data Center Services. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <div class="version-tag">v1.4</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // === CẤU HÌNH ===
+        // !!! QUAN TRỌNG: Thay email bên dưới bằng email của bạn để thành Admin !!!
+        const ADMIN_EMAIL = "admin@vdc.com"; 
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
+            authDomain: "tavietnam-78ae8.firebaseapp.com", 
+            projectId: "tavietnam-78ae8", 
+            storageBucket: "tavietnam-78ae8.firebasestorage.app", 
+            messagingSenderId: "670121705534", 
+            appId: "1:670121705534:web:1027ad98550573ad37116f" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let userData = null;
+
+        // === LOGIC CHÍNH ===
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            // Nếu là chế độ xem (View Mode) -> Load Landing Page
+            if (urlParams.get('mode') === 'view') {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                
+                // KIỂM TRA CHẾ ĐỘ TỰ ĐỘNG CHUYỂN HƯỚNG (VIP)
+                if (urlParams.get('auto') === '1' && urlParams.get('link')) {
+                    showView('redirect-view');
+                    const targetLink = urlParams.get('link');
+                    // Chuyển hướng sau 1s (để kịp thấy hiệu ứng loading)
+                    setTimeout(() => {
+                        window.location.replace(targetLink);
+                    }, 1000);
+                } else {
+                    showView('viewer-view');
+                    renderLandingPage(urlParams);
+                }
+                return;
+            }
+
+            // Nếu là chế độ tạo (Creator Mode) -> Check Login
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await syncUserToFirestore(user);
+                } else {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    showView('auth-view');
+                }
+            });
+        });
+
+        // Đồng bộ user vào Firestore
+        async function syncUserToFirestore(user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                userData = userSnap.data();
+                if (userData.isLocked) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    showView('locked-view');
+                    return;
+                }
+                
+                if (!userData.phone) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    showView('profile-view');
+                    document.getElementById('profile-name').value = userData.displayName || user.displayName;
+                } else {
+                    loadCreatorDashboard();
+                }
+            } else {
+                const newUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    phone: "", 
+                    role: (user.email === ADMIN_EMAIL) ? 'admin' : 'user',
+                    isVip: false, // Mặc định không phải VIP
+                    qrCount: 0,
+                    qrLimit: 10,
+                    isLocked: false,
+                    createdAt: new Date().toISOString()
+                };
+                await setDoc(userRef, newUser);
+                userData = newUser;
+                document.getElementById('loading-overlay').classList.add('hidden');
+                showView('profile-view');
+                document.getElementById('profile-name').value = user.displayName;
+            }
+        }
+
+        function loadCreatorDashboard() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            showView('creator-view');
+            
+            document.getElementById('display-username').textContent = userData.displayName;
+            document.getElementById('usage-count').textContent = userData.qrCount;
+            document.getElementById('usage-limit').textContent = userData.qrLimit;
+
+            // Hiển thị trạng thái VIP
+            const vipSpan = document.getElementById('vip-status-display');
+            const subTitle = document.getElementById('creator-subtitle');
+            if (userData.isVip) {
+                vipSpan.innerHTML = `<span class="vip-badge"><i class="fas fa-crown"></i> PRO Account</span>`;
+                subTitle.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check"></i> Chế độ Direct Redirect đã kích hoạt.</span> Mã QR sẽ tự động chuyển hướng.`;
+            } else {
+                vipSpan.innerHTML = `<span class="badge bg-secondary ms-2">Free</span>`;
+                subTitle.textContent = "Nhập thông tin để tạo trang đích.";
+            }
+
+            const adminBtn = document.getElementById('btn-go-admin');
+            if (userData.role === 'admin') {
+                adminBtn.classList.remove('hidden');
+                adminBtn.onclick = loadAdminDashboard;
+            }
+        }
+
+        // === CÁC SỰ KIỆN NÚT BẤM ===
+        document.getElementById('btn-login-google').addEventListener('click', () => signInWithPopup(auth, provider));
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth).then(() => window.location.reload()));
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('profile-phone').value;
+            const name = document.getElementById('profile-name').value;
+            
+            const userRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userRef, { phone: phone, displayName: name });
+            
+            userData.phone = phone;
+            userData.displayName = name;
+            loadCreatorDashboard();
+        });
+
+        // Hàm Tạo QR (Có xử lý VIP)
+        window.generateVdcQR = async function() {
+            if (userData.qrCount >= userData.qrLimit) {
+                alert(`Bạn đã đạt giới hạn tạo (${userData.qrLimit}). Vui lòng liên hệ Admin.`);
+                return;
+            }
+
+            const title = document.getElementById('docTitle').value.trim();
+            const desc = document.getElementById('docDesc').value.trim();
+            const link = document.getElementById('targetLink').value.trim();
+
+            if (!link) return alert('Thiếu link gốc!');
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                const newCount = (userData.qrCount || 0) + 1;
+                await updateDoc(userRef, { qrCount: newCount });
+                
+                userData.qrCount = newCount;
+                document.getElementById('usage-count').textContent = newCount;
+
+                const currentUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+                
+                // --- LOGIC VIP: THÊM THAM SỐ AUTO ---
+                let landingPageUrl = `${currentUrl}?mode=view&title=${encodeURIComponent(title)}&desc=${encodeURIComponent(desc)}&link=${encodeURIComponent(link)}`;
+                if (userData.isVip) {
+                    landingPageUrl += `&auto=1`; // Thêm cờ tự động
+                }
+                // ------------------------------------
+
+                document.getElementById('qr-result').classList.remove('hidden');
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = "";
+                new QRCode(qrContainer, {
+                    text: landingPageUrl, width: 200, height: 200,
+                    colorDark : "#004e92", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                });
+                document.getElementById('preview-link').href = landingPageUrl;
+
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi: " + err.message);
+            }
+        };
+
+        // Hàm Admin
+        async function loadAdminDashboard() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            const tbody = document.getElementById('admin-user-list');
+            tbody.innerHTML = '';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                querySnapshot.forEach((docSnap) => {
+                    const u = docSnap.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <div class="fw-bold">${u.displayName || 'No Name'}</div>
+                            <small class="text-muted">${u.email}</small>
+                        </td>
+                        <td>${u.phone || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm ${u.isVip ? 'btn-warning' : 'btn-outline-secondary'}" 
+                                onclick="window.toggleVip('${u.uid}', ${u.isVip})">
+                                ${u.isVip ? '<i class="fas fa-crown"></i> PRO' : 'Free'}
+                            </button>
+                        </td>
+                        <td>${u.qrCount || 0}</td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm" style="width: 80px" 
+                                value="${u.qrLimit || 10}" 
+                                onchange="window.updateLimit('${u.uid}', this.value)">
+                        </td>
+                        <td>
+                            <span class="badge ${u.isLocked ? 'bg-danger' : 'bg-success'}">
+                                ${u.isLocked ? 'Bị khóa' : 'Hoạt động'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm ${u.isLocked ? 'btn-outline-success' : 'btn-outline-danger'}" 
+                                onclick="window.toggleLock('${u.uid}', ${u.isLocked})">
+                                ${u.isLocked ? 'Mở' : 'Khóa'}
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                showView('admin-view');
+            } catch (err) {
+                alert("Lỗi Admin: " + err.message);
+            } finally {
+                document.getElementById('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        window.updateLimit = async (uid, val) => {
+            await updateDoc(doc(db, "users", uid), { qrLimit: parseInt(val) });
+        };
+
+        window.toggleLock = async (uid, currentStatus) => {
+            if(confirm(`Xác nhận ${currentStatus ? 'MỞ KHÓA' : 'KHÓA'} tài khoản này?`)) {
+                await updateDoc(doc(db, "users", uid), { isLocked: !currentStatus });
+                loadAdminDashboard();
+            }
+        };
+
+        window.toggleVip = async (uid, currentStatus) => {
+            const action = currentStatus ? "HẠ CẤP xuống Free" : "NÂNG CẤP lên PRO";
+            if(confirm(`Bạn có chắc muốn ${action} cho tài khoản này?`)) {
+                await updateDoc(doc(db, "users", uid), { isVip: !currentStatus });
+                loadAdminDashboard();
+            }
+        };
+
+        window.showCreatorFromAdmin = () => showView('creator-view');
+        
+        function showView(viewId) {
+            ['auth-view', 'profile-view', 'creator-view', 'viewer-view', 'admin-view', 'locked-view', 'redirect-view'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // === HÀM RENDER LANDING PAGE (VIEWER - Non-VIP logic) ===
+        window.renderLandingPage = function(params) {
+            const title = params.get('title') || 'Tài liệu';
+            const link = params.get('link') || '#';
+            
+            document.getElementById('view-title').textContent = title;
+            document.getElementById('view-desc').textContent = params.get('desc') || "Không có mô tả.";
+            
+            const btn = document.getElementById('view-btn');
+            
+            if(link !== '#') {
+                btn.href = link;
+                btn.target = "_blank"; 
+                btn.rel = "noopener noreferrer"; 
+                
+                setTimeout(() => {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 800);
+            } else {
+                btn.classList.add('disabled');
+                btn.textContent = "Liên kết lỗi";
+            }
+            
+            new QRCode(document.getElementById("view-qr-small"), {
+                text: window.location.href,
+                width: 100,
+                height: 100
+            });
+        };
+        
+        window.downloadQR = function() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                const link = document.createElement('a'); link.download = 'VDC-QR.png'; link.href = qrCanvas.toDataURL(); link.click();
+            } else {
+                const img = document.querySelector('#qrcode img');
+                if(img) { const link = document.createElement('a'); link.download = 'VDC-QR.png'; link.href = img.src; link.click(); }
+            }
+        };
+    </script>
+</body>
+</html>

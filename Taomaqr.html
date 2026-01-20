@@ -13,7 +13,6 @@
             --primary: #4e54c8;
             --secondary: #8f94fb;
             --accent: #ff6b6b;
-            --bg-light: #f4f7f6;
             --glass: rgba(255, 255, 255, 0.95);
         }
         
@@ -21,24 +20,81 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            color: #333;
+            display: flex;
+            flex-direction: column;
         }
 
         .hidden { display: none !important; }
 
-        /* Container Styles */
-        .app-card {
-            background: var(--glass);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            border: 1px solid rgba(255,255,255,0.5);
-            overflow: hidden;
-            max-width: 800px; /* Rộng hơn để chứa tab quản lý */
-            margin: 40px auto;
-            min-height: 500px;
+        /* --- NAVBAR & SIDEBAR STYLES --- */
+        .top-navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        /* --- VIEWER STYLES (LANDING PAGE) --- */
+        .offcanvas {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-panel {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .menu-link {
+            padding: 15px 25px;
+            display: block;
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .menu-link:hover, .menu-link.active {
+            background: #f8f9fa;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        .menu-link i { width: 30px; text-align: center; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1; /* Đẩy footer xuống dưới */
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            min-height: 400px;
+        }
+
+        /* --- FOOTER --- */
+        .app-footer {
+            background: #343a40;
+            color: #adb5bd;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+
+        /* --- VIEWER STYLES --- */
         .viewer-header {
             background: linear-gradient(to right, var(--primary), var(--secondary));
             color: white;
@@ -56,174 +112,131 @@
             padding: 30px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.1);
             text-align: center;
-        }
-        .owner-badge {
-            display: inline-block;
-            background: #eef2ff;
-            color: var(--primary);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 15px;
+            max-width: 600px;
         }
 
-        /* --- CREATOR STYLES --- */
-        .sidebar {
-            background: #f8f9fa;
-            border-right: 1px solid #eee;
-        }
-        .nav-link {
-            color: #666;
-            font-weight: 500;
-            padding: 15px 20px;
-            border-radius: 0;
-            transition: all 0.3s;
-        }
-        .nav-link:hover, .nav-link.active {
-            background: rgba(78, 84, 200, 0.1);
-            color: var(--primary);
-            border-right: 3px solid var(--primary);
-        }
-        .nav-link i { width: 25px; }
-
-        /* QR List Item */
+        /* --- COMMON COMPONENTS --- */
         .qr-item {
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            transition: transform 0.2s;
-            background: white;
+            border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 15px; background: white;
         }
-        .qr-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-        /* Message Box */
         .msg-item {
-            border-left: 3px solid var(--accent);
-            background: #fff5f5;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+            border-left: 3px solid var(--accent); background: #fff5f5; padding: 10px 15px; margin-bottom: 10px; border-radius: 4px;
         }
-        .msg-item.read {
-            border-left: 3px solid #ccc;
-            background: white;
-        }
-
-        /* Loading */
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         
-        .version-tag { position: fixed; bottom: 10px; right: 10px; font-size: 11px; color: #999; }
+        .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: #555; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div id="loading-overlay">
         <div class="spinner-border text-primary mb-3" role="status"></div>
-        <div class="text-muted small">Đang kết nối hệ thống VDC...</div>
+        <div class="text-muted small">Đang tải hệ thống...</div>
     </div>
 
-    <div id="auth-view" class="container hidden" style="padding-top: 100px;">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card border-0 shadow-lg rounded-4 p-4 text-center">
-                    <h3 class="fw-bold text-primary mb-2">VDC Smart QR</h3>
-                    <p class="text-muted mb-4">Quản lý tài liệu & Kết nối khách hàng</p>
-                    <button class="btn btn-outline-dark w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="btn-login">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                        Đăng nhập bằng Google
-                    </button>
-                </div>
-            </div>
+    <div id="auth-view" class="container hidden d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+        <div class="card border-0 shadow-lg rounded-4 p-5 text-center" style="max-width: 400px;">
+            <h3 class="fw-bold text-primary mb-2">VDC Smart QR</h3>
+            <p class="text-muted mb-4">Đăng nhập để quản lý hệ thống</p>
+            <button class="btn btn-outline-dark w-100 py-2 gap-2 d-flex justify-content-center" id="btn-login">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                <span>Google Login</span>
+            </button>
         </div>
     </div>
 
-    <div id="profile-view" class="container hidden" style="padding-top: 80px;">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card border-0 shadow p-4">
-                    <h4 class="text-center mb-4">Cập nhật thông tin</h4>
-                    <form id="profile-form">
-                        <div class="mb-3">
-                            <label>Họ và Tên hiển thị</label>
-                            <input type="text" id="profile-name" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Số điện thoại (để quản lý)</label>
-                            <input type="tel" id="profile-phone" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Hoàn tất & Bắt đầu</button>
-                    </form>
-                </div>
-            </div>
+    <div id="profile-view" class="container hidden mt-5">
+        <div class="card border-0 shadow p-4 mx-auto" style="max-width: 500px;">
+            <h4 class="text-center mb-4">Hoàn tất hồ sơ</h4>
+            <form id="profile-form">
+                <div class="mb-3"><label>Tên hiển thị</label><input type="text" id="profile-name" class="form-control" required></div>
+                <div class="mb-3"><label>Số điện thoại</label><input type="tel" id="profile-phone" class="form-control" required></div>
+                <button type="submit" class="btn btn-primary w-100">Lưu thông tin</button>
+            </form>
         </div>
     </div>
 
-    <div id="dashboard-view" class="app-card hidden">
-        <div class="row g-0 h-100">
-            <div class="col-md-3 sidebar">
-                <div class="p-4 text-center border-bottom">
-                    <div class="fw-bold text-primary">VDC Admin</div>
-                    <small class="text-muted" id="user-display-name">...</small>
-                    <div class="mt-2 badge bg-warning text-dark">Quota: <span id="quota-display">0/5</span> hôm nay</div>
+    <div id="dashboard-view" class="hidden d-flex flex-column w-100 h-100">
+        
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <h5 class="mb-0 fw-bold text-primary">VDC Admin</h5>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark border">Quota: <span id="quota-display">0/5</span></span>
+            </div>
+        </div>
+
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+            <div class="offcanvas-header p-0">
+                <div class="user-panel w-100">
+                    <i class="fas fa-user-circle fa-3x mb-2"></i>
+                    <h5 class="mb-0" id="user-display-name">User</h5>
+                    <small class="opacity-75" id="user-display-email">email@example.com</small>
                 </div>
-                <nav class="nav flex-column mt-3">
-                    <a class="nav-link active" href="#" onclick="switchTab('create')"><i class="fas fa-plus-circle"></i> Tạo mã mới</a>
-                    <a class="nav-link" href="#" onclick="switchTab('list')"><i class="fas fa-list"></i> Quản lý mã</a>
-                    <a class="nav-link" href="#" onclick="switchTab('inbox')">
-                        <i class="fas fa-envelope"></i> Hộp thư <span class="badge bg-danger rounded-pill ms-1 hidden" id="msg-badge">0</span>
+            </div>
+            <div class="offcanvas-body p-0 pt-2">
+                <nav>
+                    <a href="#" class="menu-link active" onclick="switchTab('create')">
+                        <i class="fas fa-plus-circle"></i> Tạo mã mới
                     </a>
-                    <a class="nav-link text-danger mt-5" href="#" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                    <a href="#" class="menu-link" onclick="switchTab('list')">
+                        <i class="fas fa-list-ul"></i> Quản lý mã QR
+                    </a>
+                    <a href="#" class="menu-link d-flex justify-content-between align-items-center" onclick="switchTab('inbox')">
+                        <span><i class="fas fa-inbox"></i> Hộp thư</span>
+                        <span class="badge bg-danger rounded-pill hidden" id="msg-badge">0</span>
+                    </a>
+                    <hr>
+                    <a href="#" class="menu-link text-danger" id="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
                 </nav>
             </div>
+        </div>
 
-            <div class="col-md-9 p-4 bg-white" style="min-height: 500px;">
+        <div class="main-content">
+            <div class="content-card">
                 
-                <div id="tab-create" class="tab-content">
-                    <h4 class="mb-4">Tạo mã QR Động</h4>
+                <div id="tab-create" class="tab-pane">
+                    <h4 class="mb-4 text-primary"><i class="fas fa-magic"></i> Tạo mã QR Động</h4>
                     <div class="mb-3">
-                        <label class="form-label">Tiêu đề tài liệu</label>
-                        <input type="text" id="inp-title" class="form-control" placeholder="VD: Báo cáo tháng 1">
+                        <label class="form-label text-muted small">TIÊU ĐỀ TÀI LIỆU</label>
+                        <input type="text" id="inp-title" class="form-control" placeholder="Ví dụ: Tài liệu hướng dẫn...">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Mô tả chi tiết</label>
-                        <textarea id="inp-desc" class="form-control" rows="3" placeholder="Nhập hướng dẫn sử dụng, ghi chú..."></textarea>
+                        <label class="form-label text-muted small">MÔ TẢ NGẮN</label>
+                        <textarea id="inp-desc" class="form-control" rows="3" placeholder="Nhập ghi chú..."></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Link tài liệu (Drive/Dropbox/Web)</label>
+                        <label class="form-label text-muted small">LINK ĐÍCH (DRIVE/WEB)</label>
                         <input type="url" id="inp-link" class="form-control" placeholder="https://...">
                     </div>
-                    <button class="btn btn-primary" onclick="createQR()">
-                        <i class="fas fa-magic"></i> Tạo Mã Ngay
-                    </button>
+                    <button class="btn btn-primary w-100 py-2" onclick="createQR()">Tạo Mã Ngay</button>
 
-                    <div id="new-qr-result" class="mt-4 p-3 bg-light rounded text-center hidden">
-                        <h5>Mã QR của bạn đã sẵn sàng!</h5>
+                    <div id="new-qr-result" class="mt-4 p-4 bg-light rounded text-center hidden border border-success">
+                        <h5 class="text-success">Thành công!</h5>
                         <div id="qrcode-container" class="my-3 d-flex justify-content-center"></div>
-                        <p class="small text-muted">Mã này đã được lưu vào danh sách quản lý.</p>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="downloadNewQR()">Tải ảnh QR</button>
+                        <button class="btn btn-sm btn-dark" onclick="downloadNewQR()"><i class="fas fa-download"></i> Tải ảnh về</button>
                     </div>
                 </div>
 
-                <div id="tab-list" class="tab-content hidden">
-                    <h4 class="mb-4">Danh sách mã QR của tôi</h4>
-                    <div id="my-qr-list" style="max-height: 400px; overflow-y: auto;">
-                        <p class="text-muted text-center py-5">Đang tải dữ liệu...</p>
-                    </div>
+                <div id="tab-list" class="tab-pane hidden">
+                    <h4 class="mb-4 text-primary"><i class="fas fa-tasks"></i> Danh sách mã đã tạo</h4>
+                    <div id="my-qr-list" style="max-height: 60vh; overflow-y: auto;"></div>
                 </div>
 
-                <div id="tab-inbox" class="tab-content hidden">
-                    <h4 class="mb-4">Tin nhắn từ khách hàng</h4>
-                    <div id="inbox-list" style="max-height: 400px; overflow-y: auto;">
-                        <p class="text-muted text-center py-5">Không có tin nhắn nào.</p>
-                    </div>
+                <div id="tab-inbox" class="tab-pane hidden">
+                    <h4 class="mb-4 text-primary"><i class="fas fa-envelope-open-text"></i> Hộp thư khách hàng</h4>
+                    <div id="inbox-list" style="max-height: 60vh; overflow-y: auto;"></div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -233,110 +246,65 @@
             <h2 class="fw-bold"><i class="fas fa-cloud"></i> VDC ONLINE</h2>
             <p class="mb-0">Cổng thông tin tài liệu số</p>
         </div>
-        
         <div class="viewer-card">
-            <div class="owner-badge"><i class="fas fa-user-check"></i> Được chia sẻ bởi: <span id="view-owner">...</span></div>
-            
-            <h2 id="view-title" class="fw-bold text-dark mb-3">...</h2>
-            
-            <div class="text-start bg-light p-3 rounded mb-4">
-                <small class="text-uppercase text-muted fw-bold">Mô tả / Hướng dẫn:</small>
-                <p id="view-desc" class="mt-1 mb-0" style="white-space: pre-line;">...</p>
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill">
+                <i class="fas fa-user-edit"></i> <span id="view-owner">...</span>
+            </span>
+            <h3 id="view-title" class="fw-bold text-dark mb-3">...</h3>
+            <div class="text-start bg-light p-3 rounded mb-4 border">
+                <p id="view-desc" class="mb-0 text-secondary" style="white-space: pre-line;">...</p>
             </div>
-
             <div class="d-grid gap-2">
-                <a id="view-btn" href="#" class="btn btn-success btn-lg rounded-pill shadow-sm" target="_blank">
-                    <i class="fas fa-download"></i> Tải Tài Liệu / Truy Cập
+                <a id="view-btn" href="#" class="btn btn-success btn-lg shadow-sm" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Truy cập Tài Liệu
                 </a>
-                
-                <button class="btn btn-outline-primary rounded-pill mt-2" data-bs-toggle="modal" data-bs-target="#contactModal">
-                    <i class="fas fa-comment-dots"></i> Nhắn tin cho người tạo
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#contactModal">
+                    <i class="fas fa-comment"></i> Nhắn tin cho tác giả
                 </button>
             </div>
-            
-            <p class="mt-4 small text-muted">Powered by VDC Tech &copy; 2026</p>
         </div>
     </div>
 
-    <div class="modal fade" id="contactModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Gửi tin nhắn</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label>Tên của bạn/Đơn vị</label>
-                        <input type="text" id="msg-sender" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label>Nội dung</label>
-                        <textarea id="msg-content" class="form-control" rows="3" placeholder="Ví dụ: Tôi cần hỗ trợ về file này..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100" onclick="sendContactMessage()">Gửi tin nhắn</button>
-                </div>
+    <footer class="app-footer hidden" id="main-footer">
+        <div class="container">
+            <p class="mb-1 fw-bold">VDC Smart QR Solution</p>
+            <p class="mb-0 small">Copyright &copy; 2026 Vietnam Data Center. All rights reserved.</p>
+            <div class="mt-2">
+                <a href="#" class="text-secondary text-decoration-none me-2">Privacy</a>
+                <a href="#" class="text-secondary text-decoration-none">Terms</a>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Cập nhật mã QR</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit-id">
-                    <div class="mb-3"><label>Tiêu đề mới</label><input type="text" id="edit-title" class="form-control"></div>
-                    <div class="mb-3"><label>Mô tả mới</label><textarea id="edit-desc" class="form-control" rows="3"></textarea></div>
-                    <div class="mb-3"><label>Link mới</label><input type="url" id="edit-link" class="form-control"></div>
-                </div>
-                <div class="modal-footer"><button class="btn btn-primary" onclick="saveEdit()">Lưu thay đổi</button></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="contactModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Gửi tin nhắn</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="msg-sender" class="form-control mb-2" placeholder="Tên của bạn"><textarea id="msg-content" class="form-control" rows="3" placeholder="Nội dung..."></textarea></div><div class="modal-footer"><button class="btn btn-primary w-100" onclick="sendContactMessage()">Gửi</button></div></div></div></div>
+    <div class="modal fade" id="editModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Sửa nội dung</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="edit-id"><input type="text" id="edit-title" class="form-control mb-2"><textarea id="edit-desc" class="form-control mb-2"></textarea><input type="url" id="edit-link" class="form-control"></div><div class="modal-footer"><button class="btn btn-primary" onclick="saveEdit()">Lưu</button></div></div></div></div>
 
-    <div class="version-tag">v2.0 Managed</div>
+    <div class="version-tag">v2.1 UI Update</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Cấu hình Firebase (GIỮ NGUYÊN)
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
-            authDomain: "tavietnam-78ae8.firebaseapp.com", 
-            projectId: "tavietnam-78ae8", 
-            storageBucket: "tavietnam-78ae8.firebasestorage.app", 
-            messagingSenderId: "670121705534", 
-            appId: "1:670121705534:web:1027ad98550573ad37116f" 
-        };
-
+        // Config
+        const firebaseConfig = { apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", authDomain: "tavietnam-78ae8.firebaseapp.com", projectId: "tavietnam-78ae8", storageBucket: "tavietnam-78ae8.firebasestorage.app", messagingSenderId: "670121705534", appId: "1:670121705534:web:1027ad98550573ad37116f" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        let currentUser = null;
-        let userData = null;
-        let currentQrOwnerId = null; // Dùng cho viewer gửi tin nhắn
+        let currentUser, userData, currentQrOwnerId;
 
-        // --- KHỞI TẠO ---
         document.addEventListener('DOMContentLoaded', async () => {
-            const params = new URLSearchParams(window.location.search);
-            const qrId = params.get('id');
-
+            const qrId = new URLSearchParams(window.location.search).get('id');
             if (qrId) {
-                // CHẾ ĐỘ XEM (VIEWER)
                 document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('main-footer').classList.remove('hidden'); // Show footer on viewer
                 loadQrContent(qrId);
             } else {
-                // CHẾ ĐỘ QUẢN LÝ (CREATOR)
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUser = user;
@@ -349,48 +317,24 @@
             }
         });
 
-        // --- CÁC HÀM XỬ LÝ USER & QUOTA ---
+        // --- Core Logic ---
         async function syncUser(user) {
-            const userRef = doc(db, "users", user.uid);
-            const snap = await getDoc(userRef);
-            
+            const ref = doc(db, "users", user.uid);
+            const snap = await getDoc(ref);
             if (snap.exists()) {
                 userData = snap.data();
-                if (!userData.phone) {
-                    showView('profile-view');
-                } else {
-                    // Logic reset quota ngày mới
-                    const todayStr = new Date().toDateString();
-                    if (userData.lastDate !== todayStr) {
-                        await updateDoc(userRef, { lastDate: todayStr, dailyCount: 0 });
-                        userData.dailyCount = 0;
-                    }
+                if (!userData.phone) showView('profile-view');
+                else {
+                    if (userData.lastDate !== new Date().toDateString()) await updateDoc(ref, { lastDate: new Date().toDateString(), dailyCount: 0 });
                     loadDashboard();
                 }
-            } else {
-                // User mới
-                showView('profile-view');
-            }
+            } else showView('profile-view');
             document.getElementById('loading-overlay').classList.add('hidden');
         }
 
         document.getElementById('profile-form').onsubmit = async (e) => {
             e.preventDefault();
-            const name = document.getElementById('profile-name').value;
-            const phone = document.getElementById('profile-phone').value;
-            
-            const newUser = {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                displayName: name,
-                phone: phone,
-                role: 'user',
-                dailyLimit: 5, // Mặc định 5 QR/ngày
-                dailyCount: 0,
-                lastDate: new Date().toDateString(),
-                createdAt: new Date().toISOString()
-            };
-            
+            const newUser = { uid: currentUser.uid, email: currentUser.email, displayName: document.getElementById('profile-name').value, phone: document.getElementById('profile-phone').value, dailyLimit: 5, dailyCount: 0, lastDate: new Date().toDateString(), createdAt: new Date().toISOString() };
             await setDoc(doc(db, "users", currentUser.uid), newUser);
             userData = newUser;
             loadDashboard();
@@ -398,247 +342,115 @@
 
         function loadDashboard() {
             showView('dashboard-view');
-            document.getElementById('user-display-name').textContent = userData.displayName;
-            updateQuotaDisplay();
+            document.getElementById('main-footer').classList.remove('hidden');
+            document.getElementById('user-display-name').innerText = userData.displayName;
+            document.getElementById('user-display-email').innerText = userData.email;
+            document.getElementById('quota-display').innerText = `${userData.dailyCount||0}/${userData.dailyLimit}`;
             loadMyQRs();
             loadInbox();
         }
 
-        function updateQuotaDisplay() {
-            document.getElementById('quota-display').textContent = `${userData.dailyCount || 0}/${userData.dailyLimit}`;
-        }
+        // --- Tabs & Sidebar ---
+        window.switchTab = (tab) => {
+            ['create', 'list', 'inbox'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            
+            // Auto hide sidebar on mobile
+            const sidebar = bootstrap.Offcanvas.getInstance(document.getElementById('sidebarMenu'));
+            if(sidebar) sidebar.hide();
 
-        // --- LOGIC TẠO MÃ ---
-        window.createQR = async () => {
-            if (userData.dailyCount >= userData.dailyLimit) {
-                return alert(`Bạn đã hết lượt tạo hôm nay (${userData.dailyLimit} mã). Quay lại vào ngày mai nhé!`);
-            }
+            // Update Active State
+            document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+            event.currentTarget.classList.add('active');
 
-            const title = document.getElementById('inp-title').value;
-            const desc = document.getElementById('inp-desc').value;
-            const link = document.getElementById('inp-link').value;
-
-            if (!link) return alert("Vui lòng nhập link!");
-
-            document.getElementById('loading-overlay').classList.remove('hidden');
-
-            try {
-                // 1. Lưu QR vào DB
-                const docRef = await addDoc(collection(db, "qr_codes"), {
-                    title, desc, link,
-                    createdBy: currentUser.uid,
-                    ownerName: userData.displayName, // Lưu tên chủ để hiện thị nhanh
-                    createdAt: new Date().toISOString()
-                });
-
-                // 2. Trừ Quota
-                const newCount = (userData.dailyCount || 0) + 1;
-                await updateDoc(doc(db, "users", currentUser.uid), { dailyCount: newCount });
-                userData.dailyCount = newCount;
-                updateQuotaDisplay();
-
-                // 3. Render QR
-                const shortUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
-                document.getElementById('qrcode-container').innerHTML = "";
-                new QRCode(document.getElementById('qrcode-container'), {
-                    text: shortUrl, width: 150, height: 150, colorDark: "#4e54c8"
-                });
-                document.getElementById('new-qr-result').classList.remove('hidden');
-                
-                // Clear form & reload list
-                document.getElementById('inp-title').value = "";
-                document.getElementById('inp-link').value = "";
-                loadMyQRs(); // Refresh list
-
-            } catch (e) {
-                alert("Lỗi: " + e.message);
-            } finally {
-                document.getElementById('loading-overlay').classList.add('hidden');
-            }
+            if(tab === 'list') loadMyQRs();
+            if(tab === 'inbox') loadInbox();
         };
 
-        // --- LOGIC QUẢN LÝ (LIST, EDIT, DELETE) ---
-        async function loadMyQRs() {
-            const listDiv = document.getElementById('my-qr-list');
-            listDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Đang tải...';
-
-            const q = query(collection(db, "qr_codes"), where("createdBy", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
+        // --- QR Logic ---
+        window.createQR = async () => {
+            if ((userData.dailyCount || 0) >= userData.dailyLimit) return alert("Hết lượt tạo hôm nay!");
+            const title = document.getElementById('inp-title').value;
+            const link = document.getElementById('inp-link').value;
+            if (!link) return alert("Thiếu Link!");
             
-            listDiv.innerHTML = "";
-            if (snapshot.empty) {
-                listDiv.innerHTML = '<p class="text-center text-muted mt-3">Chưa có mã nào.</p>';
-                return;
-            }
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            const docRef = await addDoc(collection(db, "qr_codes"), { title, desc: document.getElementById('inp-desc').value, link, createdBy: currentUser.uid, ownerName: userData.displayName, createdAt: new Date().toISOString() });
+            
+            await updateDoc(doc(db, "users", currentUser.uid), { dailyCount: (userData.dailyCount||0) + 1 });
+            userData.dailyCount++;
+            document.getElementById('quota-display').innerText = `${userData.dailyCount}/${userData.dailyLimit}`;
+            
+            const url = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
+            document.getElementById('qrcode-container').innerHTML = "";
+            new QRCode(document.getElementById('qrcode-container'), { text: url, width: 150, height: 150 });
+            document.getElementById('new-qr-result').classList.remove('hidden');
+            document.getElementById('loading-overlay').classList.add('hidden');
+            
+            document.getElementById('inp-title').value = ""; document.getElementById('inp-link').value = "";
+        };
 
-            snapshot.forEach(docSnap => {
-                const qr = docSnap.data();
-                const id = docSnap.id;
-                const url = `${window.location.origin}${window.location.pathname}?id=${id}`;
-                
-                const div = document.createElement('div');
-                div.className = 'qr-item';
-                div.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="fw-bold mb-1">${qr.title || 'Không tiêu đề'}</h6>
-                            <small class="text-muted"><i class="fas fa-link"></i> ${url}</small>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="${url}" target="_blank">Xem thử</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="window.openEdit('${id}')">Sửa nội dung</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#" onclick="window.deleteQR('${id}')">Xóa mã</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-                listDiv.appendChild(div);
+        async function loadMyQRs() {
+            const list = document.getElementById('my-qr-list');
+            list.innerHTML = "Đang tải...";
+            const q = query(collection(db, "qr_codes"), where("createdBy", "==", currentUser.uid), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            list.innerHTML = snap.empty ? "<p class='text-muted text-center'>Chưa có mã nào</p>" : "";
+            snap.forEach(d => {
+                const qr = d.data();
+                list.innerHTML += `<div class="qr-item d-flex justify-content-between align-items-center"><div><strong>${qr.title}</strong><br><small class="text-muted">${qr.link}</small></div><div><button class="btn btn-sm btn-outline-primary me-1" onclick="openEdit('${d.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteQR('${d.id}')"><i class="fas fa-trash"></i></button></div></div>`;
             });
         }
 
         window.openEdit = async (id) => {
-            const docSnap = await getDoc(doc(db, "qr_codes", id));
-            if(docSnap.exists()){
-                const d = docSnap.data();
-                document.getElementById('edit-id').value = id;
-                document.getElementById('edit-title').value = d.title;
-                document.getElementById('edit-desc').value = d.desc;
-                document.getElementById('edit-link').value = d.link;
-                const modal = new bootstrap.Modal(document.getElementById('editModal'));
-                modal.show();
-            }
+            const d = (await getDoc(doc(db, "qr_codes", id))).data();
+            document.getElementById('edit-id').value = id; document.getElementById('edit-title').value = d.title; document.getElementById('edit-desc').value = d.desc; document.getElementById('edit-link').value = d.link;
+            new bootstrap.Modal(document.getElementById('editModal')).show();
         };
 
         window.saveEdit = async () => {
-            const id = document.getElementById('edit-id').value;
-            await updateDoc(doc(db, "qr_codes", id), {
-                title: document.getElementById('edit-title').value,
-                desc: document.getElementById('edit-desc').value,
-                link: document.getElementById('edit-link').value
-            });
-            alert("Đã cập nhật!");
-            loadMyQRs();
-            // Close modal manually via Bootstrap JS or reload
-            location.reload(); 
+            await updateDoc(doc(db, "qr_codes", document.getElementById('edit-id').value), { title: document.getElementById('edit-title').value, desc: document.getElementById('edit-desc').value, link: document.getElementById('edit-link').value });
+            alert("Đã lưu!"); location.reload();
         };
 
         window.deleteQR = async (id) => {
-            if(confirm("Bạn chắc chắn muốn xóa? Mã QR đã in sẽ không còn hoạt động.")){
-                await deleteDoc(doc(db, "qr_codes", id));
-                loadMyQRs();
-            }
+            if(confirm("Xóa mã này?")) { await deleteDoc(doc(db, "qr_codes", id)); loadMyQRs(); }
         };
 
-        // --- LOGIC HỘP THƯ (INBOX) ---
+        // --- Inbox & Contact ---
         async function loadInbox() {
-            const listDiv = document.getElementById('inbox-list');
-            // Query messages sent TO current user
+            const list = document.getElementById('inbox-list');
+            list.innerHTML = "Đang tải...";
             const q = query(collection(db, "messages"), where("toUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
-            
-            listDiv.innerHTML = "";
-            if (snapshot.empty) {
-                listDiv.innerHTML = '<p class="text-center text-muted mt-3">Hộp thư trống.</p>';
-                return;
-            }
-
+            const snap = await getDocs(q);
+            list.innerHTML = snap.empty ? "<p class='text-muted text-center'>Trống</p>" : "";
             let unread = 0;
-            snapshot.forEach(docSnap => {
-                const msg = docSnap.data();
-                const div = document.createElement('div');
-                div.className = 'msg-item';
-                div.innerHTML = `
-                    <div class="d-flex justify-content-between">
-                        <strong>${msg.senderName || 'Khách ẩn danh'}</strong>
-                        <small class="text-muted">${new Date(msg.createdAt).toLocaleDateString()}</small>
-                    </div>
-                    <p class="mb-0 small mt-1">${msg.content}</p>
-                    <small class="text-primary fst-italic">Từ mã QR: ${msg.qrTitle || 'Unknown'}</small>
-                `;
-                listDiv.appendChild(div);
+            snap.forEach(d => {
+                const m = d.data();
+                list.innerHTML += `<div class="msg-item"><strong>${m.senderName}</strong> <small class="text-muted float-end">${new Date(m.createdAt).toLocaleDateString()}</small><p class="mb-0 mt-1">${m.content}</p><small class="text-primary">QR: ${m.qrTitle}</small></div>`;
                 unread++;
             });
-            
-            if(unread > 0) {
-                const badge = document.getElementById('msg-badge');
-                badge.textContent = unread;
-                badge.classList.remove('hidden');
-            }
+            if(unread>0) { document.getElementById('msg-badge').innerText = unread; document.getElementById('msg-badge').classList.remove('hidden'); }
         }
 
-        // --- LOGIC VIEWER & GỬI TIN NHẮN ---
         async function loadQrContent(id) {
             try {
-                const snap = await getDoc(doc(db, "qr_codes", id));
-                if (snap.exists()) {
-                    const data = snap.data();
-                    showView('viewer-view');
-                    document.getElementById('view-title').textContent = data.title;
-                    document.getElementById('view-desc').textContent = data.desc || "Không có mô tả.";
-                    document.getElementById('view-owner').textContent = data.ownerName || "VDC User";
-                    document.getElementById('view-btn').href = data.link;
-                    
-                    // Lưu context để gửi tin nhắn
-                    currentQrOwnerId = data.createdBy;
-                    window.currentQrTitle = data.title; // Hacky pass data
-                } else {
-                    document.body.innerHTML = "<h3 class='text-center mt-5'>Mã QR không tồn tại hoặc đã bị xóa.</h3>";
-                }
-            } catch (e) {
-                alert("Lỗi tải trang: " + e.message);
-            }
+                const d = (await getDoc(doc(db, "qr_codes", id))).data();
+                showView('viewer-view');
+                document.getElementById('view-title').innerText = d.title; document.getElementById('view-desc').innerText = d.desc; document.getElementById('view-owner').innerText = d.ownerName; document.getElementById('view-btn').href = d.link;
+                currentQrOwnerId = d.createdBy; window.currentQrTitle = d.title;
+            } catch(e) { document.body.innerHTML = "<h3 class='text-center mt-5'>Mã không tồn tại</h3>"; }
         }
 
         window.sendContactMessage = async () => {
-            const sender = document.getElementById('msg-sender').value;
-            const content = document.getElementById('msg-content').value;
-            
-            if(!content) return alert("Vui lòng nhập nội dung.");
-
-            try {
-                await addDoc(collection(db, "messages"), {
-                    toUid: currentQrOwnerId,
-                    senderName: sender || "Khách ẩn danh",
-                    content: content,
-                    qrTitle: window.currentQrTitle,
-                    createdAt: new Date().toISOString(),
-                    read: false
-                });
-                alert("Đã gửi tin nhắn đến chủ sở hữu!");
-                const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
-                modal.hide();
-            } catch (e) {
-                alert("Lỗi gửi tin: " + e.message);
-            }
+            await addDoc(collection(db, "messages"), { toUid: currentQrOwnerId, senderName: document.getElementById('msg-sender').value || "Ẩn danh", content: document.getElementById('msg-content').value, qrTitle: window.currentQrTitle, createdAt: new Date().toISOString() });
+            alert("Đã gửi!"); bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
         };
 
-        // --- UTILS ---
+        // --- Utils ---
         document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
         document.getElementById('btn-logout').onclick = () => signOut(auth).then(()=>location.reload());
-        
-        window.switchTab = (tabName) => {
-            // Hide all tabs
-            ['create', 'list', 'inbox'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
-            // Show selected
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            // Update active nav
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if(tabName === 'list') loadMyQRs();
-            if(tabName === 'inbox') loadInbox();
-        };
-
-        window.downloadNewQR = () => {
-            const img = document.querySelector('#qrcode-container img');
-            const link = document.createElement('a');
-            link.download = 'VDC-QR.png';
-            link.href = img.src;
-            link.click();
-        };
+        window.downloadNewQR = () => { const a = document.createElement('a'); a.download = 'QR.png'; a.href = document.querySelector('#qrcode-container img').src; a.click(); };
 
         function showView(id) {
             ['auth-view', 'profile-view', 'dashboard-view', 'viewer-view'].forEach(i => document.getElementById(i).classList.add('hidden'));

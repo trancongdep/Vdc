@@ -3,240 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC QR Service | Dynamic QR System</title>
+    <title>VDC QR Service | Dynamic System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary-color: #0d6efd;
-            --secondary-color: #6c757d;
-            --vdc-bg: #f8f9fa;
-        }
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--vdc-bg);
-            color: #333;
-        }
-        
-        /* --- Styles Viewers --- */
-        .vdc-header {
-            background: linear-gradient(135deg, #004e92, #000428);
-            color: white;
-            padding: 60px 0;
-            text-align: center;
-            border-bottom-left-radius: 50% 20px;
-            border-bottom-right-radius: 50% 20px;
-        }
-        .document-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin-top: -30px;
-            border-top: 5px solid var(--primary-color);
-            text-align: center;
-        }
-        .cta-btn {
-            background-color: #28a745;
-            color: white;
-            font-size: 1.2rem;
-            padding: 15px 40px;
-            border-radius: 50px;
-            text-transform: uppercase;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-        }
-        .cta-btn:hover { background-color: #218838; color: white; transform: translateY(-2px); }
-        .cta-btn.disabled { background-color: #6c757d; pointer-events: none; }
-
-        /* --- Styles Creator & Admin --- */
-        .creator-container, .admin-container {
-            max-width: 800px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        .admin-container { max-width: 1100px; }
-
-        .auth-card {
-            max-width: 400px;
-            margin: 80px auto;
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .google-btn {
-            background-color: #fff; border: 1px solid #ddd;
-            display: inline-flex; align-items: center; padding: 10px 20px;
-            border-radius: 4px; cursor: pointer; width: 100%; justify-content: center;
-        }
-        .google-btn img { width: 18px; height: 18px; margin-right: 10px; }
-
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; }
         .hidden { display: none !important; }
-        .vip-badge { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; font-weight: bold; }
+        
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+        
+        /* Error Box */
+        #error-console {
+            display: none;
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #343a40; color: #ff6b6b;
+            padding: 20px; font-family: monospace; font-size: 12px;
+            max-height: 200px; overflow-y: auto; z-index: 10000;
+        }
 
+        /* Container Styles */
+        .main-container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .btn-google { background: white; border: 1px solid #ddd; width: 100%; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-google:hover { background: #f1f1f1; }
+        
         /* QR Result */
-        #qrcode img, #qrcode canvas {
-            max-width: 100%; height: auto;
-            border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .version-tag {
-            position: fixed; bottom: 10px; right: 10px; font-size: 0.7rem; color: #ccc;
-        }
-        
-        /* Loading Redirect */
-        .redirect-loader {
-            height: 100vh; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; background: white;
-        }
+        #qrcode img { margin: 0 auto; border: 5px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex justify-content-center align-items-center" style="z-index: 9999;">
-        <div class="spinner-border text-primary" role="status"></div>
-    </div>
-
-    <div id="redirect-view" class="hidden redirect-loader">
-        <div class="spinner-border text-warning mb-3" role="status"></div>
-        <h4>Đang chuyển hướng...</h4>
-    </div>
-
-    <div id="auth-view" class="hidden">
-        <div class="auth-card">
-            <h3 class="mb-4 text-primary fw-bold">VDC QR Service</h3>
-            <p class="text-muted">Đăng nhập để sử dụng dịch vụ Dynamic QR.</p>
-            <button class="google-btn" id="btn-login-google">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                <span>Đăng nhập bằng Gmail</span>
-            </button>
+    <div id="loading-overlay">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <h5 id="loading-text">Đang kết nối hệ thống VDC...</h5>
+        <div id="setup-warning" class="hidden text-danger mt-3 text-center px-3" style="max-width: 500px;">
+            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>
+            <strong>LỖI CÀI ĐẶT PHÁT HIỆN:</strong><br>
+            <span id="warning-msg"></span>
         </div>
     </div>
 
-    <div id="profile-view" class="container creator-container hidden">
-        <h4 class="text-center mb-4">Cập nhật thông tin</h4>
-        <form id="profile-form">
-            <div class="mb-3">
-                <label>Họ tên</label><input type="text" class="form-control" id="profile-name" required>
-            </div>
-            <div class="mb-3">
-                <label>Số điện thoại</label><input type="tel" class="form-control" id="profile-phone" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Lưu</button>
-        </form>
-    </div>
+    <div id="error-console"></div>
 
-    <div id="locked-view" class="hidden text-center mt-5">
-        <i class="fas fa-lock fa-3x text-danger mb-3"></i>
-        <h3>Tài khoản bị khóa</h3>
-    </div>
-
-    <div id="creator-view" class="container creator-container hidden">
-        <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded">
-            <div>
-                <strong><i class="fas fa-user"></i> <span id="display-username">User</span></strong>
-                <span id="vip-status-display"></span>
-            </div>
-            <div>
-                <button class="btn btn-sm btn-outline-dark hidden" id="btn-go-admin">Admin</button>
-                <button class="btn btn-sm btn-outline-danger" id="btn-logout">Logout</button>
-            </div>
-        </div>
-
-        <h2 class="text-center text-primary mb-3">Tạo Dynamic QR</h2>
-        <p class="text-center text-muted small mb-4">Mã QR lưu trên đám mây - Quét cực nhanh - Sửa được nội dung sau in</p>
-
-        <div class="mb-3">
-            <label class="form-label">Tiêu đề tài liệu</label>
-            <input type="text" class="form-control" id="docTitle" placeholder="Tiêu đề hiển thị">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mô tả / Hướng dẫn</label>
-            <textarea class="form-control" id="docDesc" rows="2" placeholder="Nội dung mô tả..."></textarea>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Link đích (File/Drive)</label>
-            <input type="url" class="form-control" id="targetLink" placeholder="https://...">
-        </div>
-
-        <button class="btn btn-primary w-100 btn-lg" onclick="createDynamicQR()">
-            <i class="fas fa-bolt"></i> Tạo QR Nhanh (Dynamic)
+    <div id="auth-view" class="main-container hidden text-center">
+        <h3 class="text-primary fw-bold mb-4">VDC QR Service</h3>
+        <button class="btn-google" id="btn-login">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Đăng nhập với Google
         </button>
+    </div>
 
-        <div id="qr-result" class="hidden text-center mt-4 p-3 border rounded bg-light">
-            <h5 class="mb-3">Mã QR Động (Dynamic)</h5>
-            <div id="qrcode" class="d-flex justify-content-center mb-3"></div>
-            <p class="text-success small"><i class="fas fa-check-circle"></i> Mã này rất thoáng và dễ quét vì chứa ID ngắn.</p>
-            <button class="btn btn-outline-secondary btn-sm" onclick="downloadQR()">Tải ảnh QR</button>
-            <div class="mt-2"><small>Link test: <a href="#" id="preview-link" target="_blank">Click here</a></small></div>
+    <div id="creator-view" class="main-container hidden">
+        <div class="d-flex justify-content-between mb-4">
+            <span>Xin chào, <b id="user-name">User</b></span>
+            <button class="btn btn-sm btn-outline-danger" id="btn-logout">Thoát</button>
+        </div>
+
+        <div class="mb-3">
+            <label>Tiêu đề</label><input type="text" id="inp-title" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label>Link gốc</label><input type="url" id="inp-link" class="form-control" placeholder="https://...">
+        </div>
+        
+        <button class="btn btn-primary w-100" onclick="createQR()">Tạo QR</button>
+
+        <div id="result-area" class="hidden text-center mt-4">
+            <div id="qrcode"></div>
+            <p class="mt-2 text-success small">Đã tạo mã Dynamic!</p>
         </div>
     </div>
 
-    <div id="admin-view" class="container admin-container hidden">
-        <div class="d-flex justify-content-between mb-3">
-            <h3>Admin Dashboard</h3>
-            <button class="btn btn-secondary" onclick="showView('creator-view')">Back</button>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr><th>User</th><th>Phone</th><th>VIP</th><th>Limit</th><th>Status</th><th>Action</th></tr>
-                </thead>
-                <tbody id="admin-user-list"></tbody>
-            </table>
-        </div>
+    <div id="viewer-view" class="main-container hidden text-center">
+        <h2 id="view-title" class="fw-bold"></h2>
+        <p id="view-desc" class="text-muted"></p>
+        <a id="view-btn" href="#" class="btn btn-success btn-lg mt-3" target="_blank">Mở Tài Liệu</a>
     </div>
 
-    <div id="viewer-view" class="hidden">
-        <header class="vdc-header">
-            <div class="container">
-                <div class="vdc-logo"><i class="fas fa-cloud"></i> VDC ONLINE</div>
-            </div>
-        </header>
-        <div class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="document-card">
-                        <i class="fas fa-file-alt fa-4x text-primary mb-3"></i>
-                        <h2 id="view-title" class="fw-bold">Đang tải dữ liệu...</h2>
-                        <p class="text-muted">Dữ liệu được lấy từ VDC Cloud.</p>
-                        <hr>
-                        <div class="text-start bg-light p-3 rounded mb-4">
-                            <strong>Chi tiết:</strong>
-                            <p id="view-desc" class="mb-0 text-secondary">...</p>
-                        </div>
-                        <a href="#" id="view-btn" class="cta-btn" target="_blank" rel="noopener noreferrer">Truy cập ngay</a>
-                        <p class="mt-4 small text-muted">Powered by VDC Dynamic QR</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script>
+        // Hàm hiển thị lỗi ra màn hình
+        function showError(msg) {
+            const warningBox = document.getElementById('setup-warning');
+            const warningMsg = document.getElementById('warning-msg');
+            const spinner = document.querySelector('.spinner-border');
+            
+            spinner.classList.add('hidden'); // Ẩn xoay vòng
+            warningBox.classList.remove('hidden'); // Hiện bảng lỗi
+            warningMsg.innerHTML = msg;
+            
+            // Hiện log chi tiết bên dưới
+            const consoleBox = document.getElementById('error-console');
+            consoleBox.style.display = 'block';
+            consoleBox.innerHTML += `<div>> ${msg}</div>`;
+        }
 
-    <div class="version-tag">v1.5 (Dynamic)</div>
+        // 1. Kiểm tra giao thức file://
+        if (window.location.protocol === 'file:') {
+            showError(`
+                Bạn đang mở file trực tiếp (file://).<br>
+                Google Firebase <strong>KHÔNG</strong> chạy được theo cách này.<br><br>
+                <strong>Cách khắc phục:</strong><br>
+                1. Cài đặt "Live Server" trong VS Code.<br>
+                2. Hoặc mở Terminal gõ: <code>python -m http.server</code><br>
+                3. Truy cập qua <code>http://localhost:8000</code>
+            `);
+            throw new Error("File protocol detected"); // Dừng chạy script tiếp theo
+        }
+
+        // 2. Timeout an toàn: Nếu sau 8 giây mà chưa tải xong -> Báo lỗi mạng
+        setTimeout(() => {
+            const overlay = document.getElementById('loading-overlay');
+            if (!overlay.classList.contains('hidden') && document.getElementById('setup-warning').classList.contains('hidden')) {
+                showError("Kết nối quá lâu. Có thể do lỗi mạng hoặc cấu hình Firebase sai.");
+            }
+        }, 8000);
+
+        // 3. Bắt lỗi toàn cục
+        window.onerror = function(message, source, lineno, colno, error) {
+            showError(`Lỗi Script: ${message}`);
+        };
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- CẤU HÌNH ---
-        const ADMIN_EMAIL = "admin@vdc.com"; // SỬA EMAIL CỦA BẠN Ở ĐÂY
         const firebaseConfig = { 
             apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
             authDomain: "tavietnam-78ae8.firebaseapp.com", 
@@ -246,191 +146,78 @@
             appId: "1:670121705534:web:1027ad98550573ad37116f" 
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        let currentUser, userData;
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const provider = new GoogleAuthProvider();
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const qrId = urlParams.get('id'); // Lấy ID từ URL ngắn
+            // Routing đơn giản
+            const params = new URLSearchParams(window.location.search);
+            const qrId = params.get('id');
 
-            // 1. Logic Viewer (Quét mã)
             if (qrId) {
-                document.getElementById('loading-overlay').classList.add('hidden');
-                await loadDynamicContent(qrId);
-                return;
-            }
-
-            // 2. Logic Creator (Tạo mã)
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUser = user;
-                    await syncUser(user);
-                } else {
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                    showView('auth-view');
-                }
-            });
-        });
-
-        // --- LOGIC VIEWER (Quan trọng cho v1.5) ---
-        async function loadDynamicContent(qrId) {
-            try {
-                // Lấy dữ liệu từ Firestore dựa trên ID
-                const docRef = doc(db, "qr_codes", qrId);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    
-                    // Kiểm tra VIP để chuyển hướng
-                    if (data.isVip) {
-                        showView('redirect-view');
-                        setTimeout(() => window.location.replace(data.link), 800);
-                        return;
+                // --- VIEW MODE ---
+                loadQRCode(qrId);
+            } else {
+                // --- CREATOR MODE ---
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        showScreen('creator-view');
+                        document.getElementById('user-name').innerText = user.displayName;
+                        window.currentUser = user;
+                    } else {
+                        showScreen('auth-view');
                     }
-
-                    // Hiển thị Landing Page
-                    showView('viewer-view');
-                    document.getElementById('view-title').textContent = data.title;
-                    document.getElementById('view-desc').textContent = data.desc;
-                    const btn = document.getElementById('view-btn');
-                    btn.href = data.link;
-                } else {
-                    alert("Mã QR không tồn tại hoặc đã bị xóa.");
-                }
-            } catch (error) {
-                console.error(error);
-                alert("Lỗi tải dữ liệu: " + error.message);
+                    hideLoading();
+                });
             }
+
+            // Functions
+            window.createQR = async () => {
+                const title = document.getElementById('inp-title').value;
+                const link = document.getElementById('inp-link').value;
+                if(!link) return alert("Chưa nhập link!");
+
+                const docRef = await addDoc(collection(db, "qr_codes"), {
+                    title, link, createdAt: new Date().toISOString()
+                });
+
+                const shortUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
+                
+                document.getElementById('result-area').classList.remove('hidden');
+                document.getElementById('qrcode').innerHTML = "";
+                new QRCode(document.getElementById('qrcode'), { text: shortUrl, width: 150, height: 150 });
+            }
+
+            document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
+            document.getElementById('btn-logout').onclick = () => signOut(auth).then(()=>location.reload());
+
+            async function loadQRCode(id) {
+                const snap = await getDoc(doc(db, "qr_codes", id));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    showScreen('viewer-view');
+                    document.getElementById('view-title').innerText = data.title || "Tài liệu";
+                    document.getElementById('view-btn').href = data.link;
+                    hideLoading();
+                } else {
+                    alert("QR không tồn tại");
+                    hideLoading();
+                }
+            }
+
+        } catch (e) {
+            showError("Firebase Error: " + e.message);
         }
 
-        // --- LOGIC CREATOR ---
-        window.createDynamicQR = async function() {
-            if (userData.qrCount >= userData.qrLimit) return alert('Đã hết giới hạn tạo mã.');
-            
-            const title = document.getElementById('docTitle').value.trim();
-            const desc = document.getElementById('docDesc').value.trim();
-            const link = document.getElementById('targetLink').value.trim();
-
-            if (!link) return alert('Thiếu link gốc.');
-
-            try {
-                // 1. Lưu nội dung vào Firestore (Collection "qr_codes")
-                const docRef = await addDoc(collection(db, "qr_codes"), {
-                    title: title,
-                    desc: desc,
-                    link: link,
-                    createdBy: currentUser.uid,
-                    createdAt: new Date().toISOString(),
-                    isVip: userData.isVip || false
-                });
-
-                // 2. Cập nhật quota
-                const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, { qrCount: (userData.qrCount || 0) + 1 });
-                userData.qrCount++;
-                document.getElementById('usage-count').textContent = userData.qrCount;
-
-                // 3. Tạo URL ngắn gọn: Domain/?id={DocumentID}
-                const shortUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?id=${docRef.id}`;
-
-                // 4. Tạo QR Code (Bây giờ sẽ rất thoáng vì link ngắn)
-                document.getElementById('qr-result').classList.remove('hidden');
-                const qrContainer = document.getElementById("qrcode");
-                qrContainer.innerHTML = "";
-                
-                new QRCode(qrContainer, {
-                    text: shortUrl,
-                    width: 200, 
-                    height: 200,
-                    colorDark : "#000000", // Đen đậm cho dễ quét
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.M // Giảm xuống Medium để bớt nhuyễn
-                });
-
-                document.getElementById('preview-link').href = shortUrl;
-
-            } catch (e) {
-                alert("Lỗi: " + e.message);
-            }
-        };
-
-        // --- AUTH & ADMIN ---
-        async function syncUser(user) {
-            const userRef = doc(db, "users", user.uid);
-            const s = await getDoc(userRef);
-            if(s.exists()) {
-                userData = s.data();
-                if(userData.isLocked) { showView('locked-view'); return; }
-                if(!userData.phone) { showView('profile-view'); } else { loadDashboard(); }
-            } else {
-                const newUser = { 
-                    uid: user.uid, email: user.email, displayName: user.displayName, 
-                    phone: "", role: user.email === ADMIN_EMAIL ? 'admin' : 'user', 
-                    isVip: false, qrCount: 0, qrLimit: 10, isLocked: false 
-                };
-                await setDoc(userRef, newUser);
-                userData = newUser;
-                showView('profile-view');
-            }
+        function showScreen(id) {
+            ['auth-view', 'creator-view', 'viewer-view'].forEach(i => document.getElementById(i).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function hideLoading() {
             document.getElementById('loading-overlay').classList.add('hidden');
         }
-
-        function loadDashboard() {
-            showView('creator-view');
-            document.getElementById('display-username').textContent = userData.displayName;
-            document.getElementById('usage-count').textContent = userData.qrCount;
-            document.getElementById('usage-limit').textContent = userData.qrLimit;
-            if(userData.isVip) document.getElementById('vip-status-display').innerHTML = '<span class="vip-badge">VIP PRO</span>';
-            if(userData.role === 'admin') document.getElementById('btn-go-admin').classList.remove('hidden');
-        }
-
-        // Events
-        document.getElementById('btn-login-google').onclick = () => signInWithPopup(auth, provider);
-        document.getElementById('btn-logout').onclick = () => signOut(auth).then(() => location.reload());
-        document.getElementById('btn-go-admin').onclick = loadAdmin;
-        
-        document.getElementById('profile-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const phone = document.getElementById('profile-phone').value;
-            await updateDoc(doc(db, "users", currentUser.uid), { phone: phone, displayName: document.getElementById('profile-name').value });
-            location.reload();
-        };
-
-        async function loadAdmin() {
-            const tbody = document.getElementById('admin-user-list');
-            tbody.innerHTML = '';
-            const snaps = await getDocs(collection(db, "users"));
-            snaps.forEach(d => {
-                const u = d.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${u.email}</td><td>${u.phone}</td>
-                        <td><button class="btn btn-sm ${u.isVip?'btn-warning':'btn-light'}" onclick="window.tVip('${u.uid}',${u.isVip})">${u.isVip?'VIP':'Free'}</button></td>
-                        <td>${u.qrCount}</td>
-                        <td><input type="number" style="width:60px" value="${u.qrLimit}" onchange="window.uLim('${u.uid}',this.value)"></td>
-                        <td>${u.isLocked?'Locked':'Active'}</td>
-                        <td><button class="btn btn-sm btn-danger" onclick="window.tLock('${u.uid}',${u.isLocked})">Lock/Unlock</button></td>
-                    </tr>`;
-            });
-            showView('admin-view');
-        }
-
-        // Global functions for Admin Actions
-        window.tVip = async (id, s) => { await updateDoc(doc(db,"users",id),{isVip:!s}); loadAdmin(); };
-        window.uLim = async (id, v) => { await updateDoc(doc(db,"users",id),{qrLimit:Number(v)}); };
-        window.tLock = async (id, s) => { await updateDoc(doc(db,"users",id),{isLocked:!s}); loadAdmin(); };
-        window.downloadQR = () => {
-            const c = document.querySelector('#qrcode canvas') || document.querySelector('#qrcode img');
-            const a = document.createElement('a'); a.download='VDC-Dynamic-QR.png'; a.href=c.toDataURL?c.toDataURL():c.src; a.click();
-        };
-        window.showView = (id) => {
-            document.querySelectorAll('body > div:not(#loading-overlay)').forEach(d => d.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
     </script>
 </body>
 </html>

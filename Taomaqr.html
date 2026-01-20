@@ -3,140 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC QR Service | Dynamic System</title>
+    <title>VDC Smart QR | Quản lý & Kết nối</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; }
-        .hidden { display: none !important; }
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --accent: #ff6b6b;
+            --bg-light: #f4f7f6;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
         
-        /* Loading Overlay */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Container Styles */
+        .app-card {
+            background: var(--glass);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+            overflow: hidden;
+            max-width: 800px; /* Rộng hơn để chứa tab quản lý */
+            margin: 40px auto;
+            min-height: 500px;
+        }
+
+        /* --- VIEWER STYLES (LANDING PAGE) --- */
+        .viewer-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px 20px 60px;
+            text-align: center;
+            border-radius: 0 0 50% 50% / 20px;
+        }
+        .viewer-card {
+            margin-top: -40px;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .owner-badge {
+            display: inline-block;
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        /* --- CREATOR STYLES --- */
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #eee;
+        }
+        .nav-link {
+            color: #666;
+            font-weight: 500;
+            padding: 15px 20px;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(78, 84, 200, 0.1);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+        .nav-link i { width: 25px; }
+
+        /* QR List Item */
+        .qr-item {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+            background: white;
+        }
+        .qr-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        /* Message Box */
+        .msg-item {
+            border-left: 3px solid var(--accent);
+            background: #fff5f5;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .msg-item.read {
+            border-left: 3px solid #ccc;
+            background: white;
+        }
+
+        /* Loading */
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 9999;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         
-        /* Error Box */
-        #error-console {
-            display: none;
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #343a40; color: #ff6b6b;
-            padding: 20px; font-family: monospace; font-size: 12px;
-            max-height: 200px; overflow-y: auto; z-index: 10000;
-        }
-
-        /* Container Styles */
-        .main-container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .btn-google { background: white; border: 1px solid #ddd; width: 100%; padding: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        .btn-google:hover { background: #f1f1f1; }
-        
-        /* QR Result */
-        #qrcode img { margin: 0 auto; border: 5px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .version-tag { position: fixed; bottom: 10px; right: 10px; font-size: 11px; color: #999; }
     </style>
 </head>
 <body>
 
     <div id="loading-overlay">
         <div class="spinner-border text-primary mb-3" role="status"></div>
-        <h5 id="loading-text">Đang kết nối hệ thống VDC...</h5>
-        <div id="setup-warning" class="hidden text-danger mt-3 text-center px-3" style="max-width: 500px;">
-            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>
-            <strong>LỖI CÀI ĐẶT PHÁT HIỆN:</strong><br>
-            <span id="warning-msg"></span>
+        <div class="text-muted small">Đang kết nối hệ thống VDC...</div>
+    </div>
+
+    <div id="auth-view" class="container hidden" style="padding-top: 100px;">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card border-0 shadow-lg rounded-4 p-4 text-center">
+                    <h3 class="fw-bold text-primary mb-2">VDC Smart QR</h3>
+                    <p class="text-muted mb-4">Quản lý tài liệu & Kết nối khách hàng</p>
+                    <button class="btn btn-outline-dark w-100 py-2 d-flex align-items-center justify-content-center gap-2" id="btn-login">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                        Đăng nhập bằng Google
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="error-console"></div>
-
-    <div id="auth-view" class="main-container hidden text-center">
-        <h3 class="text-primary fw-bold mb-4">VDC QR Service</h3>
-        <button class="btn-google" id="btn-login">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-            Đăng nhập với Google
-        </button>
+    <div id="profile-view" class="container hidden" style="padding-top: 80px;">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card border-0 shadow p-4">
+                    <h4 class="text-center mb-4">Cập nhật thông tin</h4>
+                    <form id="profile-form">
+                        <div class="mb-3">
+                            <label>Họ và Tên hiển thị</label>
+                            <input type="text" id="profile-name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Số điện thoại (để quản lý)</label>
+                            <input type="tel" id="profile-phone" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Hoàn tất & Bắt đầu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="creator-view" class="main-container hidden">
-        <div class="d-flex justify-content-between mb-4">
-            <span>Xin chào, <b id="user-name">User</b></span>
-            <button class="btn btn-sm btn-outline-danger" id="btn-logout">Thoát</button>
-        </div>
+    <div id="dashboard-view" class="app-card hidden">
+        <div class="row g-0 h-100">
+            <div class="col-md-3 sidebar">
+                <div class="p-4 text-center border-bottom">
+                    <div class="fw-bold text-primary">VDC Admin</div>
+                    <small class="text-muted" id="user-display-name">...</small>
+                    <div class="mt-2 badge bg-warning text-dark">Quota: <span id="quota-display">0/5</span> hôm nay</div>
+                </div>
+                <nav class="nav flex-column mt-3">
+                    <a class="nav-link active" href="#" onclick="switchTab('create')"><i class="fas fa-plus-circle"></i> Tạo mã mới</a>
+                    <a class="nav-link" href="#" onclick="switchTab('list')"><i class="fas fa-list"></i> Quản lý mã</a>
+                    <a class="nav-link" href="#" onclick="switchTab('inbox')">
+                        <i class="fas fa-envelope"></i> Hộp thư <span class="badge bg-danger rounded-pill ms-1 hidden" id="msg-badge">0</span>
+                    </a>
+                    <a class="nav-link text-danger mt-5" href="#" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                </nav>
+            </div>
 
-        <div class="mb-3">
-            <label>Tiêu đề</label><input type="text" id="inp-title" class="form-control">
+            <div class="col-md-9 p-4 bg-white" style="min-height: 500px;">
+                
+                <div id="tab-create" class="tab-content">
+                    <h4 class="mb-4">Tạo mã QR Động</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề tài liệu</label>
+                        <input type="text" id="inp-title" class="form-control" placeholder="VD: Báo cáo tháng 1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả chi tiết</label>
+                        <textarea id="inp-desc" class="form-control" rows="3" placeholder="Nhập hướng dẫn sử dụng, ghi chú..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Link tài liệu (Drive/Dropbox/Web)</label>
+                        <input type="url" id="inp-link" class="form-control" placeholder="https://...">
+                    </div>
+                    <button class="btn btn-primary" onclick="createQR()">
+                        <i class="fas fa-magic"></i> Tạo Mã Ngay
+                    </button>
+
+                    <div id="new-qr-result" class="mt-4 p-3 bg-light rounded text-center hidden">
+                        <h5>Mã QR của bạn đã sẵn sàng!</h5>
+                        <div id="qrcode-container" class="my-3 d-flex justify-content-center"></div>
+                        <p class="small text-muted">Mã này đã được lưu vào danh sách quản lý.</p>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="downloadNewQR()">Tải ảnh QR</button>
+                    </div>
+                </div>
+
+                <div id="tab-list" class="tab-content hidden">
+                    <h4 class="mb-4">Danh sách mã QR của tôi</h4>
+                    <div id="my-qr-list" style="max-height: 400px; overflow-y: auto;">
+                        <p class="text-muted text-center py-5">Đang tải dữ liệu...</p>
+                    </div>
+                </div>
+
+                <div id="tab-inbox" class="tab-content hidden">
+                    <h4 class="mb-4">Tin nhắn từ khách hàng</h4>
+                    <div id="inbox-list" style="max-height: 400px; overflow-y: auto;">
+                        <p class="text-muted text-center py-5">Không có tin nhắn nào.</p>
+                    </div>
+                </div>
+
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Link gốc</label><input type="url" id="inp-link" class="form-control" placeholder="https://...">
+    </div>
+
+    <div id="viewer-view" class="hidden">
+        <div class="viewer-header">
+            <h2 class="fw-bold"><i class="fas fa-cloud"></i> VDC ONLINE</h2>
+            <p class="mb-0">Cổng thông tin tài liệu số</p>
         </div>
         
-        <button class="btn btn-primary w-100" onclick="createQR()">Tạo QR</button>
+        <div class="viewer-card">
+            <div class="owner-badge"><i class="fas fa-user-check"></i> Được chia sẻ bởi: <span id="view-owner">...</span></div>
+            
+            <h2 id="view-title" class="fw-bold text-dark mb-3">...</h2>
+            
+            <div class="text-start bg-light p-3 rounded mb-4">
+                <small class="text-uppercase text-muted fw-bold">Mô tả / Hướng dẫn:</small>
+                <p id="view-desc" class="mt-1 mb-0" style="white-space: pre-line;">...</p>
+            </div>
 
-        <div id="result-area" class="hidden text-center mt-4">
-            <div id="qrcode"></div>
-            <p class="mt-2 text-success small">Đã tạo mã Dynamic!</p>
+            <div class="d-grid gap-2">
+                <a id="view-btn" href="#" class="btn btn-success btn-lg rounded-pill shadow-sm" target="_blank">
+                    <i class="fas fa-download"></i> Tải Tài Liệu / Truy Cập
+                </a>
+                
+                <button class="btn btn-outline-primary rounded-pill mt-2" data-bs-toggle="modal" data-bs-target="#contactModal">
+                    <i class="fas fa-comment-dots"></i> Nhắn tin cho người tạo
+                </button>
+            </div>
+            
+            <p class="mt-4 small text-muted">Powered by VDC Tech &copy; 2026</p>
         </div>
     </div>
 
-    <div id="viewer-view" class="main-container hidden text-center">
-        <h2 id="view-title" class="fw-bold"></h2>
-        <p id="view-desc" class="text-muted"></p>
-        <a id="view-btn" href="#" class="btn btn-success btn-lg mt-3" target="_blank">Mở Tài Liệu</a>
+    <div class="modal fade" id="contactModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gửi tin nhắn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Tên của bạn/Đơn vị</label>
+                        <input type="text" id="msg-sender" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Nội dung</label>
+                        <textarea id="msg-content" class="form-control" rows="3" placeholder="Ví dụ: Tôi cần hỗ trợ về file này..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary w-100" onclick="sendContactMessage()">Gửi tin nhắn</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        // Hàm hiển thị lỗi ra màn hình
-        function showError(msg) {
-            const warningBox = document.getElementById('setup-warning');
-            const warningMsg = document.getElementById('warning-msg');
-            const spinner = document.querySelector('.spinner-border');
-            
-            spinner.classList.add('hidden'); // Ẩn xoay vòng
-            warningBox.classList.remove('hidden'); // Hiện bảng lỗi
-            warningMsg.innerHTML = msg;
-            
-            // Hiện log chi tiết bên dưới
-            const consoleBox = document.getElementById('error-console');
-            consoleBox.style.display = 'block';
-            consoleBox.innerHTML += `<div>> ${msg}</div>`;
-        }
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Cập nhật mã QR</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-id">
+                    <div class="mb-3"><label>Tiêu đề mới</label><input type="text" id="edit-title" class="form-control"></div>
+                    <div class="mb-3"><label>Mô tả mới</label><textarea id="edit-desc" class="form-control" rows="3"></textarea></div>
+                    <div class="mb-3"><label>Link mới</label><input type="url" id="edit-link" class="form-control"></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary" onclick="saveEdit()">Lưu thay đổi</button></div>
+            </div>
+        </div>
+    </div>
 
-        // 1. Kiểm tra giao thức file://
-        if (window.location.protocol === 'file:') {
-            showError(`
-                Bạn đang mở file trực tiếp (file://).<br>
-                Google Firebase <strong>KHÔNG</strong> chạy được theo cách này.<br><br>
-                <strong>Cách khắc phục:</strong><br>
-                1. Cài đặt "Live Server" trong VS Code.<br>
-                2. Hoặc mở Terminal gõ: <code>python -m http.server</code><br>
-                3. Truy cập qua <code>http://localhost:8000</code>
-            `);
-            throw new Error("File protocol detected"); // Dừng chạy script tiếp theo
-        }
-
-        // 2. Timeout an toàn: Nếu sau 8 giây mà chưa tải xong -> Báo lỗi mạng
-        setTimeout(() => {
-            const overlay = document.getElementById('loading-overlay');
-            if (!overlay.classList.contains('hidden') && document.getElementById('setup-warning').classList.contains('hidden')) {
-                showError("Kết nối quá lâu. Có thể do lỗi mạng hoặc cấu hình Firebase sai.");
-            }
-        }, 8000);
-
-        // 3. Bắt lỗi toàn cục
-        window.onerror = function(message, source, lineno, colno, error) {
-            showError(`Lỗi Script: ${message}`);
-        };
-    </script>
+    <div class="version-tag">v2.0 Managed</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Cấu hình Firebase (GIỮ NGUYÊN)
         const firebaseConfig = { 
             apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
             authDomain: "tavietnam-78ae8.firebaseapp.com", 
@@ -146,77 +317,332 @@
             appId: "1:670121705534:web:1027ad98550573ad37116f" 
         };
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-            // Routing đơn giản
+        let currentUser = null;
+        let userData = null;
+        let currentQrOwnerId = null; // Dùng cho viewer gửi tin nhắn
+
+        // --- KHỞI TẠO ---
+        document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const qrId = params.get('id');
 
             if (qrId) {
-                // --- VIEW MODE ---
-                loadQRCode(qrId);
+                // CHẾ ĐỘ XEM (VIEWER)
+                document.getElementById('loading-overlay').classList.add('hidden');
+                loadQrContent(qrId);
             } else {
-                // --- CREATOR MODE ---
-                onAuthStateChanged(auth, (user) => {
+                // CHẾ ĐỘ QUẢN LÝ (CREATOR)
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        showScreen('creator-view');
-                        document.getElementById('user-name').innerText = user.displayName;
-                        window.currentUser = user;
+                        currentUser = user;
+                        await syncUser(user);
                     } else {
-                        showScreen('auth-view');
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        showView('auth-view');
                     }
-                    hideLoading();
                 });
             }
+        });
 
-            // Functions
-            window.createQR = async () => {
-                const title = document.getElementById('inp-title').value;
-                const link = document.getElementById('inp-link').value;
-                if(!link) return alert("Chưa nhập link!");
+        // --- CÁC HÀM XỬ LÝ USER & QUOTA ---
+        async function syncUser(user) {
+            const userRef = doc(db, "users", user.uid);
+            const snap = await getDoc(userRef);
+            
+            if (snap.exists()) {
+                userData = snap.data();
+                if (!userData.phone) {
+                    showView('profile-view');
+                } else {
+                    // Logic reset quota ngày mới
+                    const todayStr = new Date().toDateString();
+                    if (userData.lastDate !== todayStr) {
+                        await updateDoc(userRef, { lastDate: todayStr, dailyCount: 0 });
+                        userData.dailyCount = 0;
+                    }
+                    loadDashboard();
+                }
+            } else {
+                // User mới
+                showView('profile-view');
+            }
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
 
+        document.getElementById('profile-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('profile-name').value;
+            const phone = document.getElementById('profile-phone').value;
+            
+            const newUser = {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                displayName: name,
+                phone: phone,
+                role: 'user',
+                dailyLimit: 5, // Mặc định 5 QR/ngày
+                dailyCount: 0,
+                lastDate: new Date().toDateString(),
+                createdAt: new Date().toISOString()
+            };
+            
+            await setDoc(doc(db, "users", currentUser.uid), newUser);
+            userData = newUser;
+            loadDashboard();
+        };
+
+        function loadDashboard() {
+            showView('dashboard-view');
+            document.getElementById('user-display-name').textContent = userData.displayName;
+            updateQuotaDisplay();
+            loadMyQRs();
+            loadInbox();
+        }
+
+        function updateQuotaDisplay() {
+            document.getElementById('quota-display').textContent = `${userData.dailyCount || 0}/${userData.dailyLimit}`;
+        }
+
+        // --- LOGIC TẠO MÃ ---
+        window.createQR = async () => {
+            if (userData.dailyCount >= userData.dailyLimit) {
+                return alert(`Bạn đã hết lượt tạo hôm nay (${userData.dailyLimit} mã). Quay lại vào ngày mai nhé!`);
+            }
+
+            const title = document.getElementById('inp-title').value;
+            const desc = document.getElementById('inp-desc').value;
+            const link = document.getElementById('inp-link').value;
+
+            if (!link) return alert("Vui lòng nhập link!");
+
+            document.getElementById('loading-overlay').classList.remove('hidden');
+
+            try {
+                // 1. Lưu QR vào DB
                 const docRef = await addDoc(collection(db, "qr_codes"), {
-                    title, link, createdAt: new Date().toISOString()
+                    title, desc, link,
+                    createdBy: currentUser.uid,
+                    ownerName: userData.displayName, // Lưu tên chủ để hiện thị nhanh
+                    createdAt: new Date().toISOString()
                 });
 
+                // 2. Trừ Quota
+                const newCount = (userData.dailyCount || 0) + 1;
+                await updateDoc(doc(db, "users", currentUser.uid), { dailyCount: newCount });
+                userData.dailyCount = newCount;
+                updateQuotaDisplay();
+
+                // 3. Render QR
                 const shortUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
+                document.getElementById('qrcode-container').innerHTML = "";
+                new QRCode(document.getElementById('qrcode-container'), {
+                    text: shortUrl, width: 150, height: 150, colorDark: "#4e54c8"
+                });
+                document.getElementById('new-qr-result').classList.remove('hidden');
                 
-                document.getElementById('result-area').classList.remove('hidden');
-                document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById('qrcode'), { text: shortUrl, width: 150, height: 150 });
+                // Clear form & reload list
+                document.getElementById('inp-title').value = "";
+                document.getElementById('inp-link').value = "";
+                loadMyQRs(); // Refresh list
+
+            } catch (e) {
+                alert("Lỗi: " + e.message);
+            } finally {
+                document.getElementById('loading-overlay').classList.add('hidden');
+            }
+        };
+
+        // --- LOGIC QUẢN LÝ (LIST, EDIT, DELETE) ---
+        async function loadMyQRs() {
+            const listDiv = document.getElementById('my-qr-list');
+            listDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Đang tải...';
+
+            const q = query(collection(db, "qr_codes"), where("createdBy", "==", currentUser.uid), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            
+            listDiv.innerHTML = "";
+            if (snapshot.empty) {
+                listDiv.innerHTML = '<p class="text-center text-muted mt-3">Chưa có mã nào.</p>';
+                return;
             }
 
-            document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
-            document.getElementById('btn-logout').onclick = () => signOut(auth).then(()=>location.reload());
+            snapshot.forEach(docSnap => {
+                const qr = docSnap.data();
+                const id = docSnap.id;
+                const url = `${window.location.origin}${window.location.pathname}?id=${id}`;
+                
+                const div = document.createElement('div');
+                div.className = 'qr-item';
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="fw-bold mb-1">${qr.title || 'Không tiêu đề'}</h6>
+                            <small class="text-muted"><i class="fas fa-link"></i> ${url}</small>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="${url}" target="_blank">Xem thử</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="window.openEdit('${id}')">Sửa nội dung</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="window.deleteQR('${id}')">Xóa mã</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                listDiv.appendChild(div);
+            });
+        }
 
-            async function loadQRCode(id) {
+        window.openEdit = async (id) => {
+            const docSnap = await getDoc(doc(db, "qr_codes", id));
+            if(docSnap.exists()){
+                const d = docSnap.data();
+                document.getElementById('edit-id').value = id;
+                document.getElementById('edit-title').value = d.title;
+                document.getElementById('edit-desc').value = d.desc;
+                document.getElementById('edit-link').value = d.link;
+                const modal = new bootstrap.Modal(document.getElementById('editModal'));
+                modal.show();
+            }
+        };
+
+        window.saveEdit = async () => {
+            const id = document.getElementById('edit-id').value;
+            await updateDoc(doc(db, "qr_codes", id), {
+                title: document.getElementById('edit-title').value,
+                desc: document.getElementById('edit-desc').value,
+                link: document.getElementById('edit-link').value
+            });
+            alert("Đã cập nhật!");
+            loadMyQRs();
+            // Close modal manually via Bootstrap JS or reload
+            location.reload(); 
+        };
+
+        window.deleteQR = async (id) => {
+            if(confirm("Bạn chắc chắn muốn xóa? Mã QR đã in sẽ không còn hoạt động.")){
+                await deleteDoc(doc(db, "qr_codes", id));
+                loadMyQRs();
+            }
+        };
+
+        // --- LOGIC HỘP THƯ (INBOX) ---
+        async function loadInbox() {
+            const listDiv = document.getElementById('inbox-list');
+            // Query messages sent TO current user
+            const q = query(collection(db, "messages"), where("toUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
+            
+            listDiv.innerHTML = "";
+            if (snapshot.empty) {
+                listDiv.innerHTML = '<p class="text-center text-muted mt-3">Hộp thư trống.</p>';
+                return;
+            }
+
+            let unread = 0;
+            snapshot.forEach(docSnap => {
+                const msg = docSnap.data();
+                const div = document.createElement('div');
+                div.className = 'msg-item';
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <strong>${msg.senderName || 'Khách ẩn danh'}</strong>
+                        <small class="text-muted">${new Date(msg.createdAt).toLocaleDateString()}</small>
+                    </div>
+                    <p class="mb-0 small mt-1">${msg.content}</p>
+                    <small class="text-primary fst-italic">Từ mã QR: ${msg.qrTitle || 'Unknown'}</small>
+                `;
+                listDiv.appendChild(div);
+                unread++;
+            });
+            
+            if(unread > 0) {
+                const badge = document.getElementById('msg-badge');
+                badge.textContent = unread;
+                badge.classList.remove('hidden');
+            }
+        }
+
+        // --- LOGIC VIEWER & GỬI TIN NHẮN ---
+        async function loadQrContent(id) {
+            try {
                 const snap = await getDoc(doc(db, "qr_codes", id));
                 if (snap.exists()) {
                     const data = snap.data();
-                    showScreen('viewer-view');
-                    document.getElementById('view-title').innerText = data.title || "Tài liệu";
+                    showView('viewer-view');
+                    document.getElementById('view-title').textContent = data.title;
+                    document.getElementById('view-desc').textContent = data.desc || "Không có mô tả.";
+                    document.getElementById('view-owner').textContent = data.ownerName || "VDC User";
                     document.getElementById('view-btn').href = data.link;
-                    hideLoading();
+                    
+                    // Lưu context để gửi tin nhắn
+                    currentQrOwnerId = data.createdBy;
+                    window.currentQrTitle = data.title; // Hacky pass data
                 } else {
-                    alert("QR không tồn tại");
-                    hideLoading();
+                    document.body.innerHTML = "<h3 class='text-center mt-5'>Mã QR không tồn tại hoặc đã bị xóa.</h3>";
                 }
+            } catch (e) {
+                alert("Lỗi tải trang: " + e.message);
             }
-
-        } catch (e) {
-            showError("Firebase Error: " + e.message);
         }
 
-        function showScreen(id) {
-            ['auth-view', 'creator-view', 'viewer-view'].forEach(i => document.getElementById(i).classList.add('hidden'));
+        window.sendContactMessage = async () => {
+            const sender = document.getElementById('msg-sender').value;
+            const content = document.getElementById('msg-content').value;
+            
+            if(!content) return alert("Vui lòng nhập nội dung.");
+
+            try {
+                await addDoc(collection(db, "messages"), {
+                    toUid: currentQrOwnerId,
+                    senderName: sender || "Khách ẩn danh",
+                    content: content,
+                    qrTitle: window.currentQrTitle,
+                    createdAt: new Date().toISOString(),
+                    read: false
+                });
+                alert("Đã gửi tin nhắn đến chủ sở hữu!");
+                const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                modal.hide();
+            } catch (e) {
+                alert("Lỗi gửi tin: " + e.message);
+            }
+        };
+
+        // --- UTILS ---
+        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('btn-logout').onclick = () => signOut(auth).then(()=>location.reload());
+        
+        window.switchTab = (tabName) => {
+            // Hide all tabs
+            ['create', 'list', 'inbox'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
+            // Show selected
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            // Update active nav
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if(tabName === 'list') loadMyQRs();
+            if(tabName === 'inbox') loadInbox();
+        };
+
+        window.downloadNewQR = () => {
+            const img = document.querySelector('#qrcode-container img');
+            const link = document.createElement('a');
+            link.download = 'VDC-QR.png';
+            link.href = img.src;
+            link.click();
+        };
+
+        function showView(id) {
+            ['auth-view', 'profile-view', 'dashboard-view', 'viewer-view'].forEach(i => document.getElementById(i).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-        }
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
         }
     </script>
 </body>

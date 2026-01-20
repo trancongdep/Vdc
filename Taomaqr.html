@@ -9,94 +9,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #4e54c8;
-            --secondary: #8f94fb;
-            --accent: #ff6b6b;
-            --glass: rgba(255, 255, 255, 0.95);
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex; flex-direction: column;
-        }
-
+        :root { --primary: #4e54c8; --secondary: #8f94fb; --accent: #ff6b6b; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
-
-        /* --- UI COMPONENTS --- */
-        .top-navbar {
-            background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        .user-panel {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white; padding: 30px 20px; text-align: center;
-        }
-
-        .menu-link {
-            padding: 15px 25px; display: block; color: #555; text-decoration: none; font-weight: 500; transition: all 0.2s; border-left: 4px solid transparent;
-        }
-        .menu-link:hover, .menu-link.active {
-            background: #f8f9fa; color: var(--primary); border-left: 4px solid var(--primary);
-        }
-        .menu-link i { width: 30px; text-align: center; }
-
+        
+        /* Layout */
+        .top-navbar { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .user-panel { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 30px 20px; text-align: center; }
+        .menu-link { padding: 15px 25px; display: block; color: #555; text-decoration: none; font-weight: 500; border-left: 4px solid transparent; }
+        .menu-link:hover, .menu-link.active { background: #f8f9fa; color: var(--primary); border-left: 4px solid var(--primary); }
         .main-content { flex: 1; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
         .content-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); min-height: 400px; }
-        .app-footer { background: #343a40; color: #adb5bd; text-align: center; padding: 20px; margin-top: auto; font-size: 0.9rem; }
+        
+        /* Viewer */
+        .viewer-header { background: linear-gradient(to right, var(--primary), var(--secondary)); color: white; padding: 40px 20px 60px; text-align: center; border-radius: 0 0 50% 50% / 20px; }
+        .viewer-card { margin-top: -40px; width: 90%; margin-left: auto; margin-right: auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.1); text-align: center; max-width: 600px; }
+        
+        /* Limit Reached Screen */
+        .limit-card { text-align: center; padding: 40px; }
+        .limit-icon { font-size: 4rem; color: #dc3545; margin-bottom: 20px; }
+        
+        /* Stats */
+        .view-count-badge { font-size: 0.75rem; background: #e9ecef; color: #666; padding: 2px 8px; border-radius: 4px; }
+        .view-count-badge.warning { background: #fff3cd; color: #856404; }
+        .view-count-badge.danger { background: #f8d7da; color: #721c24; }
 
-        /* --- VIEWER STYLES --- */
-        .viewer-header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white; padding: 40px 20px 60px; text-align: center; border-radius: 0 0 50% 50% / 20px;
-        }
-        .viewer-card {
-            margin-top: -40px; width: 90%; margin-left: auto; margin-right: auto;
-            background: white; border-radius: 15px; padding: 30px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1); text-align: center; max-width: 600px;
-        }
-
-        /* --- SYSTEM AD STYLE (QUẢNG CÁO CỦA VDC) --- */
-        .system-ad-container {
-            margin-top: 30px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #fdfdfd;
-            text-align: left;
-            position: relative;
-        }
-        .ad-badge {
-            background: #6c757d; color: white;
-            font-size: 0.65rem; padding: 2px 6px;
-            position: absolute; top: 0; right: 0;
-            border-bottom-left-radius: 5px;
-        }
-        .ad-content {
-            display: flex; align-items: center; padding: 15px;
-        }
-        .ad-thumb {
-            width: 60px; height: 60px; background: #e9ecef; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: var(--primary); margin-right: 15px;
-        }
-        .ad-text h6 { margin: 0; font-weight: bold; color: #333; }
-        .ad-text p { margin: 2px 0 0; font-size: 0.85rem; color: #666; }
-        .ad-cta {
-            margin-left: auto;
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            font-size: 0.8rem;
-            padding: 5px 12px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: 600;
-        }
+        /* System Ad */
+        .system-ad-container { margin-top: 30px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background: #fdfdfd; text-align: left; position: relative; }
+        .ad-badge { background: #6c757d; color: white; font-size: 0.65rem; padding: 2px 6px; position: absolute; top: 0; right: 0; border-bottom-left-radius: 5px; }
+        .ad-content { display: flex; align-items: center; padding: 15px; }
+        .ad-thumb { width: 60px; height: 60px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary); margin-right: 15px; }
+        .ad-cta { margin-left: auto; border: 1px solid var(--primary); color: var(--primary); font-size: 0.8rem; padding: 5px 12px; border-radius: 20px; text-decoration: none; font-weight: 600; }
         .ad-cta:hover { background: var(--primary); color: white; }
 
         /* Common */
@@ -111,27 +54,26 @@
 
     <div id="loading-overlay">
         <div class="spinner-border text-primary mb-3" role="status"></div>
-        <div class="text-muted small">Đang tải hệ thống...</div>
+        <div class="text-muted small">Đang xử lý dữ liệu...</div>
     </div>
 
     <div id="auth-view" class="container hidden d-flex align-items-center justify-content-center" style="min-height: 80vh;">
         <div class="card border-0 shadow-lg rounded-4 p-5 text-center" style="max-width: 400px;">
             <h3 class="fw-bold text-primary mb-2">VDC Smart QR</h3>
-            <p class="text-muted mb-4">Đăng nhập để quản lý</p>
+            <p class="text-muted mb-4">Đăng nhập quản trị</p>
             <button class="btn btn-outline-dark w-100 py-2 gap-2 d-flex justify-content-center" id="btn-login">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-                <span>Google Login</span>
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Login with Google
             </button>
         </div>
     </div>
 
     <div id="profile-view" class="container hidden mt-5">
         <div class="card border-0 shadow p-4 mx-auto" style="max-width: 500px;">
-            <h4 class="text-center mb-4">Hoàn tất hồ sơ</h4>
+            <h4 class="text-center mb-4">Cập nhật hồ sơ</h4>
             <form id="profile-form">
                 <div class="mb-3"><label>Tên hiển thị</label><input type="text" id="profile-name" class="form-control" required></div>
-                <div class="mb-3"><label>Số điện thoại</label><input type="tel" id="profile-phone" class="form-control" required></div>
-                <button type="submit" class="btn btn-primary w-100">Lưu thông tin</button>
+                <div class="mb-3"><label>SĐT Liên hệ</label><input type="tel" id="profile-phone" class="form-control" required></div>
+                <button type="submit" class="btn btn-primary w-100">Hoàn tất</button>
             </form>
         </div>
     </div>
@@ -153,17 +95,14 @@
                 <div class="user-panel w-100">
                     <i class="fas fa-user-circle fa-3x mb-2"></i>
                     <h5 class="mb-0" id="user-display-name">User</h5>
-                    <small class="opacity-75" id="user-display-email">email</small>
+                    <small class="opacity-75" id="user-display-email">...</small>
                 </div>
             </div>
             <div class="offcanvas-body p-0 pt-2">
                 <nav>
                     <a href="#" class="menu-link active" onclick="switchTab('create')"><i class="fas fa-plus-circle"></i> Tạo mã mới</a>
-                    <a href="#" class="menu-link" onclick="switchTab('list')"><i class="fas fa-list-ul"></i> Quản lý mã QR</a>
-                    <a href="#" class="menu-link d-flex justify-content-between align-items-center" onclick="switchTab('inbox')">
-                        <span><i class="fas fa-inbox"></i> Hộp thư</span>
-                        <span class="badge bg-danger rounded-pill hidden" id="msg-badge">0</span>
-                    </a>
+                    <a href="#" class="menu-link" onclick="switchTab('list')"><i class="fas fa-list-ul"></i> Quản lý & Thống kê</a>
+                    <a href="#" class="menu-link" onclick="switchTab('inbox')"><i class="fas fa-inbox"></i> Hộp thư</a>
                     <hr>
                     <a href="#" class="menu-link text-danger" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                 </nav>
@@ -173,24 +112,25 @@
         <div class="main-content">
             <div class="content-card">
                 <div id="tab-create" class="tab-pane">
-                    <h4 class="mb-4 text-primary"><i class="fas fa-magic"></i> Tạo mã QR Động</h4>
-                    <div class="mb-3"><label class="form-label small text-muted">TIÊU ĐỀ TÀI LIỆU</label><input type="text" id="inp-title" class="form-control" placeholder="Tiêu đề..."></div>
-                    <div class="mb-3"><label class="form-label small text-muted">MÔ TẢ</label><textarea id="inp-desc" class="form-control" rows="3" placeholder="Ghi chú..."></textarea></div>
-                    <div class="mb-3"><label class="form-label small text-muted">LINK ĐÍCH</label><input type="url" id="inp-link" class="form-control" placeholder="https://..."></div>
-                    <button class="btn btn-primary w-100 py-2" onclick="createQR()">Tạo Mã</button>
+                    <h4 class="mb-4 text-primary"><i class="fas fa-magic"></i> Tạo QR Mới</h4>
+                    <div class="mb-3"><input type="text" id="inp-title" class="form-control" placeholder="Tiêu đề..."></div>
+                    <div class="mb-3"><textarea id="inp-desc" class="form-control" rows="3" placeholder="Mô tả..."></textarea></div>
+                    <div class="mb-3"><input type="url" id="inp-link" class="form-control" placeholder="Link gốc (https://)..."></div>
+                    <div class="alert alert-info small"><i class="fas fa-info-circle"></i> Tài khoản Free: Giới hạn <strong>100</strong> lượt quét/mã.</div>
+                    <button class="btn btn-primary w-100 py-2" onclick="createQR()">Tạo Ngay</button>
 
                     <div id="new-qr-result" class="mt-4 p-4 bg-light rounded text-center hidden border border-success">
                         <h5 class="text-success">Thành công!</h5>
                         <div id="qrcode-container" class="my-3 d-flex justify-content-center"></div>
-                        <button class="btn btn-sm btn-dark" onclick="downloadNewQR()"><i class="fas fa-download"></i> Tải ảnh</button>
+                        <button class="btn btn-sm btn-dark" onclick="downloadNewQR()">Tải ảnh</button>
                     </div>
                 </div>
                 <div id="tab-list" class="tab-pane hidden">
-                    <h4 class="mb-4 text-primary"><i class="fas fa-tasks"></i> Quản lý mã</h4>
+                    <h4 class="mb-4 text-primary"><i class="fas fa-chart-line"></i> Thống kê lượt quét</h4>
                     <div id="my-qr-list" style="max-height: 60vh; overflow-y: auto;"></div>
                 </div>
                 <div id="tab-inbox" class="tab-pane hidden">
-                    <h4 class="mb-4 text-primary"><i class="fas fa-envelope-open-text"></i> Hộp thư</h4>
+                    <h4 class="mb-4 text-primary"><i class="fas fa-envelope"></i> Hộp thư</h4>
                     <div id="inbox-list" style="max-height: 60vh; overflow-y: auto;"></div>
                 </div>
             </div>
@@ -203,50 +143,52 @@
             <p class="mb-0">Cổng thông tin tài liệu số</p>
         </div>
         <div class="viewer-card">
-            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill">
-                <i class="fas fa-user-edit"></i> <span id="view-owner">...</span> <span id="view-vip-badge" class="hidden"><i class="fas fa-check-circle text-warning"></i></span>
-            </span>
-            <h3 id="view-title" class="fw-bold text-dark mb-3">...</h3>
-            <div class="text-start bg-light p-3 rounded mb-4 border">
-                <p id="view-desc" class="mb-0 text-secondary" style="white-space: pre-line;">...</p>
-            </div>
-            
-            <div class="d-grid gap-2">
-                <a id="view-btn" href="#" class="btn btn-success btn-lg shadow-sm" target="_blank">
-                    <i class="fas fa-download"></i> Tải Tài Liệu
-                </a>
-                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#contactModal">
-                    <i class="fas fa-comment"></i> Nhắn tin
-                </button>
-            </div>
-
-            <div id="system-ad-area" class="system-ad-container hidden">
-                <div class="ad-badge">Gợi ý từ VDC</div>
-                <div class="ad-content">
-                    <div class="ad-thumb"><i class="fas fa-shield-alt"></i></div>
-                    <div class="ad-text">
-                        <h6>Đào Tạo An Toàn VDC</h6>
-                        <p>Giải pháp huấn luyện ATVSLĐ chuyên nghiệp cho doanh nghiệp.</p>
+            <div id="view-content-area">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill">
+                    <i class="fas fa-user-edit"></i> <span id="view-owner">...</span> <span id="view-vip-badge" class="hidden"><i class="fas fa-check-circle text-warning"></i></span>
+                </span>
+                <h3 id="view-title" class="fw-bold text-dark mb-3">...</h3>
+                <div class="text-start bg-light p-3 rounded mb-4 border">
+                    <p id="view-desc" class="mb-0 text-secondary" style="white-space: pre-line;">...</p>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a id="view-btn" href="#" class="btn btn-success btn-lg shadow-sm" target="_blank">
+                        <i class="fas fa-download"></i> Tải Tài Liệu
+                    </a>
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#contactModal">
+                        <i class="fas fa-comment"></i> Nhắn tin
+                    </button>
+                </div>
+                <div id="system-ad-area" class="system-ad-container hidden">
+                    <div class="ad-badge">Quảng cáo</div>
+                    <div class="ad-content">
+                        <div class="ad-thumb"><i class="fas fa-shield-alt"></i></div>
+                        <div class="ad-text"><h6>Đào Tạo An Toàn VDC</h6><p>Giải pháp huấn luyện chuyên nghiệp.</p></div>
+                        <a href="https://vdc.com.vn" target="_blank" class="ad-cta">Xem</a>
                     </div>
-                    <a href="https://vdc.com.vn" target="_blank" class="ad-cta">Xem</a>
                 </div>
             </div>
 
+            <div id="limit-reached-area" class="hidden limit-card">
+                <i class="fas fa-lock limit-icon"></i>
+                <h4 class="text-danger fw-bold">Giới hạn truy cập</h4>
+                <p class="text-muted">Mã QR này đã đạt giới hạn lượt quét miễn phí trong gói cước của chủ sở hữu.</p>
+                <hr>
+                <p class="small">Vui lòng liên hệ chủ sở hữu để nâng cấp mã QR này.</p>
+                <button class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#contactModal">
+                    <i class="fas fa-envelope"></i> Báo cho chủ sở hữu
+                </button>
+            </div>
+            
             <p class="mt-4 small text-muted">Powered by VDC Tech</p>
         </div>
     </div>
 
-    <footer class="app-footer hidden" id="main-footer">
-        <div class="container">
-            <p class="mb-1 fw-bold">VDC Smart QR Solution</p>
-            <p class="mb-0 small">Copyright &copy; 2026. All rights reserved.</p>
-        </div>
-    </footer>
-
+    <footer class="app-footer hidden" id="main-footer"><div class="container"><p class="mb-1 fw-bold">VDC Smart QR</p><p class="mb-0 small">Copyright &copy; 2026</p></div></footer>
     <div class="modal fade" id="contactModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Gửi tin nhắn</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="msg-sender" class="form-control mb-2" placeholder="Tên của bạn"><textarea id="msg-content" class="form-control" rows="3" placeholder="Nội dung..."></textarea></div><div class="modal-footer"><button class="btn btn-primary w-100" onclick="sendContactMessage()">Gửi</button></div></div></div></div>
-    <div class="modal fade" id="editModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Sửa nội dung</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="edit-id"><input type="text" id="edit-title" class="form-control mb-2"><textarea id="edit-desc" class="form-control mb-2"></textarea><input type="url" id="edit-link" class="form-control"></div><div class="modal-footer"><button class="btn btn-primary" onclick="saveEdit()">Lưu</button></div></div></div></div>
-
-    <div class="version-tag">v2.2 Ad System</div>
+    
+    <div class="version-tag">v2.3 Metered</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -254,7 +196,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, deleteDoc, orderBy, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", authDomain: "tavietnam-78ae8.firebaseapp.com", projectId: "tavietnam-78ae8", storageBucket: "tavietnam-78ae8.firebasestorage.app", messagingSenderId: "670121705534", appId: "1:670121705534:web:1027ad98550573ad37116f" };
         const app = initializeApp(firebaseConfig);
@@ -263,6 +205,7 @@
         const provider = new GoogleAuthProvider();
 
         let currentUser, userData, currentQrOwnerId;
+        const DEFAULT_SCAN_LIMIT = 100; // Giới hạn cho bản Free
 
         document.addEventListener('DOMContentLoaded', async () => {
             const qrId = new URLSearchParams(window.location.search).get('id');
@@ -299,7 +242,6 @@
 
         document.getElementById('profile-form').onsubmit = async (e) => {
             e.preventDefault();
-            // isVip mặc định là false
             const newUser = { uid: currentUser.uid, email: currentUser.email, displayName: document.getElementById('profile-name').value, phone: document.getElementById('profile-phone').value, dailyLimit: 5, dailyCount: 0, lastDate: new Date().toDateString(), isVip: false, createdAt: new Date().toISOString() };
             await setDoc(doc(db, "users", currentUser.uid), newUser);
             userData = newUser;
@@ -312,11 +254,7 @@
             document.getElementById('user-display-name').innerText = userData.displayName;
             document.getElementById('user-display-email').innerText = userData.email;
             document.getElementById('quota-display').innerText = `${userData.dailyCount||0}/${userData.dailyLimit}`;
-            
-            if(userData.isVip) {
-                document.getElementById('vip-badge-dashboard').classList.remove('hidden');
-            }
-
+            if(userData.isVip) document.getElementById('vip-badge-dashboard').classList.remove('hidden');
             loadMyQRs();
             loadInbox();
         }
@@ -325,8 +263,6 @@
             ['create', 'list', 'inbox'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             bootstrap.Offcanvas.getInstance(document.getElementById('sidebarMenu')).hide();
-            document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-            event.currentTarget.classList.add('active');
             if(tab === 'list') loadMyQRs();
             if(tab === 'inbox') loadInbox();
         };
@@ -338,11 +274,14 @@
             if (!link) return alert("Thiếu Link!");
             
             document.getElementById('loading-overlay').classList.remove('hidden');
-            // Lưu trạng thái VIP hiện tại vào QR để sau này check nhanh hơn (hoặc check realtime user)
+            
+            // LOGIC MỚI: Thêm views (lượt xem) và limit (giới hạn)
             const docRef = await addDoc(collection(db, "qr_codes"), { 
                 title, desc: document.getElementById('inp-desc').value, link, 
                 createdBy: currentUser.uid, ownerName: userData.displayName, 
-                createdAt: new Date().toISOString() 
+                createdAt: new Date().toISOString(),
+                views: 0, // Bắt đầu từ 0
+                viewLimit: userData.isVip ? 999999 : DEFAULT_SCAN_LIMIT // VIP thì gần như vô cực, Free thì 100
             });
             
             await updateDoc(doc(db, "users", currentUser.uid), { dailyCount: (userData.dailyCount||0) + 1 });
@@ -363,50 +302,65 @@
             const q = query(collection(db, "qr_codes"), where("createdBy", "==", currentUser.uid), orderBy("createdAt", "desc"));
             const snap = await getDocs(q);
             list.innerHTML = snap.empty ? "<p class='text-muted text-center'>Chưa có mã nào</p>" : "";
+            
             snap.forEach(d => {
                 const qr = d.data();
-                list.innerHTML += `<div class="qr-item d-flex justify-content-between align-items-center"><div><strong>${qr.title}</strong><br><small class="text-muted">${qr.link}</small></div><div><button class="btn btn-sm btn-outline-primary me-1" onclick="openEdit('${d.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteQR('${d.id}')"><i class="fas fa-trash"></i></button></div></div>`;
+                // Hiển thị thống kê lượt quét
+                const views = qr.views || 0;
+                const limit = qr.viewLimit || DEFAULT_SCAN_LIMIT;
+                const percent = (views / limit) * 100;
+                let badgeClass = "";
+                if (percent > 80) badgeClass = "warning";
+                if (percent >= 100) badgeClass = "danger";
+
+                list.innerHTML += `
+                    <div class="qr-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${qr.title}</strong>
+                            <div class="mt-1">
+                                <span class="view-count-badge ${badgeClass}"><i class="fas fa-eye"></i> ${views}/${limit}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="openEdit('${d.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteQR('${d.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
             });
         }
 
-        // ... Edit & Delete Logic (Keep same as v2.1) ...
-        window.openEdit = async (id) => {
-            const d = (await getDoc(doc(db, "qr_codes", id))).data();
-            document.getElementById('edit-id').value = id; document.getElementById('edit-title').value = d.title; document.getElementById('edit-desc').value = d.desc; document.getElementById('edit-link').value = d.link;
-            new bootstrap.Modal(document.getElementById('editModal')).show();
-        };
+        // Edit/Delete/Inbox: (Code giống v2.2 - đã lược bớt để tập trung vào logic mới)
+        window.openEdit = async (id) => { const d = (await getDoc(doc(db, "qr_codes", id))).data(); document.getElementById('edit-id').value = id; document.getElementById('edit-title').value = d.title; document.getElementById('edit-desc').value = d.desc; document.getElementById('edit-link').value = d.link; new bootstrap.Modal(document.getElementById('editModal')).show(); };
+        window.saveEdit = async () => { await updateDoc(doc(db, "qr_codes", document.getElementById('edit-id').value), { title: document.getElementById('edit-title').value, desc: document.getElementById('edit-desc').value, link: document.getElementById('edit-link').value }); alert("Đã lưu!"); location.reload(); };
+        window.deleteQR = async (id) => { if(confirm("Xóa mã này?")) { await deleteDoc(doc(db, "qr_codes", id)); loadMyQRs(); } };
+        async function loadInbox() { const list = document.getElementById('inbox-list'); const q = query(collection(db, "messages"), where("toUid", "==", currentUser.uid), orderBy("createdAt", "desc")); const snap = await getDocs(q); list.innerHTML = snap.empty ? "<p class='text-muted text-center'>Trống</p>" : ""; let unread = 0; snap.forEach(d => { const m = d.data(); list.innerHTML += `<div class="msg-item"><strong>${m.senderName}</strong> <small class="text-muted float-end">${new Date(m.createdAt).toLocaleDateString()}</small><p class="mb-0 mt-1">${m.content}</p><small class="text-primary">QR: ${m.qrTitle}</small></div>`; unread++; }); if(unread>0) { document.getElementById('msg-badge').innerText = unread; document.getElementById('msg-badge').classList.remove('hidden'); } }
 
-        window.saveEdit = async () => {
-            await updateDoc(doc(db, "qr_codes", document.getElementById('edit-id').value), { title: document.getElementById('edit-title').value, desc: document.getElementById('edit-desc').value, link: document.getElementById('edit-link').value });
-            alert("Đã lưu!"); location.reload();
-        };
-
-        window.deleteQR = async (id) => {
-            if(confirm("Xóa mã này?")) { await deleteDoc(doc(db, "qr_codes", id)); loadMyQRs(); }
-        };
-
-        // ... Inbox Logic (Keep same as v2.1) ...
-        async function loadInbox() {
-            const list = document.getElementById('inbox-list');
-            const q = query(collection(db, "messages"), where("toUid", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            const snap = await getDocs(q);
-            list.innerHTML = snap.empty ? "<p class='text-muted text-center'>Trống</p>" : "";
-            let unread = 0;
-            snap.forEach(d => {
-                const m = d.data();
-                list.innerHTML += `<div class="msg-item"><strong>${m.senderName}</strong> <small class="text-muted float-end">${new Date(m.createdAt).toLocaleDateString()}</small><p class="mb-0 mt-1">${m.content}</p><small class="text-primary">QR: ${m.qrTitle}</small></div>`;
-                unread++;
-            });
-            if(unread>0) { document.getElementById('msg-badge').innerText = unread; document.getElementById('msg-badge').classList.remove('hidden'); }
-        }
-
-        // --- VIEWER LOGIC (QUAN TRỌNG: CHECK QUẢNG CÁO) ---
+        // --- VIEWER LOGIC (METERED CHECK) ---
         async function loadQrContent(id) {
             try {
-                const docSnap = await getDoc(doc(db, "qr_codes", id));
+                const qrRef = doc(db, "qr_codes", id);
+                const docSnap = await getDoc(qrRef);
                 if (!docSnap.exists()) throw new Error("No Data");
+                
                 const data = docSnap.data();
+                const views = data.views || 0;
+                const limit = data.viewLimit || DEFAULT_SCAN_LIMIT;
 
+                // 1. KIỂM TRA GIỚI HẠN
+                if (views >= limit) {
+                    showView('viewer-view');
+                    document.getElementById('view-content-area').classList.add('hidden');
+                    document.getElementById('limit-reached-area').classList.remove('hidden');
+                    // Vẫn lưu context để gửi tin báo cáo cho chủ sở hữu
+                    currentQrOwnerId = data.createdBy; window.currentQrTitle = data.title + " (Limit Reached)";
+                    return; // Dừng, không hiện nội dung
+                }
+
+                // 2. TĂNG LƯỢT XEM (INCREMENT)
+                // Lưu ý: Chỉ tăng trên server (Atomic Increment) để tránh xung đột
+                updateDoc(qrRef, { views: increment(1) });
+
+                // 3. HIỂN THỊ NỘI DUNG
                 showView('viewer-view');
                 document.getElementById('view-title').innerText = data.title;
                 document.getElementById('view-desc').innerText = data.desc;
@@ -414,21 +368,15 @@
                 document.getElementById('view-btn').href = data.link;
                 currentQrOwnerId = data.createdBy; window.currentQrTitle = data.title;
 
-                // CHECK CHỦ SỞ HỮU CÓ PHẢI VIP KHÔNG
+                // Check VIP để hiện/ẩn quảng cáo
                 const ownerRef = doc(db, "users", data.createdBy);
                 const ownerSnap = await getDoc(ownerRef);
-                
-                let isVip = false;
-                if(ownerSnap.exists()) {
-                    isVip = ownerSnap.data().isVip || false;
-                }
+                const isVip = ownerSnap.exists() ? ownerSnap.data().isVip : false;
 
                 if(isVip) {
-                    // Chủ là VIP -> Ẩn Quảng Cáo
                     document.getElementById('system-ad-area').classList.add('hidden');
                     document.getElementById('view-vip-badge').classList.remove('hidden');
                 } else {
-                    // Chủ là Free -> Hiện Quảng Cáo
                     document.getElementById('system-ad-area').classList.remove('hidden');
                 }
 
@@ -443,11 +391,7 @@
         document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
         document.getElementById('btn-logout').onclick = () => signOut(auth).then(()=>location.reload());
         window.downloadNewQR = () => { const a = document.createElement('a'); a.download = 'QR.png'; a.href = document.querySelector('#qrcode-container img').src; a.click(); };
-
-        function showView(id) {
-            ['auth-view', 'profile-view', 'dashboard-view', 'viewer-view'].forEach(i => document.getElementById(i).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
+        function showView(id) { ['auth-view', 'profile-view', 'dashboard-view', 'viewer-view'].forEach(i => document.getElementById(i).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
     </script>
 </body>
 </html>

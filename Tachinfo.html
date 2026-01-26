@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographic Component Splitter v1.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #002D5A, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold gradient-text mb-2">INFOGRAPHIC COMPONENT SPLITTER</h1>
+            <p class="text-gray-600">Version 1.1 | Tách và vẽ từng thành phần đồ họa</p>
+        </header>
+
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Dán file JSON Infographic vào đây:</label>
+            <textarea id="jsonInput" class="w-full h-48 p-4 border rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder='{ "infographic_specification": ... }'></textarea>
+            <button onclick="parseInfographic()" class="mt-4 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition">Phân tích cấu trúc</button>
+        </div>
+
+        <div id="componentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </div>
+
+    <script>
+        // Cấu hình Firebase của bạn
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
+            authDomain: "tavietnam-78ae8.firebaseapp.com", 
+            projectId: "tavietnam-78ae8", 
+            storageBucket: "tavietnam-78ae8.firebasestorage.app", 
+            messagingSenderId: "670121705534", 
+            appId: "1:670121705534:web:1027ad98550573ad37116f" 
+        };
+
+        function parseInfographic() {
+            const input = document.getElementById('jsonInput').value;
+            const grid = document.getElementById('componentsGrid');
+            grid.innerHTML = '';
+
+            try {
+                const data = JSON.parse(input);
+                const specs = data.infographic_specification;
+
+                // 1. Thêm Hero Section
+                createComponentCard("TRUNG TÂM (HERO)", specs.header.central_icon, "Hero Image");
+
+                // 2. Thêm các Sections
+                specs.sections.forEach(section => {
+                    const title = section.title;
+                    if (section.items) {
+                        section.items.forEach(item => {
+                            createComponentCard(title, item.icon_description, item.label);
+                        });
+                    } else if (section.cards) {
+                        section.cards.forEach(card => {
+                            createComponentCard(title, card.image_prompt, card.title);
+                        });
+                    }
+                });
+
+            } catch (e) {
+                alert("Lỗi định dạng JSON: " + e.message);
+            }
+        }
+
+        function createComponentCard(sectionTitle, prompt, label) {
+            const grid = document.getElementById('componentsGrid');
+            const card = document.createElement('div');
+            card.className = "bg-white p-5 rounded-xl shadow border-t-4 border-blue-900 flex flex-col justify-between";
+            
+            card.innerHTML = `
+                <div>
+                    <span class="text-xs font-bold text-blue-600 uppercase">${sectionTitle}</span>
+                    <h3 class="text-lg font-bold mt-1 text-gray-800">${label}</h3>
+                    <p class="text-sm text-gray-500 mt-2 italic">"${prompt}"</p>
+                </div>
+                <button onclick="drawComponent('${prompt}')" class="mt-4 w-full bg-yellow-500 text-white font-bold py-2 rounded-lg hover:bg-yellow-600 transition">
+                    Vẽ thành phần này
+                </button>
+            `;
+            grid.appendChild(card);
+        }
+
+        function drawComponent(prompt) {
+            alert("Đang gửi lệnh vẽ tới AI Studio với Prompt:\n\n" + prompt);
+            // Ở đây bạn có thể tích hợp API của Nano Banana để thực hiện vẽ thật
+        }
+    </script>
+</body>
+</html>

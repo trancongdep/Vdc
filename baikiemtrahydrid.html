@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bài Kiểm Tra Sát Hạch VDC - Nhóm 3</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; margin: 0; padding: 0; background: #eee; }
+        .page { width: 210mm; min-height: 297mm; background: white; margin: 20px auto; padding: 15mm 10mm; position: relative; box-sizing: border-box; }
+        
+        /* 4 MARKER ĐỊNH VỊ CHO PYTHON (QUAN TRỌNG) */
+        .marker { width: 15px; height: 15px; background: black; position: absolute; }
+        .tl { top: 10mm; left: 10mm; }
+        .tr { top: 10mm; right: 10mm; }
+        .bl { bottom: 10mm; left: 10mm; }
+        .br { bottom: 10mm; right: 10mm; }
+
+        /* HEADER */
+        .header { display: flex; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .logo { width: 100px; text-align: center; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-right: 15px; }
+        .company-info { flex: 1; }
+        .company-info h3 { margin: 0; font-size: 14px; text-transform: uppercase; }
+        .company-info p { margin: 2px 0; font-size: 11px; }
+        .test-title { text-align: center; margin-top: 10px; }
+        .test-title h1 { margin: 0; font-size: 18px; text-transform: uppercase; }
+        .test-title h2 { margin: 5px 0; font-size: 14px; font-weight: normal; }
+
+        /* INFO BOX */
+        .info-box { border: 1px solid #333; padding: 10px; margin-bottom: 20px; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .info-item { flex: 1; }
+        .dots { border-bottom: 1px dotted #000; display: inline-block; width: 70%; }
+
+        /* QUESTION STYLES */
+        .question-block { margin-bottom: 15px; page-break-inside: avoid; }
+        .q-text { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+        .options { margin-left: 15px; font-size: 13px; margin-bottom: 8px; }
+        .opt-row { display: flex; justify-content: space-between; }
+        .opt { width: 48%; margin-bottom: 3px; }
+        
+        /* ANSWER STRIP (KHU VỰC CHẤM TỰ ĐỘNG) */
+        .answer-strip { 
+            background: #f0f0f0; 
+            border: 1px solid #999; 
+            padding: 5px 10px; 
+            display: flex; 
+            align-items: center; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .strip-label { font-size: 11px; font-weight: bold; margin-right: 15px; text-transform: uppercase; }
+        .checkbox-group { display: flex; gap: 20px; }
+        .cb-item { display: flex; align-items: center; cursor: pointer; }
+        /* Ô vuong để tô */
+        .box { 
+            width: 16px; height: 16px; border: 2px solid #000; background: white; margin-right: 5px; 
+            display: inline-block;
+        }
+        .cb-label { font-weight: bold; font-size: 14px; }
+
+        /* IMAGES PLACEHOLDER */
+        .img-place { 
+            width: 100px; height: 100px; background: #ddd; margin: 10px 0; 
+            display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555; border: 1px dashed #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <div class="marker tl"></div>
+    <div class="marker tr"></div>
+    <div class="marker bl"></div>
+    <div class="marker br"></div>
+
+    <div class="header">
+        <div class="logo">LOGO VDC</div>
+        <div class="company-info">
+            <h3>CÔNG TY CỔ PHẦN HỢP TÁC QUỐC TẾ VDC</h3>
+            <p>ĐC: Số nhà 46 LK11 Khu đô thị mới Đông Sơn, P. An Hưng, TP. Thanh Hoá</p>
+            <p>Email: kiemdinhvdc@gmail.com</p>
+            <div class="test-title">
+                <h1>BÀI KIỂM TRA SÁT HẠCH</h1>
+                <h2>KHÓA HUẤN LUYỆN AN TOÀN, VỆ SINH LAO ĐỘNG NHÓM 3</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <div class="info-row">
+            <div class="info-item">Họ và tên: ................................................................</div>
+            <div class="info-item">Ngày sinh: ...........................................</div>
+        </div>
+        <div class="info-row">
+            <div class="info-item">Chức vụ/Công việc: ...........................................</div>
+            <div class="info-item">Công ty: ...............................................</div>
+        </div>
+        <div class="info-row">
+            <div class="info-item">Ngày kiểm tra: ....................................................</div>
+            <div class="info-item">Chữ ký: ...................................................</div>
+        </div>
+        <div style="margin-top:5px; font-style:italic; font-size:11px;">* Hướng dẫn: Đánh dấu X hoặc tô kín vào ô vuông tương ứng với đáp án đúng ở khung "TRẢ LỜI" bên dưới mỗi câu hỏi.</div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 1. Hệ thống văn bản quy phạm pháp luật được sắp xếp theo thứ tự nào sau đây?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Hiến pháp - Luật - Nghị định - Thông tư</div><div class="opt">B. Luật - Hiến pháp - Nghị định - Thông tư</div></div>
+            <div class="opt-row"><div class="opt">C. Nghị định - Luật - Thông tư - Tiêu chuẩn</div><div class="opt">D. Luật - Hiến pháp - Nghị định - Thông tư - Tiêu chuẩn</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 2. Luật An toàn, vệ sinh lao động là văn bản pháp luật số...?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. 84/2015/QH13</div><div class="opt">B. 45/2019/QH14</div></div>
+            <div class="opt-row"><div class="opt">C. 72/2020/QH14</div><div class="opt">D. 50/2014/QH13</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 3. Theo QCVN 18/2021/BXD, khi làm việc trên cao từ bao nhiêu mét (m) trở lên phải đeo dây đai an toàn?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. 1m</div><div class="opt">B. 2m</div></div>
+            <div class="opt-row"><div class="opt">C. 3m</div><div class="opt">D. 4m</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 4. Theo luật An toàn, vệ sinh lao động, người lao động có những quyền nào sau đây?</div>
+        <div class="options">
+            <div class="opt">A. Được bảo đảm điều kiện làm việc công bằng, an toàn; yêu cầu NSDLĐ bảo đảm an toàn...</div>
+            <div class="opt">B. Được thực hiện chế độ BHLĐ, khám sức khỏe, bảo hiểm TNLĐ...</div>
+            <div class="opt">C. Được chủ động đi khám giám định mức suy giảm khả năng lao động...</div>
+            <div class="opt">D. Cả 3 đáp án trên</div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 5. Việc trang bị phương tiện bảo vệ cá nhân trong quá trình làm việc thuộc trách nhiệm của ai?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Người sử dụng lao động</div><div class="opt">B. Người lao động</div></div>
+            <div class="opt-row"><div class="opt">C. Công đoàn</div><div class="opt">D. Tất cả các ý trên</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 6. Các yếu tố nguy hiểm trong sản xuất là:</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Các bộ phận truyền động và chuyển động</div><div class="opt">B. Vật rơi, văng bắn</div></div>
+            <div class="opt-row"><div class="opt">C. Nguồn điện</div><div class="opt">D. Cả 3 đáp án trên</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 7. Các yếu tố có hại là:</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Bụi</div><div class="opt">B. Tiếng ồn</div></div>
+            <div class="opt-row"><div class="opt">C. Hóa chất</div><div class="opt">D. Tất cả các ý trên</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+    
+     <div class="question-block">
+        <div class="q-text">Câu 8. Hàng năm, người sử dụng lao động có trách nhiệm tổ chức khám sức khỏe định kỳ cho người lao động làm công việc có yếu tố nguy hiểm, độc hại ít nhất?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. 01 lần/năm</div><div class="opt">B. 02 lần/năm</div><div class="opt">C. 03 lần/năm</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+            </div>
+        </div>
+    </div>
+
+     <div class="question-block">
+        <div class="q-text">Câu 9. Biểu tượng sau có ý nghĩa gì?</div>
+        <div class="img-place">[Dán ảnh biển cảnh báo điện tại đây]</div>
+        <div class="options">
+            <div class="opt">A. Cảnh báo nguy hiểm sét đánh</div>
+            <div class="opt">B. Cảnh báo nguy hiểm điện giật</div>
+            <div class="opt">C. Cảnh báo nguy hiểm chuyển động</div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+            </div>
+        </div>
+    </div>
+
+</div> <div class="page">
+    <div class="marker tl"></div>
+    <div class="marker tr"></div>
+    <div class="marker bl"></div>
+    <div class="marker br"></div>
+
+     <div class="question-block" style="padding-top: 20px;">
+        <div class="q-text">Câu 10. Các mối nguy về cẩu là?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Lật cần trục, vật thể rơi</div><div class="opt">B. Gãy cần nâng, va chạm với vật cản</div></div>
+            <div class="opt-row"><div class="opt">C. Chạm vào đường dây điện trên cao</div><div class="opt">D. Cả 3 đáp án trên</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 11. Mối nguy về hàn cắt là gì?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Cắt vào người, văng bắn, điện giật</div><div class="opt">B. Cháy nổ, bỏng</div></div>
+            <div class="opt-row"><div class="opt">C. Khói, khí độc</div><div class="opt">D. Cả ba đáp án trên</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 12. Không được sử dụng giàn giáo, giá đỡ khi?</div>
+        <div class="options">
+            <div class="opt">A. Giàn giáo, giá đỡ không đảm bảo yêu cầu kỹ thuật</div>
+            <div class="opt">B. Có biến dạng nứt, mòn, gỉ hoặc thiếu các bộ phận</div>
+            <div class="opt">C. Khi lắp đặt sai biện pháp</div>
+            <div class="opt">D. Cả 3 phương án trên</div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 13. Có được chở người trên xe nâng hàng (forklift) không?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Có</div><div class="opt">C. Không</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 14. Các yếu tố nguy hiểm khi vận hành xe nâng?</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A. Rơi đổ hàng</div><div class="opt">B. Xe bị lật đổ</div></div>
+            <div class="opt-row"><div class="opt">C. Va quẹt, đụng vào người và hàng hóa</div><div class="opt">D. Cả 3 phương án trên</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">D</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="q-text">Câu 15. Bình chữa cháy nào dưới đây là bình CO2?</div>
+        <div class="img-place">[Dán 3 ảnh bình chữa cháy vào đây như đề gốc]</div>
+        <div class="options">
+            <div class="opt-row"><div class="opt">A</div><div class="opt">B</div><div class="opt">C</div></div>
+        </div>
+        <div class="answer-strip">
+            <span class="strip-label">Trả lời:</span>
+            <div class="checkbox-group">
+                <div class="cb-item"><span class="box"></span><span class="cb-label">A</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">B</span></div>
+                <div class="cb-item"><span class="box"></span><span class="cb-label">C</span></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

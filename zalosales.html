@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC MONITOR V1.5</title>
+    <title>VDC MONITOR V1.6</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
         .header { background: #0068ff; color: white; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 10px; }
-        .card { background: white; padding: 12px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-left: 6px solid #0068ff; position: relative; }
-        .group { color: #0068ff; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px; }
-        .sender { font-weight: bold; color: #1c1e21; font-size: 1.1rem; display: block; margin-bottom: 6px; }
-        .content { background: #f8f9fa; padding: 10px; border-radius: 8px; color: #333; font-size: 1rem; border: 1px solid #eee; }
-        .time { font-size: 0.7rem; color: #888; position: absolute; top: 12px; right: 12px; }
-        #btn-audio { width: 100%; padding: 12px; background: #ff9800; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-left: 6px solid #e74c3c; position: relative; }
+        .group-name { color: #888; font-size: 0.75rem; margin-bottom: 4px; font-weight: bold; }
+        .sender-name { font-weight: bold; color: #1c1e21; font-size: 1.1rem; margin-bottom: 8px; display: block; }
+        .full-content { background: #fff5f5; padding: 12px; border-radius: 8px; color: #000; font-size: 1rem; border: 1px solid #ffdada; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+        .time-stamp { font-size: 0.7rem; color: #999; position: absolute; top: 15px; right: 15px; }
+        #btn-audio { width: 100%; padding: 15px; background: #ff9800; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 15px; font-size: 1rem; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h3 style="margin:0">VDC MONITORING V1.5</h3>
+    <h3 style="margin:0">HỆ THỐNG GIÁM SÁT V1.6</h3>
 </div>
 
-<button id="btn-audio" onclick="enableAudio()">🔔 BẬT CHUÔNG BÁO</button>
+<button id="btn-audio" onclick="activateAlarm()">🔔 BẬT CHUÔNG THÔNG BÁO</button>
 
-<div id="list"></div>
+<div id="display-list"></div>
 
-<audio id="ting" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+<audio id="sound-effect" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
 <script>
     const firebaseConfig = {
@@ -40,38 +40,38 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const ting = document.getElementById('ting');
-    let sound = false;
-    let first = true;
+    const database = firebase.database();
+    const sound = document.getElementById('sound-effect');
+    let isAlarmOn = false;
+    let initial = true;
 
-    function enableAudio() {
-        sound = true;
-        ting.play().then(() => ting.pause());
-        document.getElementById('btn-audio').innerText = "✅ CHUÔNG SẴN SÀNG";
+    function activateAlarm() {
+        isAlarmOn = true;
+        sound.play().then(() => sound.pause());
+        document.getElementById('btn-audio').innerText = "✅ ĐANG GIÁM SÁT CÓ CHUÔNG";
         document.getElementById('btn-audio').style.background = "#4caf50";
     }
 
-    db.ref('messages').limitToLast(15).on('value', (snapshot) => {
-        const area = document.getElementById('list');
-        area.innerHTML = "";
-        const data = snapshot.val();
+    database.ref('messages').limitToLast(10).on('value', (snapshot) => {
+        const container = document.getElementById('display-list');
+        container.innerHTML = "";
+        const val = snapshot.val();
         
-        if (data) {
-            const arr = Object.keys(data).map(k => data[k]).reverse();
-            arr.forEach(m => {
-                area.innerHTML += `
+        if (val) {
+            const sorted = Object.keys(val).map(k => val[k]).reverse();
+            sorted.forEach(item => {
+                container.innerHTML += `
                     <div class="card">
-                        <span class="time">${m.time || ''}</span>
-                        <div class="group">📂 ${m.group || 'Cá nhân'}</div>
-                        <span class="sender">👤 ${m.sender}</span>
-                        <div class="content">${m.content || '(Không có nội dung)'}</div>
+                        <span class="time-stamp">${item.time}</span>
+                        <div class="group-name">📍 Nguồn: ${item.group}</div>
+                        <span class="sender-name">👤 ${item.sender}</span>
+                        <div class="full-content">${item.content}</div>
                     </div>
                 `;
             });
 
-            if (!first && sound) { ting.play().catch(e => console.log(e)); }
-            first = false;
+            if (!initial && isAlarmOn) { sound.play(); }
+            initial = false;
         }
     });
 </script>

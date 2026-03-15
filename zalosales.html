@@ -3,85 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC MONITOR V1.7 - QUẢN LÝ TỪ KHÓA</title>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <title>VDC MONITOR V1.8 - QUẢN LÝ TIN NHẮN</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
-        .header { background: #0068ff; color: white; padding: 15px; text-align: center; border-radius: 10px; }
-        .config-section { background: white; padding: 15px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input { padding: 8px; width: 60%; border: 1px solid #ddd; border-radius: 5px; }
-        .btn-add { padding: 8px 15px; background: #0068ff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .keyword-tag { display: inline-block; background: #e7f3ff; color: #0068ff; padding: 5px 10px; border-radius: 15px; margin: 5px; font-size: 0.85rem; }
-        .keyword-tag span { margin-left: 8px; color: red; cursor: pointer; font-weight: bold; }
-        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 12px; border-left: 5px solid #2ecc71; position: relative; }
-        .full-content { background: #f9f9f9; padding: 10px; border-radius: 8px; white-space: pre-wrap; margin-top: 5px; border: 1px solid #eee; }
-        .time { font-size: 0.7rem; color: #999; float: right; }
+        :root {
+            --primary-color: #3498db;
+            --bg-color: #f4f7f6;
+            --text-color: #2c3e50;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .tag {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .tag span {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .message-card {
+            border-left: 5px solid var(--primary-color);
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .message-header {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .sender-name {
+            font-weight: bold;
+            color: #2980b9;
+            display: block;
+            font-size: 16px;
+        }
+        .message-content {
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .footer-info {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 20px;
+            color: #95a5a6;
+        }
     </style>
 </head>
 <body>
 
-<div class="header"><h3>VDC MONITOR V1.7</h3></div>
-
-<div class="config-section">
-    <strong>Từ khóa lọc tin:</strong> (Để trống để lấy tất cả)
-    <div style="margin-top:10px;">
-        <input type="text" id="kwInput" placeholder="Nhập từ khóa...">
-        <button class="btn-add" onclick="addKeyword()">Thêm</button>
+<div class="container">
+    <div class="header">
+        <h2>VDC MONITOR V1.8</h2>
+        <p>Hệ thống giám sát tin nhắn Zalo tự động</p>
     </div>
-    <div id="kwList" style="margin-top:10px;"></div>
+
+    <div class="filter-section">
+        <label><strong>Từ khóa lọc tin:</strong> (Để trống để lấy tất cả)</label>
+        <input type="text" id="keywordInput" placeholder="Nhập từ khóa và nhấn Enter...">
+        <div id="tagContainer" class="tag-container"></div>
+    </div>
+
+    <div id="messageList">
+        </div>
+
+    <div class="footer-info">
+        Phiên bản 1.8 | Cập nhật ngày 15/03/2026 | User: Trần Công Đẹp
+    </div>
 </div>
 
-<button id="btnAudio" onclick="enableAudio()" style="width:100%; padding:15px; background:#ff9800; color:white; border:none; border-radius:10px; font-weight:bold; margin-bottom:10px;">🔔 BẬT CHUÔNG GIÁM SÁT</button>
-
-<div id="display-list"></div>
-
-<audio id="ting" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo",
-        authDomain: "tavietnam-78ae8.firebaseapp.com",
-        projectId: "tavietnam-78ae8",
-        storageBucket: "tavietnam-78ae8.firebasestorage.app",
-        messagingSenderId: "670121705534",
-        appId: "1:670121705534:web:1027ad98550573ad37116f"
+    // Firebase Config của bạn
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
+        authDomain: "tavietnam-78ae8.firebaseapp.com", 
+        projectId: "tavietnam-78ae8", 
+        storageBucket: "tavietnam-78ae8.firebasestorage.app", 
+        messagingSenderId: "670121705534", 
+        appId: "1:670121705534:web:1027ad98550573ad37116f" 
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ting = document.getElementById('ting');
-    let soundOn = false; let first = true;
+    const messagesRef = db.ref('zalo_messages');
 
-    function enableAudio() { soundOn = true; ting.play().then(()=>ting.pause()); document.getElementById('btnAudio').style.background="#4caf50"; document.getElementById('btnAudio').innerText="✅ ĐANG TRỰC ONLINE"; }
+    let keywords = ['huấn luyện', 'nhóm 3'];
 
-    // QUẢN LÝ TỪ KHÓA
-    function addKeyword() {
-        const val = document.getElementById('kwInput').value.trim();
-        if(val) { db.ref('keywords').push(val); document.getElementById('kwInput').value = ""; }
+    // Hiển thị tags ban đầu
+    function renderTags() {
+        const container = document.getElementById('tagContainer');
+        container.innerHTML = '';
+        keywords.forEach((kw, index) => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `${kw} <span onclick="removeTag(${index})">&times;</span>`;
+            container.appendChild(tag);
+        });
     }
-    function removeKeyword(key) { db.ref('keywords/'+key).remove(); }
 
-    db.ref('keywords').on('value', snap => {
-        const list = document.getElementById('kwList'); list.innerHTML = "";
-        const data = snap.val();
-        if(data) {
-            Object.keys(data).forEach(k => {
-                list.innerHTML += `<div class="keyword-tag">${data[k]} <span onclick="removeKeyword('${k}')">x</span></div>`;
-            });
+    function removeTag(index) {
+        keywords.splice(index, 1);
+        renderTags();
+        loadMessages();
+    }
+
+    document.getElementById('keywordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim() !== '') {
+            keywords.push(this.value.trim().toLowerCase());
+            this.value = '';
+            renderTags();
+            loadMessages();
         }
     });
 
-    // HIỂN THỊ TIN NHẮN
-    db.ref('messages').limitToLast(10).on('value', snap => {
-        const area = document.getElementById('display-list'); area.innerHTML = "";
-        const data = snap.val();
-        if(data) {
-            Object.keys(data).map(k => data[k]).reverse().forEach(m => {
-                area.innerHTML += `<div class="card"><span class="time">${m.time}</span><div style="font-size:0.8rem; color:#888;">Nguồn: ${m.group}</div><strong>${m.sender}</strong><div class="full-content">${m.content}</div></div>`;
+    function loadMessages() {
+        messagesRef.limitToLast(50).on('value', (snapshot) => {
+            const messageList = document.getElementById('messageList');
+            messageList.innerHTML = '';
+            const data = snapshot.val();
+            
+            if (!data) return;
+
+            // Chuyển object thành array và đảo ngược để tin mới lên đầu
+            const sortedMsgs = Object.values(data).reverse();
+
+            sortedMsgs.forEach(msg => {
+                const content = msg.content || "";
+                const sender = msg.sender || "Không rõ";
+                const source = msg.source || "Cá nhân";
+                
+                // Kiểm tra điều kiện lọc
+                const matches = keywords.length === 0 || keywords.some(kw => content.toLowerCase().includes(kw));
+
+                if (matches) {
+                    const card = document.createElement('div');
+                    card.className = 'message-card';
+                    card.innerHTML = `
+                        <div class="message-header">Nguồn: ${source}</div>
+                        <span class="sender-name">${sender}</span>
+                        <div class="message-content">${content}</div>
+                    `;
+                    messageList.appendChild(card);
+                }
             });
-            if(!first && soundOn) ting.play(); first = false;
-        }
-    });
+        });
+    }
+
+    // Khởi tạo
+    renderTags();
+    loadMessages();
 </script>
+
 </body>
 </html>

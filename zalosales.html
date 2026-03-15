@@ -3,36 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC MONITOR V1.8</title>
+    <title>VDC MONITOR V1.9</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
         .header { background: #0068ff; color: white; padding: 15px; text-align: center; border-radius: 10px; }
-        .config-box { background: white; padding: 15px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input { padding: 10px; width: 60%; border: 1px solid #ddd; border-radius: 5px; }
-        .btn { padding: 10px 15px; background: #0068ff; color: white; border: none; border-radius: 5px; font-weight: bold; }
-        .tag { display: inline-block; background: #e7f3ff; color: #0068ff; padding: 5px 10px; border-radius: 15px; margin: 5px; font-size: 0.8rem; }
-        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 6px solid #2ecc71; position: relative; }
-        .sender { font-weight: bold; color: #1c1e21; font-size: 1.1rem; }
-        .content { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 8px; white-space: pre-wrap; line-height: 1.5; border: 1px solid #eee; }
-        .time { font-size: 0.7rem; color: #999; float: right; }
+        .config-box { background: white; padding: 10px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 12px; border-left: 6px solid #e74c3c; position: relative; }
+        .sender-info { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
+        .group-label { color: #0068ff; font-weight: bold; font-size: 0.8rem; }
+        .time-label { color: #888; font-size: 0.75rem; }
+        .sender-name { font-weight: bold; color: #333; display: block; margin-bottom: 5px; }
+        .message-body { background: #fff5f5; padding: 10px; border-radius: 8px; color: #000; line-height: 1.5; white-space: pre-wrap; border: 1px solid #ffdada; }
+        #btnAlarm { width: 100%; padding: 15px; background: #ff9800; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div class="header"><h3>VDC MONITOR V1.8</h3></div>
+<div class="header"><h3>VDC MONITOR V1.9</h3></div>
 
 <div class="config-box">
-    <strong>Từ khóa lọc:</strong>
-    <div style="margin-top:8px;">
-        <input type="text" id="kwInput" placeholder="Ví dụ: huấn luyện...">
-        <button class="btn" onclick="addKw()">THÊM</button>
-    </div>
-    <div id="kwList" style="margin-top:8px;"></div>
+    <strong>Từ khóa:</strong> <input type="text" id="kwIn" style="width:50%; padding:5px;"> 
+    <button onclick="addK()" style="padding:5px 10px; background:#0068ff; color:white; border:none; border-radius:3px;">Thêm</button>
+    <div id="kwList" style="margin-top:5px;"></div>
 </div>
 
-<button id="btnAlarm" onclick="enableSound()" style="width:100%; padding:15px; background:#ff9800; color:white; border:none; border-radius:10px; font-weight:bold; margin-bottom:10px;">🔔 BẬT CHUÔNG GIÁM SÁT</button>
+<button id="btnAlarm" onclick="enableAudio()">🔔 BẬT CHUÔNG GIÁM SÁT</button>
 
 <div id="msgList"></div>
 <audio id="ting" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
@@ -49,16 +46,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const ting = document.getElementById('ting');
-    let soundOn = false; let first = true;
+    let sound = false; let initial = true;
 
-    function enableSound() { soundOn = true; ting.play().then(()=>ting.pause()); document.getElementById('btnAlarm').style.background="#4caf50"; document.getElementById('btnAlarm').innerText="✅ HỆ THỐNG SẴN SÀNG"; }
-
-    function addKw() { const v = document.getElementById('kwInput').value.trim(); if(v){ db.ref('keywords').push(v); document.getElementById('kwInput').value=""; } }
-    function delKw(k) { db.ref('keywords/'+k).remove(); }
+    function enableAudio() { sound = true; ting.play().then(()=>ting.pause()); document.getElementById('btnAlarm').style.background="#4caf50"; document.getElementById('btnAlarm').innerText="✅ ĐANG TRỰC..."; }
+    function addK() { const v = document.getElementById('kwIn').value; if(v){ db.ref('keywords').push(v); document.getElementById('kwIn').value=""; } }
+    function delK(k) { db.ref('keywords/'+k).remove(); }
 
     db.ref('keywords').on('value', s => {
         const l = document.getElementById('kwList'); l.innerHTML = "";
-        const d = s.val(); if(d) Object.keys(d).forEach(k => { l.innerHTML += `<div class="tag">${d[k]} <span onclick="delKw('${k}')" style="color:red; cursor:pointer; margin-left:5px;">x</span></div>`; });
+        const d = s.val(); if(d) Object.keys(d).forEach(k => { l.innerHTML += `<span style="background:#eee; padding:3px 8px; margin:3px; border-radius:10px; display:inline-block; font-size:0.8rem;">${d[k]} <b onclick="delK('${k}')" style="color:red; cursor:pointer;">x</b></span>`; });
     });
 
     db.ref('messages').limitToLast(15).on('value', s => {
@@ -66,9 +62,18 @@
         const d = s.val();
         if(d) {
             Object.keys(d).map(k => d[k]).reverse().forEach(m => {
-                area.innerHTML += `<div class="card"><span class="time">${m.time}</span><div style="font-size:0.75rem; color:#888;">Nguồn: ${m.group}</div><div class="sender">👤 ${m.sender}</div><div class="content">${m.content}</div></div>`;
+                area.innerHTML += `
+                    <div class="card">
+                        <div class="sender-info">
+                            <span class="group-label">📁 ${m.group}</span>
+                            <span class="time-label">🕒 ${m.time}</span>
+                        </div>
+                        <span class="sender-name">👤 ${m.sender}</span>
+                        <div class="message-body">${m.content}</div>
+                    </div>`;
             });
-            if(!first && soundOn) ting.play(); first = false;
+            if(!initial && sound) ting.play();
+            initial = false;
         }
     });
 </script>

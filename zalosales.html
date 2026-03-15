@@ -3,129 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VDC MONITOR V1.8 - QUẢN LÝ TIN NHẮN</title>
+    <title>VDC MONITOR V1.9 - QUẢN LÝ TIN NHẮN</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --primary-color: #3498db;
-            --bg-color: #f4f7f6;
-            --text-color: #2c3e50;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .header {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .filter-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        .tag-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .tag {
-            background: #e1f5fe;
-            color: #0288d1;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-        }
-        .tag span {
-            margin-left: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .message-card {
-            border-left: 5px solid var(--primary-color);
-            background: #fff;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        .message-header {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-bottom: 5px;
-        }
-        .sender-name {
-            font-weight: bold;
-            color: #2980b9;
-            display: block;
-            font-size: 16px;
-        }
-        .message-content {
-            font-size: 15px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-        }
-        .footer-info {
-            font-size: 12px;
-            text-align: center;
-            margin-top: 20px;
-            color: #95a5a6;
-        }
+        :root { --primary-color: #3498db; --bg-color: #f4f7f6; --text-color: #2c3e50; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        .filter-section { margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag { background: #e1f5fe; color: #0288d1; padding: 5px 12px; border-radius: 15px; font-size: 14px; display: flex; align-items: center; }
+        .tag span { margin-left: 8px; cursor: pointer; font-weight: bold; }
+        .message-card { border-left: 5px solid var(--primary-color); background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); animation: highlight 1s ease-out; }
+        @keyframes highlight { from { background: #fff9c4; } to { background: #fff; } }
+        .message-header { font-size: 12px; color: #7f8c8d; margin-bottom: 5px; }
+        .sender-name { font-weight: bold; color: #2980b9; display: block; font-size: 16px; }
+        .message-content { font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; color: #000; }
+        .footer-info { font-size: 12px; text-align: center; margin-top: 20px; color: #95a5a6; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header">
-        <h2>VDC MONITOR V1.8</h2>
-        <p>Hệ thống giám sát tin nhắn Zalo tự động</p>
+        <h2>VDC MONITOR V1.9</h2>
+        <p>Hệ thống giám sát tin nhắn Zalo</p>
     </div>
-
     <div class="filter-section">
-        <label><strong>Từ khóa lọc tin:</strong> (Để trống để lấy tất cả)</label>
-        <input type="text" id="keywordInput" placeholder="Nhập từ khóa và nhấn Enter...">
+        <label><strong>Từ khóa lọc tin:</strong></label>
+        <input type="text" id="keywordInput" placeholder="Thêm từ khóa lọc...">
         <div id="tagContainer" class="tag-container"></div>
     </div>
-
-    <div id="messageList">
-        </div>
-
-    <div class="footer-info">
-        Phiên bản 1.8 | Cập nhật ngày 15/03/2026 | User: Trần Công Đẹp
-    </div>
+    <div id="messageList"></div>
+    <div class="footer-info">Phiên bản 1.9 | 15/03/2026 | Chief Trainer: Trần Công Đẹp</div>
 </div>
 
 <script>
-    // Firebase Config của bạn
     const firebaseConfig = { 
         apiKey: "AIzaSyCzWjfcD5Dgq7V-i2izb9tKLR6QM6qWPQo", 
         authDomain: "tavietnam-78ae8.firebaseapp.com", 
@@ -141,7 +55,6 @@
 
     let keywords = ['huấn luyện', 'nhóm 3'];
 
-    // Hiển thị tags ban đầu
     function renderTags() {
         const container = document.getElementById('tagContainer');
         container.innerHTML = '';
@@ -169,30 +82,22 @@
     });
 
     function loadMessages() {
-        messagesRef.limitToLast(50).on('value', (snapshot) => {
+        messagesRef.limitToLast(20).on('value', (snapshot) => {
             const messageList = document.getElementById('messageList');
             messageList.innerHTML = '';
             const data = snapshot.val();
-            
             if (!data) return;
 
-            // Chuyển object thành array và đảo ngược để tin mới lên đầu
-            const sortedMsgs = Object.values(data).reverse();
-
-            sortedMsgs.forEach(msg => {
+            Object.values(data).reverse().forEach(msg => {
                 const content = msg.content || "";
-                const sender = msg.sender || "Không rõ";
-                const source = msg.source || "Cá nhân";
-                
-                // Kiểm tra điều kiện lọc
-                const matches = keywords.length === 0 || keywords.some(kw => content.toLowerCase().includes(kw));
+                const matches = keywords.length === 0 || keywords.some(kw => content.toLowerCase().includes(kw.toLowerCase()));
 
                 if (matches) {
                     const card = document.createElement('div');
                     card.className = 'message-card';
                     card.innerHTML = `
-                        <div class="message-header">Nguồn: ${source}</div>
-                        <span class="sender-name">${sender}</span>
+                        <div class="message-header">${msg.source || 'Zalo'} | ${msg.timestamp || ''}</div>
+                        <span class="sender-name">${msg.sender || 'Ẩn danh'}</span>
                         <div class="message-content">${content}</div>
                     `;
                     messageList.appendChild(card);
@@ -201,10 +106,8 @@
         });
     }
 
-    // Khởi tạo
     renderTags();
     loadMessages();
 </script>
-
 </body>
 </html>

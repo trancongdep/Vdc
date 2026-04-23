@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VDC SAFETY - AI FACE ID v1.6.4</title>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --vdc-blue: #1e293b; --vdc-accent: #3b82f6; }
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; }
+        .app-container { max-width: 450px; width: 100%; background: white; border-radius: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden; margin: auto; }
+        #video-container { position: relative; width: 280px; height: 373px; margin: 15px auto; background: #000; border-radius: 30px; overflow: hidden; border: 6px solid #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .mirror { transform: scaleX(-1); }
+        canvas { position: absolute; top: 0; left: 0; }
+        .face-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 75%; border: 4px dashed rgba(255, 255, 255, 0.4); border-radius: 50% / 60%; pointer-events: none; z-index: 20; transition: 0.3s; }
+        .face-detected { border-color: #10b981; border-style: solid; box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
+        
+        .btn-control { width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; items-center: center; justify-content: center; border: 1.5px solid rgba(255,255,255,0.8); backdrop-filter: blur(4px); }
+        
+        /* Thanh Zoom mượt mà */
+        #zoom-container { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); width: 200px; z-index: 40; display: none; }
+        input[type=range] { width: 100%; accent-color: #3b82f6; }
+        
+        .btn-vdc { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; transition: 0.3s; }
+        .btn-vdc:disabled { background: #cbd5e1; color: #94a3b8; }
+    </style>
+</head>
+<body class="p-4 flex flex-col items-center justify-center min-h-screen">
+
+<div class="app-container">
+    <div id="session-info" class="bg-slate-900 text-white p-4 text-[10px] tracking-wider text-center uppercase font-bold border-b border-slate-700 italic text-blue-400 font-mono">Loading Config...</div>
+
+    <div class="p-6 text-center">
+        <div class="flex items-center justify-center gap-2 mb-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-sm shadow-lg">V</div>
+            <h1 class="text-xl font-black text-slate-800 tracking-tighter uppercase">VDC Safety AI</h1>
+        </div>
+        <p id="loading-msg" class="text-[10px] text-red-500 font-bold animate-pulse mb-4 tracking-widest">⌛ ĐANG KHỞI CHẠY AI ENGINE...</p>
+
+        <div id="scanner-section">
+            <div id="video-container">
+                <video id="video" autoplay muted playsinline class="mirror"></video>
+                <canvas id="overlay" class="mirror"></canvas>
+                <div class="face-guide" id="faceGuide"></div>
+                
+                <div class="absolute bottom-4 right-4 flex flex-col gap-3 z-30">
+                    <button class="btn-control shadow-xl" onclick="switchCamera()"><i class="fas fa-sync-alt"></i></button>
+                </div>
+
+                <div id="zoom-container" class="bg-black/40 p-2 rounded-full border border-white/20">
+                    <div class="flex items-center gap-2 px-2">
+                        <span class="text-[9px] text-white font-bold">1x</span>
+                        <input type="range" id="zoomRange" min="1" max="3" step="0.1" value="1" oninput="applyZoom(this.value)">
+                        <span class="text-[9px] text-white font-bold">3x</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p id="scan-status" class="text-[10px] font-black text-slate-400 mb-4 tracking-widest uppercase">ÁP MẶT VÀO HÌNH BẦU DỤC</p>
+            <button class="btn-vdc w-full py-5 rounded-2xl font-black text-lg shadow-xl uppercase" id="btnCapture" onclick="checkFace()" disabled>Xác nhận mặt</button>
+        </div>
+
+        <div id="search-section" class="hidden mt-4 pt-6 border-t border-dashed border-slate-200 text-left">
+             <div class="bg-orange-50 border-l-4 border-orange-500 p-3 mb-4 text-[10px] text-orange-600 font-bold uppercase tracking-tight">AI chưa nhận diện được</div>
+             <input type="text" id="inputName" class="w-full p-4 bg-slate-50 border rounded-2xl mb-3 outline-none font-bold text-slate-700" placeholder="NHẬP TÊN KHÔNG DẤU...">
+             <button class="w-full py-4 bg-slate-700 text-white rounded-2xl font-bold uppercase text-sm" onclick="searchStudent()">Tìm hồ sơ</button>
+        </div>
+
+        <div id="verify-section" class="hidden mt-4 text-left bg-blue-50/50 p-5 rounded-3xl border border-blue-100">
+            <img id="preview-photo" class="w-24 h-32 object-cover rounded-xl border-4 border-white shadow-md mx-auto mb-6 bg-slate-200">
+            <div class="space-y-4 text-[10px] font-bold text-slate-400 uppercase">
+                <div class="flex gap-3">
+                    <div class="flex-1">STT<input type="text" id="c1" disabled class="w-full p-2 bg-slate-100 rounded-lg font-bold text-slate-800"></div>
+                    <div class="flex-[3]">Học viên<input type="text" id="c2" disabled class="w-full p-2 bg-slate-100 rounded-lg font-bold text-slate-800 uppercase"></div>
+                </div>
+                <div>Ngày sinh<input type="text" id="c4" class="w-full p-3 bg-white border rounded-xl text-slate-700 font-bold"></div>
+                <div>Đơn vị<input type="text" id="c7" class="w-full p-3 bg-white border rounded-xl text-slate-700 font-bold"></div>
+            </div>
+            <button class="w-full mt-6 py-5 bg-green-600 text-white rounded-2xl font-black text-lg uppercase shadow-lg shadow-green-100" onclick="saveFinal()">Lưu Face ID</button>
+        </div>
+
+        <div id="result-screen" class="hidden mt-4 animate-bounce">
+            <div class="bg-white p-6 rounded-[40px] shadow-2xl border border-green-50 text-center">
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg"><i class="fas fa-check"></i></div>
+                <img id="res-photo" class="w-32 h-44 object-cover rounded-2xl border-4 border-white shadow-md mx-auto mb-4">
+                <h2 class="text-xl font-black text-slate-800 uppercase" id="res-name"></h2>
+                <p class="text-[10px] font-bold text-green-600 mt-2" id="res-time"></p>
+                <button class="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase text-xs" onclick="location.reload()">Tiếp tục</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-8 text-[9px] text-slate-400 uppercase tracking-[0.3em] font-bold">VDC Safety v1.6.4 | <span class="text-slate-800">Mr. An Toàn</span></footer>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgbd-57H8-StCcBQPWyLWWAt4QAm-oVNI",
+        authDomain: "hepc-ed95d.firebaseapp.com",
+        databaseURL: "https://hepc-ed95d-default-rtdb.firebaseio.com",
+        projectId: "hepc-ed95d",
+        storageBucket: "hepc-ed95d.firebasestorage.app",
+        messagingSenderId: "536861347284",
+        appId: "1:536861347284:web:61d162705878577f741a41"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let lastDescriptor, isDetecting, faceMatcher, session, currentStudent, capturedPhoto;
+    let currentFacingMode = "user";
+    let videoTrack = null;
+
+    function removeAccents(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    }
+
+    async function initAI() {
+        const URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+        try {
+            await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(URL), 
+                faceapi.nets.faceLandmark68Net.loadFromUri(URL),
+                faceapi.nets.faceRecognitionNet.loadFromUri(URL)
+            ]);
+            document.getElementById('loading-msg').style.display = 'none';
+            db.ref('current_session').on('value', snap => {
+                session = snap.val();
+                if(session) document.getElementById('session-info').innerHTML = `BATCH: ${session.class}`;
+            });
+            startCamera();
+            loadFaceDB();
+        } catch (e) { document.getElementById('loading-msg').innerHTML = "❌ AI INITIALIZATION FAILED"; }
+    }
+
+    async function startCamera() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('overlay');
+        const zoomContainer = document.getElementById('zoom-container');
+        
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            video.srcObject = stream;
+            videoTrack = stream.getVideoTracks()[0];
+            
+            // Chỉ hiện Zoom khi dùng Camera sau (environment)
+            const caps = videoTrack.getCapabilities();
+            if(currentFacingMode === "environment" && caps.zoom) {
+                zoomContainer.style.display = 'block';
+                document.getElementById('zoomRange').min = caps.zoom.min;
+                document.getElementById('zoomRange').max = caps.zoom.max;
+                document.getElementById('zoomRange').step = caps.zoom.step;
+            } else {
+                zoomContainer.style.display = 'none';
+            }
+
+            if(currentFacingMode === "user") {
+                video.classList.add('mirror'); canvas.classList.add('mirror');
+            } else {
+                video.classList.remove('mirror'); canvas.classList.remove('mirror');
+            }
+
+            video.onloadedmetadata = () => {
+                video.play();
+                faceapi.matchDimensions(canvas, { width: 280, height: 373 });
+                isDetecting = true;
+                runDetection();
+            };
+        } catch (e) { alert("Camera Error: Hãy cấp quyền camera trong Chrome/Safari"); }
+    }
+
+    function applyZoom(val) {
+        if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
+            videoTrack.applyConstraints({ advanced: [{ zoom: val }] });
+        }
+    }
+
+    function switchCamera() {
+        currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+        startCamera();
+    }
+
+    async function runDetection() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('overlay');
+        const timer = setInterval(async () => {
+            if(!isDetecting) { clearInterval(timer); return; }
+            const det = await faceapi.detectSingleFace(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })).withFaceLandmarks().withFaceDescriptor();
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            if(det) {
+                lastDescriptor = det.descriptor;
+                document.getElementById('btnCapture').disabled = false;
+                document.getElementById('faceGuide').classList.add('face-detected');
+                document.getElementById('scan-status').innerHTML = "✅ KHÓA MỤC TIÊU";
+                document.getElementById('scan-status').className = "text-[10px] font-black text-green-600 mb-4 tracking-widest uppercase";
+            } else {
+                document.getElementById('btnCapture').disabled = true;
+                document.getElementById('faceGuide').classList.remove('face-detected');
+                document.getElementById('scan-status').innerHTML = "🔍 TÌM KIẾM KHUÔN MẶT...";
+                document.getElementById('scan-status').className = "text-[10px] font-black text-slate-400 mb-4 tracking-widest uppercase";
+            }
+        }, 600);
+    }
+
+    // Các hàm loadFaceDB, checkFace, searchStudent, saveFinal, saveAttendance giữ nguyên logic v1.6.3...
+    async function loadFaceDB() {
+        const snap = await db.ref('students').once('value');
+        const data = snap.val() || {};
+        const labeled = Object.values(data).filter(u => u.descriptor).map(u => new faceapi.LabeledFaceDescriptors(u.stt.toString(), [new Float32Array(u.descriptor)]));
+        if(labeled.length > 0) faceMatcher = new faceapi.FaceMatcher(labeled, 0.42);
+    }
+
+    async function checkFace() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 450; canvas.height = 600;
+        const v = document.getElementById('video');
+        const ctx = canvas.getContext('2d');
+        if(currentFacingMode === "user") { ctx.translate(450, 0); ctx.scale(-1, 1); }
+        ctx.drawImage(v, (v.videoWidth-(v.videoHeight*0.75))/2, v.videoHeight*0.05, v.videoHeight*0.75, v.videoHeight*0.95, 0, 0, 450, 600);
+        capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
+
+        if(faceMatcher && lastDescriptor) {
+            const match = faceMatcher.findBestMatch(lastDescriptor);
+            if(match.label !== 'unknown') {
+                const snap = await db.ref(`classes/${session.source}/students/${match.label}`).once('value');
+                if(snap.val()) {
+                    currentStudent = snap.val();
+                    currentStudent.photo = capturedPhoto; 
+                    return saveAttendance(currentStudent);
+                }
+            }
+        }
+        document.getElementById('scanner-section').style.display = 'none';
+        document.getElementById('search-section').classList.remove('hidden');
+    }
+
+    async function searchStudent() {
+        const inputName = document.getElementById('inputName').value.trim().toLowerCase();
+        const cleanInput = removeAccents(inputName);
+        const snapMaster = await db.ref(`classes/${session.source}/students`).once('value');
+        const list = snapMaster.val() || {};
+        const found = Object.values(list).find(u => u.name && (u.name.toLowerCase() === inputName || removeAccents(u.name.toLowerCase()) === cleanInput));
+
+        if(found) {
+            const snapFace = await db.ref(`students/${found.stt}`).once('value');
+            if(snapFace.exists()) { alert("⚠️ HỒ SƠ ĐÃ CÓ DỮ LIỆU FACE ID!"); return; }
+            currentStudent = found;
+            document.getElementById('search-section').style.display = 'none';
+            document.getElementById('verify-section').classList.remove('hidden');
+            document.getElementById('preview-photo').src = capturedPhoto;
+            document.getElementById('c1').value = found.stt;
+            document.getElementById('c2').value = found.name;
+            document.getElementById('c4').value = found.dob || "";
+            document.getElementById('c7').value = found.department || found.company || "";
+        } else { alert("Không tìm thấy tên!"); }
+    }
+
+    async function saveFinal() {
+        const data = { ...currentStudent, descriptor: Array.from(lastDescriptor), photo: capturedPhoto, time: new Date().toLocaleTimeString('vi-VN') };
+        await db.ref('students/' + data.stt).set(data);
+        saveAttendance(data);
+    }
+
+    async function saveAttendance(st) {
+        const timeStr = new Date().toLocaleTimeString('vi-VN') + " ngày " + new Date().toLocaleDateString('vi-VN');
+        await db.ref(`attendance/${session.date}/${session.session}/${st.stt}`).set({ name: st.name, time: timeStr, photo: st.photo || "" });
+        isDetecting = false;
+        document.getElementById('scanner-section').style.display = 'none';
+        document.getElementById('verify-section').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('res-photo').src = st.photo || "";
+        document.getElementById('res-name').innerText = st.name.toUpperCase();
+        document.getElementById('res-time').innerText = "ĐIỂM DANH: " + timeStr;
+    }
+
+    initAI();
+</script>
+</body>
+</html>

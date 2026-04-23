@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VDC SAFETY - AI FACE ID v1.6.4</title>
+    <title>VDC SAFETY - AI FACE ID v1.6.5</title>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
@@ -13,27 +13,45 @@
         :root { --vdc-blue: #1e293b; --vdc-accent: #3b82f6; }
         body { background: #f8fafc; font-family: 'Inter', sans-serif; }
         .app-container { max-width: 450px; width: 100%; background: white; border-radius: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); overflow: hidden; margin: auto; }
-        #video-container { position: relative; width: 280px; height: 373px; margin: 15px auto; background: #000; border-radius: 30px; overflow: hidden; border: 6px solid #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .mirror { transform: scaleX(-1); }
-        canvas { position: absolute; top: 0; left: 0; }
+        
+        /* FIX LỖI LỆCH KHUNG: Video container căn giữa con */
+        #video-container { 
+            position: relative; width: 280px; height: 373px; margin: 15px auto; 
+            background: #000; border-radius: 30px; overflow: hidden; 
+            border: 6px solid #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+        
+        /* Canvas phải nằm đè lên video và căn giữa tuyệt đối */
+        canvas { 
+            position: absolute; 
+            top: 0; left: 50% !important; 
+            transform: translateX(-50%) !important; 
+            z-index: 10;
+        }
+
+        /* Lật gương cho camera trước */
+        .mirror-mode { transform: translateX(-50%) scaleX(-1) !important; }
+        video.mirror-mode { transform: scaleX(-1) !important; left: 0 !important; }
+
+        .scan-line { position: absolute; width: 100%; height: 2px; background: #3b82f6; box-shadow: 0 0 15px #3b82f6; top: 0; animation: scan 2.5s infinite linear; z-index: 15; }
+        @keyframes scan { 0% { top: 10%; opacity: 0; } 50% { top: 50%; opacity: 1; } 100% { top: 90%; opacity: 0; } }
+
         .face-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 75%; border: 4px dashed rgba(255, 255, 255, 0.4); border-radius: 50% / 60%; pointer-events: none; z-index: 20; transition: 0.3s; }
         .face-detected { border-color: #10b981; border-style: solid; box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
         
         .btn-control { width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; items-center: center; justify-content: center; border: 1.5px solid rgba(255,255,255,0.8); backdrop-filter: blur(4px); }
-        
-        /* Thanh Zoom mượt mà */
-        #zoom-container { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); width: 200px; z-index: 40; display: none; }
+        #zoom-container { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); width: 180px; z-index: 40; display: none; }
         input[type=range] { width: 100%; accent-color: #3b82f6; }
-        
-        .btn-vdc { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; transition: 0.3s; }
-        .btn-vdc:disabled { background: #cbd5e1; color: #94a3b8; }
+        .btn-vdc { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); color: white; }
     </style>
 </head>
 <body class="p-4 flex flex-col items-center justify-center min-h-screen">
 
 <div class="app-container">
-    <div id="session-info" class="bg-slate-900 text-white p-4 text-[10px] tracking-wider text-center uppercase font-bold border-b border-slate-700 italic text-blue-400 font-mono">Loading Config...</div>
+    <div id="session-info" class="bg-slate-900 text-white p-4 text-[10px] tracking-wider text-center uppercase font-bold border-b border-slate-700 italic text-blue-400">VDC Safety Cloud</div>
 
     <div class="p-6 text-center">
         <div class="flex items-center justify-center gap-2 mb-2">
@@ -44,12 +62,13 @@
 
         <div id="scanner-section">
             <div id="video-container">
-                <video id="video" autoplay muted playsinline class="mirror"></video>
-                <canvas id="overlay" class="mirror"></canvas>
+                <div class="scan-line"></div>
+                <video id="video" autoplay muted playsinline></video>
+                <canvas id="overlay"></canvas>
                 <div class="face-guide" id="faceGuide"></div>
                 
                 <div class="absolute bottom-4 right-4 flex flex-col gap-3 z-30">
-                    <button class="btn-control shadow-xl" onclick="switchCamera()"><i class="fas fa-sync-alt"></i></button>
+                    <button class="btn-control" onclick="switchCamera()"><i class="fas fa-sync-alt"></i></button>
                 </div>
 
                 <div id="zoom-container" class="bg-black/40 p-2 rounded-full border border-white/20">
@@ -66,9 +85,9 @@
         </div>
 
         <div id="search-section" class="hidden mt-4 pt-6 border-t border-dashed border-slate-200 text-left">
-             <div class="bg-orange-50 border-l-4 border-orange-500 p-3 mb-4 text-[10px] text-orange-600 font-bold uppercase tracking-tight">AI chưa nhận diện được</div>
+             <div class="bg-orange-50 border-l-4 border-orange-500 p-3 mb-4 text-[10px] text-orange-600 font-bold uppercase tracking-tight text-center italic">AI chưa nhận diện được - Vui lòng tìm tên</div>
              <input type="text" id="inputName" class="w-full p-4 bg-slate-50 border rounded-2xl mb-3 outline-none font-bold text-slate-700" placeholder="NHẬP TÊN KHÔNG DẤU...">
-             <button class="w-full py-4 bg-slate-700 text-white rounded-2xl font-bold uppercase text-sm" onclick="searchStudent()">Tìm hồ sơ</button>
+             <button class="w-full py-4 bg-slate-700 text-white rounded-2xl font-bold uppercase text-sm" onclick="searchStudent()">Tìm hồ sơ lớp</button>
         </div>
 
         <div id="verify-section" class="hidden mt-4 text-left bg-blue-50/50 p-5 rounded-3xl border border-blue-100">
@@ -81,22 +100,22 @@
                 <div>Ngày sinh<input type="text" id="c4" class="w-full p-3 bg-white border rounded-xl text-slate-700 font-bold"></div>
                 <div>Đơn vị<input type="text" id="c7" class="w-full p-3 bg-white border rounded-xl text-slate-700 font-bold"></div>
             </div>
-            <button class="w-full mt-6 py-5 bg-green-600 text-white rounded-2xl font-black text-lg uppercase shadow-lg shadow-green-100" onclick="saveFinal()">Lưu Face ID</button>
+            <button class="w-full mt-6 py-5 bg-green-600 text-white rounded-2xl font-black text-lg uppercase shadow-lg shadow-green-100" onclick="saveFinal()">Xác nhận đăng ký</button>
         </div>
 
-        <div id="result-screen" class="hidden mt-4 animate-bounce">
+        <div id="result-screen" class="hidden mt-4">
             <div class="bg-white p-6 rounded-[40px] shadow-2xl border border-green-50 text-center">
                 <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg"><i class="fas fa-check"></i></div>
                 <img id="res-photo" class="w-32 h-44 object-cover rounded-2xl border-4 border-white shadow-md mx-auto mb-4">
                 <h2 class="text-xl font-black text-slate-800 uppercase" id="res-name"></h2>
-                <p class="text-[10px] font-bold text-green-600 mt-2" id="res-time"></p>
-                <button class="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase text-xs" onclick="location.reload()">Tiếp tục</button>
+                <p class="text-[10px] font-bold text-green-600 mt-2 italic font-mono" id="res-time"></p>
+                <button class="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-bold uppercase text-xs" onclick="location.reload()">Tiếp tục quét</button>
             </div>
         </div>
     </div>
 </div>
 
-<footer class="mt-8 text-[9px] text-slate-400 uppercase tracking-[0.3em] font-bold">VDC Safety v1.6.4 | <span class="text-slate-800">Mr. An Toàn</span></footer>
+<footer class="mt-8 text-[9px] text-slate-400 uppercase tracking-[0.3em] font-bold">VDC Safety v1.6.5 | <span class="text-slate-800">Mr. An Toàn</span></footer>
 
 <script>
     const firebaseConfig = {
@@ -142,9 +161,7 @@
         const canvas = document.getElementById('overlay');
         const zoomContainer = document.getElementById('zoom-container');
         
-        if (video.srcObject) {
-            video.srcObject.getTracks().forEach(track => track.stop());
-        }
+        if (video.srcObject) { video.srcObject.getTracks().forEach(track => track.stop()); }
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -153,21 +170,20 @@
             video.srcObject = stream;
             videoTrack = stream.getVideoTracks()[0];
             
-            // Chỉ hiện Zoom khi dùng Camera sau (environment)
             const caps = videoTrack.getCapabilities();
-            if(currentFacingMode === "environment" && caps.zoom) {
-                zoomContainer.style.display = 'block';
+            zoomContainer.style.display = (currentFacingMode === "environment" && caps.zoom) ? 'block' : 'none';
+            if(caps.zoom) {
                 document.getElementById('zoomRange').min = caps.zoom.min;
                 document.getElementById('zoomRange').max = caps.zoom.max;
-                document.getElementById('zoomRange').step = caps.zoom.step;
-            } else {
-                zoomContainer.style.display = 'none';
             }
 
+            // CSS FIX: Chỉ thêm class mirror khi là camera trước
             if(currentFacingMode === "user") {
-                video.classList.add('mirror'); canvas.classList.add('mirror');
+                video.classList.add('mirror-mode');
+                canvas.classList.add('mirror-mode');
             } else {
-                video.classList.remove('mirror'); canvas.classList.remove('mirror');
+                video.classList.remove('mirror-mode');
+                canvas.classList.remove('mirror-mode');
             }
 
             video.onloadedmetadata = () => {
@@ -176,7 +192,7 @@
                 isDetecting = true;
                 runDetection();
             };
-        } catch (e) { alert("Camera Error: Hãy cấp quyền camera trong Chrome/Safari"); }
+        } catch (e) { alert("Lỗi Camera! Vui lòng cho phép quyền truy cập."); }
     }
 
     function applyZoom(val) {
@@ -198,10 +214,11 @@
             const det = await faceapi.detectSingleFace(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })).withFaceLandmarks().withFaceDescriptor();
             canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
             if(det) {
+                faceapi.draw.drawDetections(canvas, faceapi.resizeResults(det, { width: 280, height: 373 }));
                 lastDescriptor = det.descriptor;
                 document.getElementById('btnCapture').disabled = false;
                 document.getElementById('faceGuide').classList.add('face-detected');
-                document.getElementById('scan-status').innerHTML = "✅ KHÓA MỤC TIÊU";
+                document.getElementById('scan-status').innerHTML = "✅ SẴN SÀNG";
                 document.getElementById('scan-status').className = "text-[10px] font-black text-green-600 mb-4 tracking-widest uppercase";
             } else {
                 document.getElementById('btnCapture').disabled = true;
@@ -212,7 +229,6 @@
         }, 600);
     }
 
-    // Các hàm loadFaceDB, checkFace, searchStudent, saveFinal, saveAttendance giữ nguyên logic v1.6.3...
     async function loadFaceDB() {
         const snap = await db.ref('students').once('value');
         const data = snap.val() || {};
@@ -280,7 +296,7 @@
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('res-photo').src = st.photo || "";
         document.getElementById('res-name').innerText = st.name.toUpperCase();
-        document.getElementById('res-time').innerText = "ĐIỂM DANH: " + timeStr;
+        document.getElementById('res-time').innerText = "THÀNH CÔNG: " + timeStr;
     }
 
     initAI();
